@@ -1,8 +1,8 @@
 (() => {
-  const fanMode = document.createElement('script');
-  fanMode.src = 'series-fan-mode.js?v=1';
-  fanMode.async = false;
-  document.head.appendChild(fanMode);
+  const game = document.createElement('script');
+  game.src = 'pixely-game.js?v=1';
+  game.async = false;
+  document.head.appendChild(game);
 
   const theme = document.createElement('link');
   theme.rel = 'stylesheet';
