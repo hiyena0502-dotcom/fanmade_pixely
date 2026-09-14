@@ -1,4 +1,9 @@
 (() => {
+  const introFix = document.createElement('link');
+  introFix.rel = 'stylesheet';
+  introFix.href = 'intro-layout-fix.css?v=1';
+  document.head.appendChild(introFix);
+
   const theme = document.createElement('link');
   theme.rel = 'stylesheet';
   theme.href = 'collection-groups.css?v=6';
