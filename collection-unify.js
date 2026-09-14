@@ -46,45 +46,56 @@
     meta.unlockLog = Array.isArray(meta.unlockLog) ? meta.unlockLog : [];
 
     let canonical = meta.groups.find(g => g?.id === 'pixely');
+    let changed = false;
     if (!canonical) {
       canonical = { id: 'pixely', name: '픽셀리', subtitle: 'PIXELY MEMBERS', icon: '✦', color: '#79bff2', rewardId: '' };
       meta.groups.unshift(canonical);
+      changed = true;
     }
-    if (!canonical.name) canonical.name = '픽셀리';
+    if (!canonical.name) { canonical.name = '픽셀리'; changed = true; }
 
     const duplicates = duplicateIds(core, meta);
-    if (!duplicates.size) return duplicates;
-
-    for (const group of meta.groups) {
-      if (!duplicates.has(group?.id)) continue;
-      if (!canonical.rewardId && group.rewardId) canonical.rewardId = group.rewardId;
-    }
-
-    for (const item of Object.values(meta.itemMeta)) {
-      if (item && duplicates.has(item.groupId)) item.groupId = 'pixely';
-    }
-    for (const bonus of meta.bonusItems) {
-      if (bonus && duplicates.has(bonus.groupId)) bonus.groupId = 'pixely';
-    }
-
-    meta.groups = meta.groups.filter(group => !duplicates.has(group?.id));
-    localStorage.setItem(META_KEY, JSON.stringify(meta));
-
-    const collapse = read(COLLAPSE_KEY, {});
-    collapse.defaults = collapse.defaults || {};
-    collapse.collapsed = collapse.collapsed || {};
-    for (const id of duplicates) {
-      if (!Object.prototype.hasOwnProperty.call(collapse.defaults, 'pixely') && Object.prototype.hasOwnProperty.call(collapse.defaults, id)) {
-        collapse.defaults.pixely = !!collapse.defaults[id];
+    if (duplicates.size) {
+      for (const group of meta.groups) {
+        if (!duplicates.has(group?.id)) continue;
+        if (!canonical.rewardId && group.rewardId) { canonical.rewardId = group.rewardId; changed = true; }
       }
-      if (!Object.prototype.hasOwnProperty.call(collapse.collapsed, 'pixely') && Object.prototype.hasOwnProperty.call(collapse.collapsed, id)) {
-        collapse.collapsed.pixely = !!collapse.collapsed[id];
+      for (const item of Object.values(meta.itemMeta)) {
+        if (item && duplicates.has(item.groupId)) { item.groupId = 'pixely'; changed = true; }
       }
-      delete collapse.defaults[id];
-      delete collapse.collapsed[id];
+      for (const bonus of meta.bonusItems) {
+        if (bonus && duplicates.has(bonus.groupId)) { bonus.groupId = 'pixely'; changed = true; }
+      }
+      const nextGroups = meta.groups.filter(group => !duplicates.has(group?.id));
+      if (nextGroups.length !== meta.groups.length) { meta.groups = nextGroups; changed = true; }
     }
-    localStorage.setItem(COLLAPSE_KEY, JSON.stringify(collapse));
+
+    if (changed) localStorage.setItem(META_KEY, JSON.stringify(meta));
+
+    if (duplicates.size) {
+      const collapse = read(COLLAPSE_KEY, {});
+      collapse.defaults = collapse.defaults || {};
+      collapse.collapsed = collapse.collapsed || {};
+      let collapseChanged = false;
+      for (const id of duplicates) {
+        if (!Object.prototype.hasOwnProperty.call(collapse.defaults, 'pixely') && Object.prototype.hasOwnProperty.call(collapse.defaults, id)) {
+          collapse.defaults.pixely = !!collapse.defaults[id];
+          collapseChanged = true;
+        }
+        if (!Object.prototype.hasOwnProperty.call(collapse.collapsed, 'pixely') && Object.prototype.hasOwnProperty.call(collapse.collapsed, id)) {
+          collapse.collapsed.pixely = !!collapse.collapsed[id];
+          collapseChanged = true;
+        }
+        if (Object.prototype.hasOwnProperty.call(collapse.defaults, id)) { delete collapse.defaults[id]; collapseChanged = true; }
+        if (Object.prototype.hasOwnProperty.call(collapse.collapsed, id)) { delete collapse.collapsed[id]; collapseChanged = true; }
+      }
+      if (collapseChanged) localStorage.setItem(COLLAPSE_KEY, JSON.stringify(collapse));
+    }
     return duplicates;
+  }
+
+  function setText(node, value) {
+    if (node && node.textContent !== value) node.textContent = value;
   }
 
   function cleanUi() {
@@ -92,16 +103,16 @@
     const meta = read(META_KEY, {});
     const duplicates = duplicateIds(core, meta);
 
-    const heading = $('.gc-collection-head h2');
-    if (heading) heading.textContent = '컬렉션';
-    const kicker = $('.gc-collection-head > div > span');
-    if (kicker) kicker.textContent = 'COLLECTION';
+    setText($('.gc-collection-head h2'), '컬렉션');
+    setText($('.gc-collection-head > div > span'), 'COLLECTION');
 
     $$('.settings-section__heading h3').forEach(el => {
-      if (el.textContent.trim() === '컬렉션 그룹 · 시리즈') el.textContent = '컬렉션 그룹';
+      if (el.textContent.trim() === '컬렉션 그룹 · 시리즈') setText(el, '컬렉션 그룹');
     });
+
     const note = $('.gc-settings-note');
-    if (note) note.innerHTML = '픽셀리 멤버는 <b>픽셀리</b> 한 그룹으로 통합됩니다. 같은 이름의 시리즈형 그룹이 생겨도 자동으로 이 그룹에 합쳐집니다.';
+    const noteHtml = '픽셀리 멤버는 <b>픽셀리</b> 한 그룹으로 통합됩니다. 같은 이름의 시리즈형 그룹이 생겨도 자동으로 이 그룹에 합쳐집니다.';
+    if (note && note.innerHTML !== noteHtml) note.innerHTML = noteHtml;
 
     $$('[data-group-row]').forEach(row => {
       const id = row.dataset.groupRow;
@@ -113,7 +124,7 @@
       [...select.options].forEach(option => {
         if (option.value !== 'pixely' && (duplicates.has(option.value) || isPixelyName(option.textContent))) option.remove();
       });
-      if (![...select.options].some(option => option.value === select.value)) select.value = 'pixely';
+      if (![...select.options].some(option => option.value === select.value) && select.value !== 'pixely') select.value = 'pixely';
     });
 
     const pixelySections = $$('.gc-group').filter(section => isPixelyName(section.querySelector('.gc-group-head h3')?.textContent));
@@ -151,6 +162,6 @@
     if ([CORE_KEY, META_KEY, COLLAPSE_KEY].includes(event.key)) queue();
   });
 
-  new MutationObserver(queue).observe(document.body, { childList: true, subtree: true });
+  /* Do not watch the whole document. The previous observer reacted to its own DOM writes and could create a render loop. */
   run();
 })();
