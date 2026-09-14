@@ -11,6 +11,12 @@
     const collapse = document.createElement('script');
     collapse.src = 'collection-collapse.js?v=1';
     collapse.async = false;
+    collapse.onload = () => {
+      const unify = document.createElement('script');
+      unify.src = 'collection-unify.js?v=1';
+      unify.async = false;
+      document.head.appendChild(unify);
+    };
     document.head.appendChild(collapse);
   };
   document.head.appendChild(core);
