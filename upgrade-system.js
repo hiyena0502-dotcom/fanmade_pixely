@@ -1,6 +1,6 @@
 (() => {
-  if (window.__PIXELY_UPGRADE_SYSTEM_V2__) return;
-  window.__PIXELY_UPGRADE_SYSTEM_V2__ = true;
+  if (window.__PIXELY_UPGRADE_SYSTEM_V3__) return;
+  window.__PIXELY_UPGRADE_SYSTEM_V3__ = true;
 
   const CORE_KEY = 'pixely-diary-save-v1';
   const GAME_KEY = 'pixely-game-v1';
@@ -104,7 +104,6 @@
     const core = getCore();
     let changed = false;
 
-    // Old EXP cards no longer drop. Keep only already-owned legacy cards as archive entries.
     const filtered = core.gachaItems.filter(item => !LEGACY_IDS.has(item.id) || Number(core.owned[item.id] || 0) > 0);
     if (filtered.length !== core.gachaItems.length) {
       core.gachaItems = filtered;
@@ -117,8 +116,7 @@
         core.gachaItems.push(toGachaItem(card));
         changed = true;
       } else {
-        const next = toGachaItem(card);
-        Object.assign(existing, next);
+        Object.assign(existing, toGachaItem(card));
         changed = true;
       }
     }
@@ -289,15 +287,26 @@
     document.head.appendChild(style);
   }
 
+  function loadClickReset() {
+    if (document.querySelector('script[data-click-reset-loader]')) return;
+    const script = document.createElement('script');
+    script.src = 'click-reset.js?v=1';
+    script.async = false;
+    script.setAttribute('data-click-reset-loader', '');
+    document.head.appendChild(script);
+  }
+
   function boot() {
     installStyle();
     migrateAndSeedCards();
     installSequentialPicker();
+    loadClickReset();
     const modal = $('#result-modal');
     if (modal) new MutationObserver(() => { if (!modal.hidden) setTimeout(handleResult, 0); }).observe(modal,{attributes:true,attributeFilter:['hidden']});
     document.addEventListener('click', event => {
       if (event.target.closest?.('[data-tab="series"], [data-open-tab="series"], #pixely-click-star')) setTimeout(decorateClick, 0);
     });
+    window.addEventListener('pixely:click-upgrade-reset', () => setTimeout(refreshClickUi, 0));
     setTimeout(decorateClick, 120);
   }
 
