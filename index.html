@@ -65,6 +65,9 @@
           </button>
           <div class="app-bar__actions">
             <span class="weather-pill"><i></i> 푸른 하늘 · 맑음</span>
+            <button class="settings-button" id="open-settings" type="button">
+              <span aria-hidden="true">⚙</span> 설정
+            </button>
             <button class="sky-button" id="back-to-sky" type="button">
               <span aria-hidden="true">☁</span> 하늘로
             </button>
@@ -158,7 +161,7 @@
                 </button>
 
                 <div class="home-stats">
-                  <div><span>모은 카드</span><b><em data-owned-count>0</em> / 12</b></div>
+                  <div><span>모은 카드</span><b><em data-owned-count>0</em> / <em data-total-cards>12</em></b></div>
                   <div><span>별가루</span><b>✦ <em data-dust-count>0</em></b></div>
                   <button type="button" data-open-tab="collection">컬렉션 보기 →</button>
                 </div>
@@ -173,20 +176,7 @@
                 <h2 id="series-heading">메인 시리즈</h2>
                 <p>간직하고 싶은 이야기를 골라 기록을 펼쳐보세요.</p>
 
-                <div class="series-list" role="list">
-                  <button class="series-item is-active" type="button" data-series="mystery" role="listitem">
-                    <span class="series-item__number">01</span>
-                    <span class="series-item__thumb series-item__thumb--mystery" aria-hidden="true">⌕</span>
-                    <span><b>미스터리 수사반</b><small>사건 기록 파일</small></span>
-                    <i>→</i>
-                  </button>
-                  <button class="series-item" type="button" data-series="next" role="listitem">
-                    <span class="series-item__number">02</span>
-                    <span class="series-item__thumb series-item__thumb--next" aria-hidden="true">＋</span>
-                    <span><b>다음 시리즈</b><small>새 기록을 준비 중이에요</small></span>
-                    <i>→</i>
-                  </button>
-                </div>
+                <div class="series-list" id="series-list" role="list"></div>
 
                 <div class="index-memo">
                   <span aria-hidden="true">✎</span>
@@ -196,36 +186,7 @@
 
               <div class="paper-page paper-page--right series-detail">
                 <div class="page-number">04</div>
-                <article class="series-view is-active" data-series-view="mystery">
-                  <div class="case-cover">
-                    <div class="case-cover__top">
-                      <span>CASE FILE</span><b>NO. 001</b>
-                    </div>
-                    <div class="case-cover__icon" aria-hidden="true">?</div>
-                    <h3>미스터리 수사반</h3>
-                    <p>MYSTERY INVESTIGATION TEAM</p>
-                    <div class="case-cover__tape" aria-hidden="true"></div>
-                  </div>
-                  <div class="series-summary">
-                    <span class="status-stamp">RECORDING</span>
-                    <div>
-                      <b>나의 시리즈 기록</b>
-                      <p>소개, 등장인물, 에피소드와 명장면이 이 페이지에 차곡차곡 쌓일 예정이에요.</p>
-                    </div>
-                  </div>
-                  <div class="series-chips">
-                    <span># 등장인물</span><span># 에피소드</span><span># 명장면</span><span># 관계성</span>
-                  </div>
-                  <button class="coming-button" type="button" disabled>첫 번째 기록 준비 중</button>
-                </article>
-
-                <article class="series-view" data-series-view="next" hidden>
-                  <div class="empty-series">
-                    <span aria-hidden="true">＋</span>
-                    <h3>다음 이야기를 위한 빈 페이지</h3>
-                    <p>새로운 메인 시리즈가 정해지면 이곳에 표지와 기록을 채울 수 있어요.</p>
-                  </div>
-                </article>
+                <div id="series-detail"></div>
               </div>
             </section>
 
@@ -257,7 +218,7 @@
               <div class="paper-page paper-page--right gacha-play">
                 <div class="page-number">06</div>
                 <div class="gacha-counts">
-                  <span>COLLECTION <b><em data-owned-count>0</em>/12</b></span>
+                  <span>COLLECTION <b><em data-owned-count>0</em>/<em data-total-cards>12</em></b></span>
                   <span>STARDUST <b>✦ <em data-dust-count>0</em></b></span>
                 </div>
 
@@ -295,7 +256,7 @@
                   </div>
                   <div class="collection-total">
                     <span>COLLECTED</span>
-                    <b><em data-owned-count>0</em><small>/ 12</small></b>
+                    <b><em data-owned-count>0</em><small>/ <em data-total-cards>12</em></small></b>
                   </div>
                 </div>
 
@@ -307,6 +268,12 @@
                 </div>
               </div>
             </section>
+          </div>
+
+          <div class="mobile-page-controls" aria-label="다이어리 낱장 이동">
+            <button id="mobile-page-prev" type="button" aria-label="이전 장">←</button>
+            <span id="mobile-page-label">1 / 2</span>
+            <button id="mobile-page-next" type="button" aria-label="다음 장">→</button>
           </div>
         </div>
         <p class="fanmade-note">UNOFFICIAL FANMADE WEBSITE · 개인 팬 프로젝트</p>
@@ -327,6 +294,135 @@
         </div>
       </div>
     </div>
+
+    <div class="settings-modal" id="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title" hidden>
+      <div class="settings-backdrop" data-close-settings></div>
+      <section class="settings-panel">
+        <header class="settings-header">
+          <div>
+            <span>DIARY CONTROL ROOM</span>
+            <h2 id="settings-title">다이어리 설정</h2>
+          </div>
+          <button type="button" data-close-settings aria-label="설정 닫기">×</button>
+        </header>
+
+        <nav class="settings-tabs" aria-label="설정 메뉴">
+          <button class="is-active" type="button" data-settings-tab="gacha">가챠 카드</button>
+          <button type="button" data-settings-tab="series">메인 시리즈</button>
+          <button type="button" data-settings-tab="reset">백업·초기화</button>
+        </nav>
+
+        <div class="settings-content">
+          <section class="settings-section is-active" data-settings-panel="gacha">
+            <div class="settings-section__heading">
+              <div><h3>가챠 카드 관리</h3><p>카드의 이름, 기호, 등급과 색상을 바꿀 수 있어요.</p></div>
+              <button class="add-setting-button" type="button" data-add-item="gacha">＋ 카드 추가</button>
+            </div>
+            <div class="settings-item-list" id="gacha-settings-list"></div>
+          </section>
+
+          <section class="settings-section" data-settings-panel="series" hidden>
+            <div class="settings-section__heading">
+              <div><h3>메인 시리즈 관리</h3><p>다이어리에 보여줄 시리즈와 표지 색상을 관리해요.</p></div>
+              <button class="add-setting-button" type="button" data-add-item="series">＋ 시리즈 추가</button>
+            </div>
+            <div class="settings-item-list" id="series-settings-list"></div>
+          </section>
+
+          <section class="settings-section" data-settings-panel="reset" hidden>
+            <div class="settings-section__heading">
+              <div><h3>백업과 초기화</h3><p>현재 설정은 이 브라우저에 자동 저장돼요.</p></div>
+            </div>
+
+            <div class="backup-card">
+              <div><span aria-hidden="true">⇩</span><p><b>다이어리 백업</b><small>카드, 시리즈와 컬렉션을 파일로 보관해요.</small></p></div>
+              <div class="backup-actions">
+                <button id="export-settings" type="button">내보내기</button>
+                <label for="import-settings">불러오기</label>
+                <input id="import-settings" type="file" accept="application/json,.json" hidden />
+              </div>
+            </div>
+
+            <div class="reset-grid">
+              <button type="button" data-reset="collection"><span>▦</span><b>컬렉션 초기화</b><small>뽑은 카드와 별가루만 비워요.</small></button>
+              <button type="button" data-reset="gacha"><span>✦</span><b>카드 목록 복구</b><small>가챠 카드 구성을 기본값으로 돌려요.</small></button>
+              <button type="button" data-reset="series"><span>▤</span><b>시리즈 목록 복구</b><small>메인 시리즈를 기본값으로 돌려요.</small></button>
+              <button class="reset-all" type="button" data-reset="all"><span>↻</span><b>전체 초기화</b><small>모든 설정과 기록을 처음으로 돌려요.</small></button>
+            </div>
+          </section>
+        </div>
+
+        <footer class="settings-footer">
+          <span><i></i> 변경사항 자동 저장</span>
+          <b id="settings-summary">카드 12개 · 시리즈 1개</b>
+        </footer>
+      </section>
+    </div>
+
+    <div class="editor-modal" id="editor-modal" role="dialog" aria-modal="true" aria-labelledby="editor-title" hidden>
+      <div class="settings-backdrop" data-close-editor></div>
+      <form class="editor-card" id="item-editor-form">
+        <header>
+          <div><span>EDIT A PAGE</span><h2 id="editor-title">새 카드 추가</h2></div>
+          <button type="button" data-close-editor aria-label="편집창 닫기">×</button>
+        </header>
+
+        <input id="editor-type" type="hidden" />
+        <input id="editor-id" type="hidden" />
+
+        <div class="editor-fields">
+          <label class="field field--wide">
+            <span id="editor-name-label">카드 이름</span>
+            <input id="editor-name" type="text" maxlength="30" required placeholder="예: 별빛 카드" />
+          </label>
+          <label class="field">
+            <span id="editor-symbol-label">카드 기호</span>
+            <input id="editor-symbol" type="text" maxlength="4" required placeholder="✦" />
+          </label>
+          <label class="field">
+            <span>대표 색상</span>
+            <input id="editor-color" type="color" value="#76aee8" />
+          </label>
+          <label class="field field--wide" id="editor-rarity-field">
+            <span>가챠 등급</span>
+            <select id="editor-rarity">
+              <option value="CLOUD">CLOUD · 일반</option>
+              <option value="SKY">SKY · 멤버</option>
+              <option value="STAR">STAR · 희귀</option>
+              <option value="RAINBOW">RAINBOW · 특별</option>
+            </select>
+          </label>
+          <label class="field field--wide" id="editor-subtitle-field" hidden>
+            <span>한 줄 설명</span>
+            <input id="editor-subtitle" type="text" maxlength="45" placeholder="예: 사건 기록 파일" />
+          </label>
+          <label class="field field--wide" id="editor-description-field" hidden>
+            <span>시리즈 소개</span>
+            <textarea id="editor-description" rows="3" maxlength="140" placeholder="다이어리에 표시할 짧은 소개를 적어주세요."></textarea>
+          </label>
+        </div>
+
+        <footer>
+          <button class="editor-cancel" type="button" data-close-editor>취소</button>
+          <button class="editor-save" type="submit">저장하기</button>
+        </footer>
+      </form>
+    </div>
+
+    <div class="confirm-modal" id="confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" hidden>
+      <div class="settings-backdrop" data-cancel-confirm></div>
+      <section class="confirm-card">
+        <span class="confirm-icon" aria-hidden="true">!</span>
+        <h2 id="confirm-title">정말 변경할까요?</h2>
+        <p id="confirm-copy">이 작업은 되돌릴 수 없어요.</p>
+        <div>
+          <button type="button" data-cancel-confirm>취소</button>
+          <button class="confirm-danger" id="confirm-action" type="button">확인</button>
+        </div>
+      </section>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <noscript>이 사이트의 다이어리와 가챠를 이용하려면 JavaScript를 켜주세요.</noscript>
   </body>
