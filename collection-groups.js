@@ -15,7 +15,7 @@
   document.head.appendChild(css);
 
   const members = document.createElement('script');
-  members.src = 'member-order.js?v=1';
+  members.src = 'member-order.js?v=2';
   members.async = false;
   members.onload = () => {
     const core = document.createElement('script');
