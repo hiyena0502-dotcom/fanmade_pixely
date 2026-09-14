@@ -15,6 +15,12 @@
       const unify = document.createElement('script');
       unify.src = 'collection-unify.js?v=1';
       unify.async = false;
+      unify.onload = () => {
+        const routeFix = document.createElement('script');
+        routeFix.src = 'collection-route-fix.js?v=1';
+        routeFix.async = false;
+        document.head.appendChild(routeFix);
+      };
       document.head.appendChild(unify);
     };
     document.head.appendChild(collapse);
