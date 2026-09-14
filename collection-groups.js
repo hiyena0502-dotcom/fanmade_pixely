@@ -2,6 +2,12 @@
   const game = document.createElement('script');
   game.src = 'pixely-game.js?v=10';
   game.async = false;
+  game.onload = () => {
+    const gachaUpgrade = document.createElement('script');
+    gachaUpgrade.src = 'gacha-upgrade.js?v=1';
+    gachaUpgrade.async = false;
+    document.head.appendChild(gachaUpgrade);
+  };
   document.head.appendChild(game);
 
   const theme = document.createElement('link');
@@ -31,7 +37,7 @@
         routeFix.async = false;
         routeFix.onload = () => {
           const storyGroups = document.createElement('script');
-          storyGroups.src = 'scenario-groups.js?v=1';
+          storyGroups.src = 'scenario-groups.js?v=2';
           storyGroups.async = false;
           document.head.appendChild(storyGroups);
         };
