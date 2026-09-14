@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="푸른 하늘 너머 펼쳐지는 픽셀리 팬메이드 다이어리"
+    />
+    <meta name="theme-color" content="#79bff2" />
+    <title>PIXELY SKY DIARY</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <div class="sky" aria-hidden="true">
+      <div class="sun-glow"></div>
+      <div class="cloud cloud--one"><i></i><i></i><i></i></div>
+      <div class="cloud cloud--two"><i></i><i></i><i></i></div>
+      <div class="cloud cloud--three"><i></i><i></i><i></i></div>
+      <div class="pixel-sparkles">
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      </div>
+    </div>
+
+    <main>
+      <section class="intro" id="intro" aria-labelledby="intro-title">
+        <div class="intro__copy">
+          <span class="intro__eyebrow">A FANMADE PLACE FOR PIXELY</span>
+          <h1 id="intro-title">
+            <span>구름 너머에 간직해 둔</span>
+            우리들의 이야기
+          </h1>
+          <p>푸른 하늘을 지나, 한 장씩 모아 둔 기록을 펼쳐보세요.</p>
+        </div>
+
+        <button class="diary-door" id="enter-button" type="button">
+          <span class="diary-door__book" aria-hidden="true">
+            <span class="diary-door__band"></span>
+            <span class="diary-door__label">
+              <b>PIXELY</b>
+              <small>sky diary</small>
+            </span>
+            <span class="diary-door__stars">✦</span>
+          </span>
+          <span class="diary-door__caption">다이어리 펼치기</span>
+          <span class="diary-door__hint">CLICK TO OPEN</span>
+        </button>
+
+        <div class="intro__scroll" aria-hidden="true">
+          <span></span>
+          <small>오늘의 하늘은 맑음</small>
+        </div>
+      </section>
+
+      <section class="diary-app" id="diary-app" aria-hidden="true">
+        <header class="app-bar">
+          <button class="brand" type="button" data-go-home aria-label="다이어리 홈으로 이동">
+            <span class="brand__mark">P</span>
+            <span>
+              <b>PIXELY DIARY</b>
+              <small>our little sky archive</small>
+            </span>
+          </button>
+          <div class="app-bar__actions">
+            <span class="weather-pill"><i></i> 푸른 하늘 · 맑음</span>
+            <button class="sky-button" id="back-to-sky" type="button">
+              <span aria-hidden="true">☁</span> 하늘로
+            </button>
+          </div>
+        </header>
+
+        <div class="diary-wrap">
+          <nav class="diary-tabs" aria-label="다이어리 메뉴">
+            <button class="tab tab--home is-active" type="button" data-tab="home" aria-current="page">
+              <span aria-hidden="true">⌂</span><b>HOME</b>
+            </button>
+            <button class="tab tab--series" type="button" data-tab="series">
+              <span aria-hidden="true">▤</span><b>SERIES</b>
+            </button>
+            <button class="tab tab--gacha" type="button" data-tab="gacha">
+              <span aria-hidden="true">✦</span><b>GACHA</b>
+            </button>
+            <button class="tab tab--collection" type="button" data-tab="collection">
+              <span aria-hidden="true">▦</span><b>COLLECT</b>
+            </button>
+          </nav>
+
+          <div class="diary-book" id="diary-book">
+            <div class="book-cover" aria-hidden="true"></div>
+            <div class="ring-binder" aria-hidden="true">
+              <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+            </div>
+
+            <section class="diary-panel is-active" data-panel="home" aria-labelledby="home-heading">
+              <div class="paper-page paper-page--left home-left">
+                <div class="page-number">01</div>
+                <div class="washi-tape washi-tape--blue" aria-hidden="true"></div>
+                <p class="hand-note">A page for everything we love ♡</p>
+                <div class="date-stamp">
+                  <b id="today-date">09.14</b>
+                  <span>TODAY'S MEMORY</span>
+                </div>
+                <h2 id="home-heading">오늘도 한 페이지,<br />우리의 이야기를 기록해.</h2>
+                <p class="home-intro">
+                  좋아하는 시리즈와 장면, 그리고 우연히 만난 작은 행운까지.
+                  이곳은 픽셀리의 순간을 차곡차곡 모아두는 팬메이드 다이어리예요.
+                </p>
+
+                <div class="member-dots" aria-label="픽셀리 멤버 컬러">
+                  <span class="member-dot member-dot--blue" title="잠뜰">잠</span>
+                  <span class="member-dot member-dot--yellow" title="각별">각</span>
+                  <span class="member-dot member-dot--green" title="공룡">공</span>
+                  <span class="member-dot member-dot--cyan" title="수현">수</span>
+                  <span class="member-dot member-dot--red" title="라더">라</span>
+                  <span class="member-dot member-dot--orange" title="덕개">덕</span>
+                </div>
+
+                <div class="paper-plane" aria-hidden="true">➤</div>
+                <p class="scribble">keep every sparkling moment!</p>
+              </div>
+
+              <div class="paper-page paper-page--right home-right">
+                <div class="page-number">02</div>
+                <div class="page-heading">
+                  <div>
+                    <span>QUICK MENU</span>
+                    <h3>어디부터 펼쳐볼까?</h3>
+                  </div>
+                  <span class="tiny-sun" aria-hidden="true">☼</span>
+                </div>
+
+                <button class="feature-card feature-card--series" type="button" data-open-tab="series">
+                  <span class="feature-card__label">MAIN SERIES</span>
+                  <span class="feature-card__art" aria-hidden="true">
+                    <i class="file file--back"></i>
+                    <i class="file file--front"><b>?</b></i>
+                    <i class="magnifier"></i>
+                  </span>
+                  <span class="feature-card__copy">
+                    <b>메인 시리즈 기록</b>
+                    <small>에피소드와 인물, 소중한 장면을 한 권에</small>
+                  </span>
+                  <span class="round-arrow" aria-hidden="true">↗</span>
+                </button>
+
+                <button class="feature-card feature-card--gacha" type="button" data-open-tab="gacha">
+                  <span class="feature-card__label">TODAY'S GACHA</span>
+                  <span class="mini-capsules" aria-hidden="true">
+                    <i></i><i></i><i></i>
+                  </span>
+                  <span class="feature-card__copy">
+                    <b>오늘의 픽셀 뽑기</b>
+                    <small>어떤 추억이 기다리고 있을까요?</small>
+                  </span>
+                  <span class="round-arrow" aria-hidden="true">↗</span>
+                </button>
+
+                <div class="home-stats">
+                  <div><span>모은 카드</span><b><em data-owned-count>0</em> / 12</b></div>
+                  <div><span>별가루</span><b>✦ <em data-dust-count>0</em></b></div>
+                  <button type="button" data-open-tab="collection">컬렉션 보기 →</button>
+                </div>
+              </div>
+            </section>
+
+            <section class="diary-panel" data-panel="series" aria-labelledby="series-heading" hidden>
+              <div class="paper-page paper-page--left series-index">
+                <div class="page-number">03</div>
+                <div class="washi-tape washi-tape--yellow" aria-hidden="true"></div>
+                <span class="section-kicker">TABLE OF CONTENTS</span>
+                <h2 id="series-heading">메인 시리즈</h2>
+                <p>간직하고 싶은 이야기를 골라 기록을 펼쳐보세요.</p>
+
+                <div class="series-list" role="list">
+                  <button class="series-item is-active" type="button" data-series="mystery" role="listitem">
+                    <span class="series-item__number">01</span>
+                    <span class="series-item__thumb series-item__thumb--mystery" aria-hidden="true">⌕</span>
+                    <span><b>미스터리 수사반</b><small>사건 기록 파일</small></span>
+                    <i>→</i>
+                  </button>
+                  <button class="series-item" type="button" data-series="next" role="listitem">
+                    <span class="series-item__number">02</span>
+                    <span class="series-item__thumb series-item__thumb--next" aria-hidden="true">＋</span>
+                    <span><b>다음 시리즈</b><small>새 기록을 준비 중이에요</small></span>
+                    <i>→</i>
+                  </button>
+                </div>
+
+                <div class="index-memo">
+                  <span aria-hidden="true">✎</span>
+                  <p>시리즈가 늘어나면 이곳에 목차가 한 줄씩 추가됩니다.</p>
+                </div>
+              </div>
+
+              <div class="paper-page paper-page--right series-detail">
+                <div class="page-number">04</div>
+                <article class="series-view is-active" data-series-view="mystery">
+                  <div class="case-cover">
+                    <div class="case-cover__top">
+                      <span>CASE FILE</span><b>NO. 001</b>
+                    </div>
+                    <div class="case-cover__icon" aria-hidden="true">?</div>
+                    <h3>미스터리 수사반</h3>
+                    <p>MYSTERY INVESTIGATION TEAM</p>
+                    <div class="case-cover__tape" aria-hidden="true"></div>
+                  </div>
+                  <div class="series-summary">
+                    <span class="status-stamp">RECORDING</span>
+                    <div>
+                      <b>나의 시리즈 기록</b>
+                      <p>소개, 등장인물, 에피소드와 명장면이 이 페이지에 차곡차곡 쌓일 예정이에요.</p>
+                    </div>
+                  </div>
+                  <div class="series-chips">
+                    <span># 등장인물</span><span># 에피소드</span><span># 명장면</span><span># 관계성</span>
+                  </div>
+                  <button class="coming-button" type="button" disabled>첫 번째 기록 준비 중</button>
+                </article>
+
+                <article class="series-view" data-series-view="next" hidden>
+                  <div class="empty-series">
+                    <span aria-hidden="true">＋</span>
+                    <h3>다음 이야기를 위한 빈 페이지</h3>
+                    <p>새로운 메인 시리즈가 정해지면 이곳에 표지와 기록을 채울 수 있어요.</p>
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            <section class="diary-panel" data-panel="gacha" aria-labelledby="gacha-heading" hidden>
+              <div class="paper-page paper-page--left gacha-info">
+                <div class="page-number">05</div>
+                <div class="washi-tape washi-tape--pink" aria-hidden="true"></div>
+                <span class="section-kicker">LUCKY PIXEL</span>
+                <h2 id="gacha-heading">오늘의 픽셀 뽑기</h2>
+                <p>하늘에서 떨어진 작은 캡슐 안에는 어떤 기록이 들어 있을까요?</p>
+
+                <div class="rarity-list">
+                  <div><i class="rarity-dot rarity-dot--cloud"></i><span><b>CLOUD</b><small>포근한 일상의 조각</small></span></div>
+                  <div><i class="rarity-dot rarity-dot--sky"></i><span><b>SKY</b><small>반짝이는 멤버 카드</small></span></div>
+                  <div><i class="rarity-dot rarity-dot--star"></i><span><b>STAR</b><small>특별한 시리즈 기록</small></span></div>
+                  <div><i class="rarity-dot rarity-dot--rainbow"></i><span><b>RAINBOW</b><small>아주 희귀한 행운</small></span></div>
+                </div>
+
+                <div class="gacha-rule">
+                  <b>HOW TO PLAY</b>
+                  <ol>
+                    <li>하늘 구슬을 눌러 캡슐을 뽑아요.</li>
+                    <li>처음 만난 카드는 컬렉션에 저장돼요.</li>
+                    <li>중복 카드는 별가루 10개로 변해요.</li>
+                  </ol>
+                </div>
+              </div>
+
+              <div class="paper-page paper-page--right gacha-play">
+                <div class="page-number">06</div>
+                <div class="gacha-counts">
+                  <span>COLLECTION <b><em data-owned-count>0</em>/12</b></span>
+                  <span>STARDUST <b>✦ <em data-dust-count>0</em></b></span>
+                </div>
+
+                <div class="gacha-machine" id="gacha-machine" aria-hidden="true">
+                  <div class="machine-top">
+                    <div class="machine-glass">
+                      <i class="ball ball--1"></i><i class="ball ball--2"></i><i class="ball ball--3"></i>
+                      <i class="ball ball--4"></i><i class="ball ball--5"></i><i class="ball ball--6"></i>
+                      <span>PIXELY<br /><b>GACHA</b></span>
+                    </div>
+                  </div>
+                  <div class="machine-base">
+                    <div class="machine-knob">✦</div>
+                    <div class="machine-slot"></div>
+                  </div>
+                </div>
+
+                <button class="draw-button" id="draw-button" type="button">
+                  <span>✦</span>
+                  <b>1회 뽑기</b>
+                  <small>행운을 눌러보세요!</small>
+                </button>
+                <p class="gacha-message" id="gacha-message" aria-live="polite">오늘도 좋은 기록을 만날 수 있을 거예요.</p>
+              </div>
+            </section>
+
+            <section class="diary-panel" data-panel="collection" aria-labelledby="collection-heading" hidden>
+              <div class="paper-page paper-page--full collection-page">
+                <div class="page-number">07—08</div>
+                <div class="collection-heading">
+                  <div>
+                    <span class="section-kicker">MY LITTLE TREASURES</span>
+                    <h2 id="collection-heading">픽셀 컬렉션</h2>
+                    <p>가챠에서 만난 기록들이 이 페이지에 하나씩 붙어요.</p>
+                  </div>
+                  <div class="collection-total">
+                    <span>COLLECTED</span>
+                    <b><em data-owned-count>0</em><small>/ 12</small></b>
+                  </div>
+                </div>
+
+                <div class="collection-grid" id="collection-grid"></div>
+
+                <div class="collection-footer">
+                  <span>✦ 별가루 <b data-dust-count>0</b></span>
+                  <button type="button" data-open-tab="gacha">가챠로 돌아가기 →</button>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+        <p class="fanmade-note">UNOFFICIAL FANMADE WEBSITE · 개인 팬 프로젝트</p>
+      </section>
+    </main>
+
+    <div class="result-modal" id="result-modal" role="dialog" aria-modal="true" aria-labelledby="result-title" hidden>
+      <div class="result-backdrop" data-close-modal></div>
+      <div class="result-box">
+        <div class="result-rays" aria-hidden="true"></div>
+        <span class="result-kicker" id="result-kicker">NEW MEMORY!</span>
+        <div class="result-card" id="result-card"></div>
+        <h2 id="result-title">새로운 카드를 만났어요!</h2>
+        <p id="result-copy">컬렉션에 소중히 보관했어요.</p>
+        <div class="result-actions">
+          <button class="result-button result-button--again" id="draw-again" type="button">한 번 더 뽑기</button>
+          <button class="result-button result-button--close" type="button" data-close-modal>다이어리에 붙이기</button>
+        </div>
+      </div>
+    </div>
+
+    <noscript>이 사이트의 다이어리와 가챠를 이용하려면 JavaScript를 켜주세요.</noscript>
+  </body>
+</html>
