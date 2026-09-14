@@ -29,6 +29,12 @@
         const routeFix = document.createElement('script');
         routeFix.src = 'collection-route-fix.js?v=3';
         routeFix.async = false;
+        routeFix.onload = () => {
+          const storyGroups = document.createElement('script');
+          storyGroups.src = 'scenario-groups.js?v=1';
+          storyGroups.async = false;
+          document.head.appendChild(storyGroups);
+        };
         document.head.appendChild(routeFix);
       };
       document.head.appendChild(unify);
