@@ -147,8 +147,8 @@
           <span class="gc-collapse-toggle" aria-hidden="true"></span>
         </header>
         <div class="gc-grid"><p class="gc-empty-settings" style="grid-column:1/-1;margin:12px 0 4px">아직 등록된 카드가 없어요.</p></div>`;
-      const etc = [...root.querySelectorAll('.gc-group')].find(el => el.querySelector('h3')?.textContent.trim() === '기타 컬렉션');
-      if (etc) root.insertBefore(section, etc); else root.appendChild(section);
+      // Append after core-rendered groups so the existing collapse script keeps its index mapping intact.
+      root.appendChild(section);
     });
   }
 
