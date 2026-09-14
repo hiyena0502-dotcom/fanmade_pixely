@@ -11,9 +11,10 @@
     <title>PIXELY SKY DIARY</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="collection-groups.css?v=1" />
+    <link rel="stylesheet" href="collection-groups.css?v=5" />
     <script src="script.js" defer></script>
-    <script src="collection-groups.js?v=1" defer></script>
+    <script src="pixely-game.js?v=10" defer></script>
+    <script src="collection-groups.js?v=10" defer></script>
   </head>
   <body>
     <div class="sky" aria-hidden="true">
@@ -82,7 +83,7 @@
               <span aria-hidden="true">⌂</span><b>HOME</b>
             </button>
             <button class="tab tab--series" type="button" data-tab="series">
-              <span aria-hidden="true">▤</span><b>SERIES</b>
+              <span aria-hidden="true">✦</span><b>CLICK</b>
             </button>
             <button class="tab tab--gacha" type="button" data-tab="gacha">
               <span aria-hidden="true">✦</span><b>GACHA</b>
@@ -143,15 +144,15 @@
                 </div>
 
                 <button class="feature-card feature-card--series home-recent-series" type="button" data-open-tab="series">
-                  <span class="feature-card__label">MAIN SERIES</span>
+                  <span class="feature-card__label">STAR DUST CLICKER</span>
                   <span class="feature-card__art" aria-hidden="true">
                     <i class="file file--back"></i>
-                    <i class="file file--front"><b>?</b></i>
+                    <i class="file file--front"><b>✦</b></i>
                     <i class="magnifier"></i>
                   </span>
                   <span class="feature-card__copy">
-                    <b id="home-recent-series-title">메인 시리즈 기록</b>
-                    <small id="home-recent-series-copy">에피소드와 인물, 소중한 장면을 한 권에</small>
+                    <b id="home-recent-series-title">별가루 모으기</b>
+                    <small id="home-recent-series-copy">CLICK에서 별가루를 모아 가챠를 돌려보세요.</small>
                   </span>
                   <span class="round-arrow" aria-hidden="true">↗</span>
                 </button>
@@ -182,7 +183,7 @@
             </section>
 
             <section class="diary-panel" data-panel="series" aria-labelledby="series-heading" hidden>
-              <h2 class="sr-only" id="series-heading">메인 시리즈</h2>
+              <h2 class="sr-only" id="series-heading">별가루 클릭커</h2>
               <div class="spread-stage" id="series-spreads"></div>
             </section>
 
