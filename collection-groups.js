@@ -1,7 +1,12 @@
 (() => {
+  const theme = document.createElement('link');
+  theme.rel = 'stylesheet';
+  theme.href = 'collection-groups.css?v=2';
+  document.head.appendChild(theme);
+
   const css = document.createElement('link');
   css.rel = 'stylesheet';
-  css.href = 'collection-collapse.css?v=1';
+  css.href = 'collection-collapse.css?v=2';
   document.head.appendChild(css);
 
   const core = document.createElement('script');
