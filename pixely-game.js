@@ -1,6 +1,6 @@
 (() => {
-  if (window.__PIXELY_CLICK_FIXED_V10__) return;
-  window.__PIXELY_CLICK_FIXED_V10__ = true;
+  if (window.__PIXELY_CLICK_FIXED_V11__) return;
+  window.__PIXELY_CLICK_FIXED_V11__ = true;
 
   const CORE_KEY = 'pixely-diary-save-v1';
   const GAME_KEY = 'pixely-game-v1';
@@ -51,13 +51,13 @@
   }
 
   function installStyle() {
-    if ($('#pixely-click-fixed-style')) return;
+    document.getElementById('pixely-click-fixed-style')?.remove();
     const style = document.createElement('style');
     style.id = 'pixely-click-fixed-style';
     style.textContent = `
       .tab--click{background:#8d8bd8!important}
       #pixely-click-fixed[hidden]{display:none!important}
-      #pixely-click-fixed{position:fixed!important;z-index:999999!important;display:grid!important;grid-template-columns:1fr 1fr!important;overflow:hidden!important;border:2px solid rgba(83,122,148,.18)!important;border-radius:22px!important;background:#fffdf5!important;box-shadow:0 28px 70px rgba(34,72,98,.30)!important;color:#405f74!important}
+      #pixely-click-fixed{position:fixed!important;z-index:15!important;display:grid!important;grid-template-columns:1fr 1fr!important;overflow:hidden!important;border:2px solid rgba(83,122,148,.18)!important;border-radius:22px!important;background:#fffdf5!important;box-shadow:0 28px 70px rgba(34,72,98,.30)!important;color:#405f74!important}
       #pixely-click-fixed::after{content:'';position:absolute;top:0;bottom:0;left:50%;width:2px;background:rgba(110,96,78,.12);transform:translateX(-50%);pointer-events:none}
       .pcf-page{position:relative;min-width:0;padding:54px 58px;background-color:#fffdf5;background-image:linear-gradient(rgba(103,143,168,.07) 1px,transparent 1px);background-size:100% 29px}
       .pcf-left{display:flex;flex-direction:column;justify-content:center}
@@ -79,7 +79,7 @@
       #pixely-click-star small{margin-top:5px;color:#967757;font-size:12px;font-weight:800}
       .pcf-right>p{margin:23px 0 11px;color:#8a999f;font-size:12px}
       .pcf-gacha{padding:10px 16px;border:1px solid #d8e5ec;border-radius:999px;background:#fff;color:#6589a0;font-weight:800;cursor:pointer}
-      .pcf-float{position:absolute;z-index:50;color:#c18b30;font-size:24px;font-weight:900;pointer-events:none;animation:pcfFloat .8s ease-out forwards}
+      .pcf-float{position:absolute;z-index:16;color:#c18b30;font-size:24px;font-weight:900;pointer-events:none;animation:pcfFloat .8s ease-out forwards}
       @keyframes pcfFloat{0%{opacity:0;transform:translate(-50%,0)}20%{opacity:1}100%{opacity:0;transform:translate(-50%,-92px)}}
       body.pixely-click-fixed-active #spread-page-controls{visibility:hidden!important}
       @media(max-width:900px){#pixely-click-fixed{grid-template-columns:1fr!important}.pcf-left{display:none}.pcf-right{min-height:100%}#pixely-click-star{width:240px;height:240px}.pcf-star{font-size:92px}}
@@ -247,7 +247,7 @@
         return;
       }
 
-      if (event.target.closest?.('[data-tab="home"], [data-tab="gacha"], [data-tab="collection"], [data-go-home]')) {
+      if (event.target.closest?.('[data-tab="home"], [data-tab="gacha"], [data-tab="collection"], [data-go-home], #back-to-sky, .sky-button')) {
         hideClick();
       }
 
@@ -270,7 +270,13 @@
       if (!$('#pixely-click-fixed')?.hidden) placeOverlay();
     });
 
-    /* UX test: if the CLICK tab is already active from an older script, force the overlay back in. */
+    const diaryApp = $('#diary-app');
+    if (diaryApp) {
+      new MutationObserver(() => {
+        if (diaryApp.getAttribute('aria-hidden') === 'true' || !diaryApp.classList.contains('is-visible')) hideClick();
+      }).observe(diaryApp, { attributes:true, attributeFilter:['aria-hidden','class'] });
+    }
+
     setTimeout(() => {
       const tab = ensureTab();
       if (tab?.classList.contains('is-active')) showClick();
