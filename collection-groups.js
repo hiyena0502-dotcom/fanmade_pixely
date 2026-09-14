@@ -1,6 +1,6 @@
 (() => {
   const game = document.createElement('script');
-  game.src = 'pixely-game.js?v=1';
+  game.src = 'pixely-game.js?v=2';
   game.async = false;
   document.head.appendChild(game);
 
