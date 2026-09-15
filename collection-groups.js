@@ -24,6 +24,18 @@
   tidyJs.async = false;
   document.head.appendChild(tidyJs);
 
+  function loadScriptsInOrder(files, done) {
+    const load = (index) => {
+      if (index >= files.length) { done?.(); return; }
+      const script = document.createElement('script');
+      script.src = files[index];
+      script.async = false;
+      script.onload = () => load(index + 1);
+      document.head.appendChild(script);
+    };
+    load(0);
+  }
+
   const members = document.createElement('script');
   members.src = 'member-order.js?v=2';
   members.async = false;
@@ -47,6 +59,15 @@
             const storyGroups = document.createElement('script');
             storyGroups.src = 'scenario-groups.js?v=3';
             storyGroups.async = false;
+            storyGroups.onload = () => {
+              loadScriptsInOrder([
+                'story-card-seed-core.js?v=1',
+                'story-cards-long.js?v=1',
+                'story-cards-short.js?v=1',
+                'story-cards-series-a.js?v=1',
+                'story-cards-series-b.js?v=1',
+              ], () => window.PIXELY_STORY_PACK?.seed());
+            };
             document.head.appendChild(storyGroups);
           };
           document.head.appendChild(routeFix);
