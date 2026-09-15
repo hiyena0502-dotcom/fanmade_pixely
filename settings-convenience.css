@@ -1,23 +1,236 @@
-/* Compact helpers for gacha + collection settings */
-.sc-toolbar{display:grid;gap:9px;margin:12px 0 14px;padding:12px;border:1px solid #dfe6e5;border-radius:14px;background:rgba(255,255,255,.72)}
-.sc-toolbar-main{display:grid;grid-template-columns:minmax(180px,1fr) minmax(150px,.55fr) minmax(120px,.42fr);gap:8px;align-items:center}
-.sc-toolbar select,.sc-toolbar input,.sc-quick-controls select{width:100%;min-height:34px;border:1px solid #d9e0df;border-radius:9px;background:#fff;color:#667982;font:inherit;font-size:.65rem;outline:none}
-.sc-toolbar select,.sc-quick-controls select{padding:0 9px}.sc-toolbar input{padding:0 10px 0 28px}
-.sc-search{position:relative}.sc-search>span{position:absolute;left:10px;top:50%;transform:translateY(-50%);z-index:2;color:#91a0a5;font-size:.8rem}
+/* Gacha + collection settings convenience UI v2 */
+
+/* Give management screens enough room. The old modal was too narrow for quick controls. */
+.settings-modal .settings-panel{
+  width:min(1180px,calc(100vw - 56px))!important;
+  max-width:none!important;
+  height:min(780px,calc(100vh - 48px))!important;
+}
+.settings-modal .settings-content{
+  overflow-x:hidden!important;
+}
+.settings-modal .settings-section{
+  min-width:0!important;
+}
+
+/* Toolbar */
+.sc-toolbar{
+  display:grid;
+  gap:10px;
+  margin:12px 0 14px;
+  padding:12px 14px;
+  border:1px solid #dfe6e5;
+  border-radius:14px;
+  background:rgba(255,255,255,.74);
+}
+.sc-toolbar-main{
+  display:grid;
+  grid-template-columns:minmax(230px,1.4fr) minmax(170px,.65fr) minmax(140px,.5fr);
+  gap:9px;
+  align-items:center;
+}
+.sc-toolbar select,.sc-toolbar input,.sc-quick-controls select{
+  width:100%;
+  min-width:0;
+  min-height:36px;
+  border:1px solid #d9e0df;
+  border-radius:9px;
+  background:#fff;
+  color:#667982;
+  font:inherit;
+  font-size:.66rem;
+  outline:none;
+}
+.sc-toolbar select,.sc-quick-controls select{padding:0 10px}
+.sc-toolbar input{padding:0 11px 0 30px}
+.sc-search{position:relative}
+.sc-search>span{position:absolute;left:11px;top:50%;z-index:2;transform:translateY(-50%);color:#91a0a5;font-size:.82rem}
 .sc-search input:focus,.sc-toolbar select:focus,.sc-quick-controls select:focus{border-color:#8fb4c9;box-shadow:0 0 0 3px rgba(111,160,190,.1)}
-.sc-batch{display:flex;align-items:center;gap:7px;padding-top:9px;border-top:1px dashed #d9dfde}.sc-batch[hidden]{display:none!important}.sc-batch>b{margin-right:auto;color:#657c89;font-size:.65rem}.sc-batch select{width:auto;min-width:150px}.sc-batch button{min-height:32px;padding:0 11px;border:0;border-radius:999px;background:#769eb7;color:#fff;font-size:.6rem;font-weight:900;cursor:pointer}.sc-batch button.sc-ghost{border:1px solid #d7dfdf;background:#fff;color:#87969b}
+.sc-batch{display:flex;align-items:center;gap:8px;padding-top:10px;border-top:1px dashed #d9dfde}
+.sc-batch[hidden]{display:none!important}
+.sc-batch>b{margin-right:auto;color:#657c89;font-size:.66rem}
+.sc-batch select{width:auto;min-width:180px}
+.sc-batch button{min-height:34px;padding:0 13px;border:0;border-radius:999px;background:#769eb7;color:#fff;font-size:.61rem;font-weight:900;cursor:pointer}
+.sc-batch button.sc-ghost{border:1px solid #d7dfdf;background:#fff;color:#87969b}
 
-#gacha-settings-list .settings-item[data-sc-item-id]{display:grid;grid-template-columns:auto auto minmax(120px,1fr) minmax(255px,.95fr) auto;gap:9px;align-items:center;padding:11px 12px}
-.sc-select-box{display:grid;place-items:center;width:24px;height:24px;cursor:pointer}.sc-select-box input{position:absolute;opacity:0}.sc-select-box i{display:grid;place-items:center;width:17px;height:17px;border:1.5px solid #cbd6d8;border-radius:5px;background:#fff}.sc-select-box input:checked+i{border-color:#739db7;background:#739db7}.sc-select-box input:checked+i::after{content:'✓';color:#fff;font-size:.62rem;font-weight:900}
-.sc-group-chip{display:inline-flex;margin-top:5px;padding:3px 7px;border:1px solid #d9e5e9;border-radius:999px;background:#f5fafc;color:#6f8d9d;font-size:.48rem;font-weight:900;cursor:pointer}.sc-group-chip:hover{background:#edf6fa}
-.sc-quick-controls{display:grid;grid-template-columns:1.2fr .72fr auto;gap:6px;align-items:end}.sc-quick-controls label{display:grid;gap:3px}.sc-quick-controls small{color:#94a0a3;font-size:.47rem;font-weight:900;letter-spacing:.04em}.sc-completion{display:flex!important;align-items:center;gap:5px;min-height:34px;padding:0 8px;border:1px solid #e0e5e4;border-radius:9px;background:#fff;color:#819095;font-size:.52rem;font-weight:800}.sc-completion input{accent-color:#789fb8}
-.sc-filter-empty{padding:22px;border:2px dashed #dfe4e1;border-radius:13px;color:#9aa5a6;font-size:.65rem;text-align:center}.sc-filter-empty[hidden]{display:none!important}
+/* IMPORTANT: force the gacha manager to one clean column. */
+#gacha-settings-list{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:8px!important;
+  width:100%!important;
+  min-width:0!important;
+  overflow:visible!important;
+}
+#gacha-settings-list .settings-item[data-sc-item-id]{
+  display:grid!important;
+  grid-template-columns:28px 48px minmax(190px,1fr) minmax(330px,430px) 72px!important;
+  gap:10px!important;
+  align-items:center!important;
+  width:100%!important;
+  min-width:0!important;
+  padding:10px 12px!important;
+  border-radius:12px!important;
+}
+#gacha-settings-list .settings-item__preview{
+  width:44px!important;
+  height:44px!important;
+  min-width:44px!important;
+}
+#gacha-settings-list .settings-item__copy{
+  min-width:0!important;
+}
+#gacha-settings-list .settings-item__copy>b{
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+#gacha-settings-list .settings-item__copy>small,
+#gacha-settings-list .settings-item__copy>em{
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+#gacha-settings-list .settings-item__actions{
+  display:flex!important;
+  justify-content:flex-end!important;
+  gap:5px!important;
+  min-width:64px!important;
+}
 
-#collection-group-settings .gc-setting-group{transition:border-color .2s,box-shadow .2s,background .2s}.gc-setting-group.sc-highlight{border-color:#82abc3!important;background:#f7fbfd!important;box-shadow:0 0 0 4px rgba(116,165,193,.12)}
-.sc-group-summary{grid-column:1/-1;margin-top:8px;padding-top:9px;border-top:1px dashed #e0e3de}.sc-group-summary-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.sc-group-summary-head>b{color:#6c8998;font-size:.58rem}.sc-group-summary-head button{padding:5px 9px;border:1px solid #dce5e7;border-radius:999px;background:#fff;color:#7895a4;font-size:.5rem;font-weight:900;cursor:pointer}.sc-group-summary-head button:hover{background:#f2f8fb}
-.sc-item-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}.sc-item-chips span{padding:4px 7px;border-radius:999px;background:#eef4f5;color:#76888d;font-size:.48rem;font-weight:800}.sc-item-chips em{color:#9aa3a1;font-size:.52rem;font-style:normal}
-.sc-classification-toggle{margin-left:auto;padding:7px 11px;border:1px solid #d9e2e4;border-radius:999px;background:#fff;color:#718d9b;font-size:.55rem;font-weight:900;cursor:pointer}.sc-classification-toggle:hover{background:#f2f8fa}
+.sc-select-box{display:grid;place-items:center;width:24px;height:24px;cursor:pointer}
+.sc-select-box input{position:absolute;opacity:0}
+.sc-select-box i{display:grid;place-items:center;width:18px;height:18px;border:1.5px solid #cbd6d8;border-radius:5px;background:#fff}
+.sc-select-box input:checked+i{border-color:#739db7;background:#739db7}
+.sc-select-box input:checked+i::after{content:'✓';color:#fff;font-size:.62rem;font-weight:900}
+
+.sc-group-chip{
+  display:inline-flex;
+  max-width:100%;
+  margin-top:5px;
+  padding:3px 8px;
+  overflow:hidden;
+  border:1px solid #d9e5e9;
+  border-radius:999px;
+  background:#f5fafc;
+  color:#6f8d9d;
+  font-size:.49rem;
+  font-weight:900;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  cursor:pointer;
+}
+.sc-group-chip:hover{background:#edf6fa}
+
+.sc-quick-controls{
+  display:grid;
+  grid-template-columns:minmax(150px,1.25fr) minmax(92px,.62fr) minmax(88px,.58fr);
+  gap:7px;
+  align-items:end;
+  min-width:0;
+}
+.sc-quick-controls label{display:grid;gap:3px;min-width:0}
+.sc-quick-controls small{color:#94a0a3;font-size:.47rem;font-weight:900;letter-spacing:.04em}
+.sc-completion{
+  display:flex!important;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  min-height:36px;
+  padding:0 8px;
+  border:1px solid #e0e5e4;
+  border-radius:9px;
+  background:#fff;
+  color:#819095;
+  font-size:.52rem;
+  font-weight:800;
+  white-space:nowrap;
+}
+.sc-completion input{accent-color:#789fb8}
+.sc-filter-empty{padding:22px;border:2px dashed #dfe4e1;border-radius:13px;color:#9aa5a6;font-size:.65rem;text-align:center}
+.sc-filter-empty[hidden]{display:none!important}
+
+/* Collection group manager */
+#collection-group-settings .gc-settings-groups{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:10px!important;
+}
+#collection-group-settings .gc-setting-group{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(210px,.34fr) auto!important;
+  gap:10px 14px!important;
+  align-items:center!important;
+  width:100%!important;
+  min-width:0!important;
+  padding:14px!important;
+  transition:border-color .2s,box-shadow .2s,background .2s;
+}
+#collection-group-settings .gc-setting-group-main{
+  display:grid!important;
+  grid-template-columns:minmax(150px,1.2fr) minmax(150px,1fr) 64px 48px!important;
+  gap:7px!important;
+  min-width:0!important;
+}
+#collection-group-settings .gc-setting-group-main input,
+#collection-group-settings .gc-setting-group select{
+  min-width:0!important;
+}
+.gc-setting-group.sc-highlight{border-color:#82abc3!important;background:#f7fbfd!important;box-shadow:0 0 0 4px rgba(116,165,193,.12)}
+.sc-group-summary{grid-column:1/-1;margin-top:2px;padding-top:10px;border-top:1px dashed #e0e3de}
+.sc-group-summary-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sc-group-summary-head>b{color:#6c8998;font-size:.6rem}
+.sc-group-summary-head button{padding:6px 10px;border:1px solid #dce5e7;border-radius:999px;background:#fff;color:#7895a4;font-size:.51rem;font-weight:900;cursor:pointer}
+.sc-group-summary-head button:hover{background:#f2f8fb}
+.sc-item-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.sc-item-chips span{padding:4px 8px;border-radius:999px;background:#eef4f5;color:#76888d;font-size:.49rem;font-weight:800}
+.sc-item-chips em{color:#9aa3a1;font-size:.52rem;font-style:normal}
+.sc-classification-toggle{margin-left:auto;padding:7px 11px;border:1px solid #d9e2e4;border-radius:999px;background:#fff;color:#718d9b;font-size:.55rem;font-weight:900;cursor:pointer}
+.sc-classification-toggle:hover{background:#f2f8fa}
 .gc-item-manager[hidden]{display:none!important}
 
-@media(max-width:1050px){#gacha-settings-list .settings-item[data-sc-item-id]{grid-template-columns:auto auto minmax(120px,1fr) auto}.sc-quick-controls{grid-column:3/5;width:100%}}
-@media(max-width:760px){.sc-toolbar-main{grid-template-columns:1fr}.sc-batch{align-items:stretch;flex-direction:column}.sc-batch>b{margin-right:0}.sc-batch select{width:100%}#gacha-settings-list .settings-item[data-sc-item-id]{grid-template-columns:auto auto 1fr auto}.sc-quick-controls{grid-column:2/-1;grid-template-columns:1fr 1fr}.sc-completion{grid-column:1/-1;justify-content:center}.sc-group-summary-head{align-items:flex-start;flex-direction:column}}
+/* Prevent the horizontal scrollbar seen in the old layout. */
+.settings-modal .settings-content,
+#gacha-settings-list,
+#collection-group-settings{
+  max-width:100%!important;
+  overflow-x:hidden!important;
+}
+
+@media(max-width:1100px){
+  .settings-modal .settings-panel{width:calc(100vw - 32px)!important}
+  #gacha-settings-list .settings-item[data-sc-item-id]{
+    grid-template-columns:28px 48px minmax(160px,1fr) 72px!important;
+  }
+  .sc-quick-controls{
+    grid-column:3/5;
+    width:100%;
+    grid-template-columns:1.2fr .7fr .65fr;
+  }
+  #collection-group-settings .gc-setting-group{grid-template-columns:1fr!important}
+  #collection-group-settings .gc-setting-group-main{grid-template-columns:1.2fr 1fr 64px 48px!important}
+}
+
+@media(max-width:760px){
+  .settings-modal .settings-panel{
+    width:calc(100vw - 18px)!important;
+    height:calc(100vh - 18px)!important;
+  }
+  .sc-toolbar-main{grid-template-columns:1fr}
+  .sc-batch{align-items:stretch;flex-direction:column}
+  .sc-batch>b{margin-right:0}
+  .sc-batch select{width:100%}
+  #gacha-settings-list .settings-item[data-sc-item-id]{
+    grid-template-columns:28px 44px minmax(0,1fr) auto!important;
+    gap:8px!important;
+  }
+  .sc-quick-controls{
+    grid-column:2/-1;
+    grid-template-columns:1fr 1fr;
+  }
+  .sc-completion{grid-column:1/-1;justify-content:center}
+  #collection-group-settings .gc-setting-group-main{grid-template-columns:1fr 1fr!important}
+  .sc-group-summary-head{align-items:flex-start;flex-direction:column}
+}
