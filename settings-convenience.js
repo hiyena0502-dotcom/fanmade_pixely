@@ -156,17 +156,20 @@
         const actions = $('.settings-item__actions', row);
         if (actions) row.insertBefore(quick, actions); else row.appendChild(quick);
       }
-      quick.innerHTML = `
-        <label><small>그룹</small><select data-sc-quick-group>${groupOptions(meta, m.groupId)}</select></label>
-        <label><small>종류</small><select data-sc-quick-type><option value="card" ${m.type === 'card' ? 'selected' : ''}>CARD</option><option value="item" ${m.type === 'item' ? 'selected' : ''}>ITEM</option></select></label>
-        <label class="sc-completion"><input type="checkbox" data-sc-quick-completion ${m.includeInCompletion !== false ? 'checked' : ''}><span>완성도</span></label>`;
+      const signature = `${m.groupId}|${m.type}|${m.includeInCompletion !== false ? 1 : 0}|${meta.groups.map(g=>g.id).join(',')}`;
+      if (quick.dataset.signature !== signature) {
+        quick.dataset.signature = signature;
+        quick.innerHTML = `
+          <label><small>그룹</small><select data-sc-quick-group>${groupOptions(meta, m.groupId)}</select></label>
+          <label><small>종류</small><select data-sc-quick-type><option value="card" ${m.type === 'card' ? 'selected' : ''}>CARD</option><option value="item" ${m.type === 'item' ? 'selected' : ''}>ITEM</option></select></label>
+          <label class="sc-completion"><input type="checkbox" data-sc-quick-completion ${m.includeInCompletion !== false ? 'checked' : ''}><span>완성도</span></label>`;
+      }
 
       let chip = $('.sc-group-chip', row);
       if (!chip) {
         chip = document.createElement('button');
         chip.type = 'button';
         chip.className = 'sc-group-chip';
-        chip.dataset.scOpenGroup = m.groupId;
         $('.settings-item__copy', row)?.appendChild(chip);
       }
       chip.dataset.scOpenGroup = m.groupId;
@@ -230,8 +233,13 @@
         summary.className = 'sc-group-summary';
         row.appendChild(summary);
       }
-      summary.innerHTML = `<div class="sc-group-summary-head"><b>${items.length}개</b><button type="button" data-sc-view-group="${esc(id)}">가챠 카드에서 이 그룹 보기 →</button></div>
-        <div class="sc-item-chips">${items.length ? items.slice(0,8).map(item => `<span>${esc(item.name)}</span>`).join('') : '<em>아직 들어있는 카드가 없어요.</em>'}${items.length > 8 ? `<span>+${items.length - 8}</span>` : ''}</div>`;
+      const names = items.map(item=>item.name).join('|');
+      const signature = `${items.length}:${names}`;
+      if (summary.dataset.signature !== signature) {
+        summary.dataset.signature = signature;
+        summary.innerHTML = `<div class="sc-group-summary-head"><b>${items.length}개</b><button type="button" data-sc-view-group="${esc(id)}">가챠 카드에서 이 그룹 보기 →</button></div>
+          <div class="sc-item-chips">${items.length ? items.slice(0,8).map(item => `<span>${esc(item.name)}</span>`).join('') : '<em>아직 들어있는 카드가 없어요.</em>'}${items.length > 8 ? `<span>+${items.length - 8}</span>` : ''}</div>`;
+      }
     });
 
     const manager = $('.gc-item-manager', panel);
@@ -252,14 +260,13 @@
 
   function openGachaForGroup(groupId) {
     groupFilter = groupId || 'all';
-    const tab = $('[data-settings-tab="gacha"]');
-    tab?.click();
+    $('[data-settings-tab="gacha"]')?.click();
     setTimeout(() => {
       ensureGachaToolbar();
       const select = $('[data-sc-group-filter]');
       if (select) select.value = groupFilter;
       decorateGachaRows();
-    }, 40);
+    }, 50);
   }
 
   function scheduleDecorate() {
@@ -268,7 +275,7 @@
       ensureGachaToolbar();
       decorateGachaRows();
       decorateGroupSettings();
-    }, 40);
+    }, 50);
   }
 
   function bind() {
@@ -320,7 +327,7 @@
           target?.scrollIntoView({behavior:'smooth', block:'center'});
           target?.classList.add('sc-highlight');
           setTimeout(() => target?.classList.remove('sc-highlight'), 1500);
-        }, 70);
+        }, 80);
         return;
       }
       if (event.target.closest?.('[data-sc-toggle-classification]')) {
@@ -328,7 +335,11 @@
         decorateGroupSettings();
         return;
       }
-      if (event.target.closest?.('#open-settings,[data-settings-tab],[data-collection-groups-tab],[data-add-item="gacha"],[data-edit-item="gacha"]')) scheduleDecorate();
+      if (event.target.closest?.('#open-settings,[data-settings-tab],[data-collection-groups-tab],[data-add-item="gacha"],[data-edit-item="gacha"],[data-gc-add-group],[data-gc-delete-group],[data-gc-add-bonus],[data-gc-delete-bonus]')) scheduleDecorate();
+    });
+
+    document.addEventListener('submit', event => {
+      if (event.target.matches?.('#item-editor-form')) setTimeout(scheduleDecorate, 80);
     });
   }
 
@@ -336,11 +347,7 @@
     bind();
     scheduleDecorate();
     const modal = $('#settings-modal');
-    if (modal) {
-      new MutationObserver(() => { if (!modal.hidden) scheduleDecorate(); }).observe(modal, {attributes:true, attributeFilter:['hidden']});
-      const content = $('.settings-content', modal);
-      if (content) new MutationObserver(() => scheduleDecorate()).observe(content, {childList:true, subtree:true});
-    }
+    if (modal) new MutationObserver(() => { if (!modal.hidden) scheduleDecorate(); }).observe(modal, {attributes:true, attributeFilter:['hidden']});
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true});
