@@ -61,11 +61,12 @@
             storyGroups.async = false;
             storyGroups.onload = () => {
               loadScriptsInOrder([
-                'story-card-seed-core.js?v=1',
+                'story-card-seed-core.js?v=2',
                 'story-cards-long.js?v=1',
                 'story-cards-short.js?v=1',
                 'story-cards-series-a.js?v=1',
                 'story-cards-series-b.js?v=1',
+                'story-data-cleanup.js?v=1',
               ], () => window.PIXELY_STORY_PACK?.seed());
             };
             document.head.appendChild(storyGroups);
