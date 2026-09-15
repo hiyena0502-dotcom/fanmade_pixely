@@ -14,6 +14,16 @@
   css.href = 'collection-collapse.css?v=5';
   document.head.appendChild(css);
 
+  const tidyCss = document.createElement('link');
+  tidyCss.rel = 'stylesheet';
+  tidyCss.href = 'ux-tidy.css?v=1';
+  document.head.appendChild(tidyCss);
+
+  const tidyJs = document.createElement('script');
+  tidyJs.src = 'ux-tidy.js?v=1';
+  tidyJs.async = false;
+  document.head.appendChild(tidyJs);
+
   const members = document.createElement('script');
   members.src = 'member-order.js?v=2';
   members.async = false;
