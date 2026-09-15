@@ -1,0 +1,123 @@
+/* Soften the convenience UX so it feels like part of the original diary. */
+.ux-statusbar{
+  display:flex!important;
+  align-items:center!important;
+  gap:0!important;
+  margin-left:auto!important;
+  margin-right:8px!important;
+  padding:3px 7px!important;
+  border:1px solid rgba(255,255,255,.38)!important;
+  border-radius:999px!important;
+  background:rgba(255,255,255,.13)!important;
+  box-shadow:none!important;
+  backdrop-filter:blur(8px)!important;
+}
+.ux-status-chip{
+  min-height:26px!important;
+  padding:3px 8px!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  gap:4px!important;
+}
+.ux-status-chip+ .ux-status-chip{border-left:1px solid rgba(255,255,255,.26)!important}
+.ux-status-chip small{display:none!important}
+.ux-status-chip b{font-size:.64rem!important;letter-spacing:.01em!important}
+button.ux-status-chip:hover{transform:none!important;background:rgba(255,255,255,.08)!important}
+
+/* Keep the original single-draw button as the visual primary action. */
+.ux-gacha-actions{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:8px!important;
+  width:min(92%,500px)!important;
+  margin-top:8px!important;
+}
+.ux-gacha-actions .draw-button{order:1!important;width:100%!important;margin:0!important}
+.ux-draw-ten{
+  order:2!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:7px!important;
+  min-height:43px!important;
+  padding:9px 14px!important;
+  border:1px solid #d7d5ee!important;
+  border-radius:14px!important;
+  background:rgba(255,255,255,.82)!important;
+  box-shadow:none!important;
+  color:#7773a5!important;
+}
+.ux-draw-ten>span{font-size:.78rem!important;color:#a58bd0!important}
+.ux-draw-ten b{font-size:.68rem!important}
+.ux-draw-ten small{font-size:.52rem!important;color:#9a95b3!important}
+.ux-draw-ten:hover:not(:disabled){transform:none!important;background:#f7f5ff!important;box-shadow:none!important}
+.ux-draw-ten:disabled{box-shadow:none!important}
+
+/* NEW should be a tiny annotation, not a loud game badge. */
+.ux-new-badge{
+  min-width:18px!important;
+  height:17px!important;
+  padding:0 5px!important;
+  background:#e68a99!important;
+  box-shadow:none!important;
+  font-size:.43rem!important;
+}
+.tab>.ux-new-badge{top:-4px!important;right:-3px!important}
+
+/* Collection tools should read like a diary index strip. */
+.ux-collection-tools{
+  justify-content:flex-start!important;
+  gap:10px!important;
+  margin:8px 0 10px!important;
+  padding:7px 9px!important;
+  border:0!important;
+  border-bottom:1px dashed rgba(116,139,151,.22)!important;
+  border-radius:0!important;
+  background:transparent!important;
+}
+.ux-filter-label{display:none!important}
+.ux-filter-buttons{gap:5px!important}
+.ux-filter-buttons button{
+  padding:6px 10px!important;
+  border-color:#dfe3e1!important;
+  background:rgba(255,255,255,.55)!important;
+  font-size:.55rem!important;
+}
+.ux-filter-buttons button.is-active{
+  border-color:#9fb5c2!important;
+  background:#eef5f8!important;
+  color:#58778a!important;
+  box-shadow:none!important;
+}
+
+/* The next-goal helper stays inside the existing upgrade card. */
+.ux-next-gacha{
+  margin-top:8px!important;
+  padding:7px 10px!important;
+  border-style:dashed!important;
+  background:rgba(255,255,255,.58)!important;
+}
+
+/* Settings should still look like the original control room. */
+.settings-tabs .ux-play-tab{
+  background:transparent!important;
+  color:inherit!important;
+}
+.settings-tabs .ux-play-tab.is-active{
+  background:var(--settings-tab-active, #7776b8)!important;
+  color:#fff!important;
+}
+.ux-play-settings .ux-play-card{margin-top:10px!important}
+.ux-pref-row{padding:13px 14px!important;background:rgba(255,255,255,.58)!important}
+
+@media(max-width:960px){
+  .ux-statusbar{margin-left:4px!important;margin-right:4px!important}
+  .ux-status-chip{padding:3px 6px!important}
+}
+@media(max-width:720px){
+  .ux-statusbar{order:3!important;width:auto!important;max-width:100%!important;margin:4px auto 0!important}
+  .ux-status-chip{flex:0 1 auto!important}
+  .ux-gacha-actions{width:100%!important}
+}
