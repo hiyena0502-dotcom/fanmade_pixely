@@ -1,12 +1,11 @@
 (() => {
-  if (window.__PIXELY_GACHA_UPGRADE_V3__) return;
-  window.__PIXELY_GACHA_UPGRADE_V3__ = true;
+  if (window.__PIXELY_GACHA_UPGRADE_V4__) return;
+  window.__PIXELY_GACHA_UPGRADE_V4__ = true;
 
   const CORE_KEY = 'pixely-diary-save-v1';
   const DRAW_COST = 100;
   const $ = (s, r=document) => r.querySelector(s);
   const $$ = (s, r=document) => [...r.querySelectorAll(s)];
-  let pendingCharges = 0;
 
   function readCore() {
     try {
@@ -20,10 +19,14 @@
     const core = readCore();
     core.dust = value;
     localStorage.setItem(CORE_KEY, JSON.stringify(core));
+
+    // Keep script.js's in-memory save object in sync before its draw logic persists again.
+    // This prevents the old dust value from being written back after the charge.
     try {
       if (typeof save !== 'undefined' && save && typeof save === 'object') save.dust = value;
       if (typeof persistSave === 'function') persistSave();
     } catch {}
+
     $$('[data-dust-count], [data-pcf-dust]').forEach(node => {
       const next = value.toLocaleString('ko-KR');
       if (node.textContent !== next) node.textContent = next;
@@ -52,13 +55,20 @@
       setText($('b', draw), '1회 뽑기');
       setText($('small', draw), `별가루 ✦ ${DRAW_COST} 사용`);
     }
+
+    const again = $('#draw-again');
+    if (again) {
+      again.dataset.drawCost = String(DRAW_COST);
+      again.title = `별가루 ${DRAW_COST} 사용`;
+    }
+
     setText($('[data-panel="gacha"] .gacha-info h2'), '하늘빛 캡슐 뽑기');
 
     const rules = $('[data-panel="gacha"] .gacha-rule ol');
     if (rules) {
       const wanted = [
         'CLICK에서 별가루를 모아요.',
-        '1회 뽑기에 별가루 100을 사용해요.',
+        '1회 뽑기마다 별가루 100을 사용해요.',
         '카드와 성장 카드는 컬렉션에 저장돼요.'
       ];
       const current = [...rules.children].map(li => li.textContent.trim());
@@ -78,57 +88,59 @@
     });
   }
 
-  function commitCharge() {
-    if (pendingCharges <= 0) return;
-    pendingCharges -= 1;
-    const core = readCore();
-    const before = Math.max(0, Number(core.dust) || 0);
-    const after = syncDust(Math.max(0, before - DRAW_COST));
-    const message = $('#gacha-message');
-    setText(message, `뽑기 완료 · 별가루 ✦ ${DRAW_COST} 사용 · 남은 별가루 ✦ ${after.toLocaleString('ko-KR')}`);
+  function rejectDraw(draw) {
+    toast(`별가루가 부족해요. 1회 뽑기에는 ✦ ${DRAW_COST}이 필요해요.`);
+    if (draw.id === 'draw-again') $('#result-modal')?.setAttribute('hidden','');
+    setTimeout(goClick, 80);
   }
 
-  document.addEventListener('click', event => {
-    const draw = event.target.closest?.('#draw-button, #draw-again');
-    if (!draw || draw.disabled || event.__pixelyDustChecked) return;
+  function chargeForDraw(draw, event) {
+    if (!draw || draw.disabled || event.__pixelyDustCharged) return true;
 
     const core = readCore();
-    if (!Array.isArray(core.gachaItems) || !core.gachaItems.length) return;
-    const dust = Math.max(0, Number(core.dust) || 0);
+    if (!Array.isArray(core.gachaItems) || !core.gachaItems.length) return true;
 
+    const dust = Math.max(0, Number(core.dust) || 0);
     if (dust < DRAW_COST) {
       event.preventDefault();
       event.stopPropagation();
       event.stopImmediatePropagation();
-      toast(`별가루가 부족해요. 1회 뽑기에는 ✦ ${DRAW_COST}이 필요해요.`);
-      if (draw.id === 'draw-again') $('#result-modal')?.setAttribute('hidden','');
-      setTimeout(goClick, 80);
-      return;
+      rejectDraw(draw);
+      return false;
     }
 
-    event.__pixelyDustChecked = true;
-    pendingCharges += 1;
-    setText($('#gacha-message'), `별가루 ✦ ${DRAW_COST}을 사용해 캡슐을 열고 있어요…`);
-    setTimeout(() => {
-      if (pendingCharges > 0 && $('#result-modal')?.hidden) pendingCharges -= 1;
-    }, 3500);
+    event.__pixelyDustCharged = true;
+    const after = syncDust(dust - DRAW_COST);
+    setText($('#gacha-message'), `별가루 ✦ ${DRAW_COST} 사용 · 남은 별가루 ✦ ${after.toLocaleString('ko-KR')}`);
+    return true;
+  }
+
+  // Charge at the start of EVERY draw request. The old implementation waited for the
+  // result modal to change hidden state, but "draw again" keeps that modal open, so
+  // repeat draws were never charged. Both buttons now share this exact payment path.
+  document.addEventListener('click', event => {
+    const draw = event.target.closest?.('#draw-button, #draw-again');
+    if (!draw) return;
+    chargeForDraw(draw, event);
   }, true);
 
   function boot() {
     decorate();
-
-    // IMPORTANT: Do not watch the whole gacha subtree. decorate() changes that subtree,
-    // so observing it creates a self-triggering render loop and freezes tab transitions.
-    const modal = $('#result-modal');
-    if (modal) new MutationObserver(() => {
-      if (!modal.hidden && pendingCharges > 0) setTimeout(commitCharge, 0);
-    }).observe(modal,{attributes:true,attributeFilter:['hidden']});
 
     document.addEventListener('click', event => {
       if (event.target.closest?.('[data-tab="gacha"], [data-open-tab="gacha"]')) {
         setTimeout(decorate, 0);
       }
     });
+
+    // Result content can be replaced without closing the modal. Keep the cost hint
+    // current without observing/mutating the whole gacha subtree.
+    const modal = $('#result-modal');
+    if (modal) {
+      new MutationObserver(() => {
+        if (!modal.hidden) setTimeout(decorate, 0);
+      }).observe(modal, { attributes:true, attributeFilter:['hidden'] });
+    }
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot,{once:true});
