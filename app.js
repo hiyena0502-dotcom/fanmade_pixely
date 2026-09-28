@@ -1037,7 +1037,7 @@
       input.addEventListener("input",event=>updateWardrobeTransform(event.target.dataset.wardrobeTransform,event.target.value,false));
       input.addEventListener("change",event=>updateWardrobeTransform(event.target.dataset.wardrobeTransform,event.target.value,true));
     });
-    $("[data-layer-move]").forEach(button=>button.addEventListener("click",()=>moveWardrobeLayer(button.dataset.layerMove)));
+    Array.from(document.querySelectorAll("[data-layer-move]")).forEach(button=>button.addEventListener("click",()=>moveWardrobeLayer(button.dataset.layerMove)));
     $("#wardrobe-reset-transform").addEventListener("click",resetWardrobeTransform);
     $("#wardrobe-delete-image").addEventListener("click",deleteWardrobeImage);
     $("#wardrobe-preview").addEventListener("click",event=>{
