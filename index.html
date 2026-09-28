@@ -7,8 +7,8 @@
   <meta name="theme-color" content="#111a3b" />
   <title>PIXELY : LOST SKY</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=4" />
-  <script src="app.js?v=3" defer></script>
+  <link rel="stylesheet" href="style.css?v=5" />
+  <script src="app.js?v=4" defer></script>
 </head>
 <body>
   <div class="game-root">
@@ -54,7 +54,7 @@
 
         <button class="command-button command-button--collection" type="button" data-open-collection>
           <span class="command-cursor">▶</span>
-          <span><b>COLLECTION</b><small>인물 · 아이템 다이어리</small></span>
+          <span><b>COLLECTION</b><small>카드 · 아이템 · 엽서 다이어리</small></span>
         </button>
 
         <button class="command-button" type="button" id="save-manager-button">
@@ -108,7 +108,7 @@
       <div class="diary-desk" aria-hidden="true"></div>
       <header class="subpage-topbar collection-topbar">
         <button class="back-button" type="button" data-go-home>←</button>
-        <div><small>TRAVEL DIARY</small><h2>COLLECTION</h2></div>
+        <div><small>COLLECTION</small><h2>여행 다이어리</h2></div>
         <div class="collection-count"><small>DISCOVERED</small><b><span id="collection-owned">0</span> / <span id="collection-total">0</span></b></div>
       </header>
 
@@ -119,11 +119,12 @@
           <aside class="diary-left-page">
             <p class="diary-date">PIXELY TRAVEL NOTE</p>
             <h3>여행 다이어리</h3>
-            <p class="diary-note">여행 중 만난 인물과 손에 넣은 물건을 한 장씩 기록해둡니다.</p>
+            <p class="diary-note">여행 중 만난 인물과 손에 넣은 물건, 기억에 남는 순간을 한 장씩 기록해둡니다.</p>
 
             <nav class="diary-tabs" aria-label="컬렉션 분류">
-              <button class="is-active" type="button" data-collection-tab="characters">인물</button>
-              <button type="button" data-collection-tab="items">아이템</button>
+              <button class="is-active" type="button" data-collection-tab="cards"><span>CARD</span>카드</button>
+              <button type="button" data-collection-tab="items"><span>ITEM</span>아이템</button>
+              <button type="button" data-collection-tab="postcards"><span>POST</span>엽서</button>
             </nav>
 
             <div class="diary-decoration" aria-hidden="true">
@@ -137,10 +138,10 @@
           <section class="diary-right-page">
             <div class="diary-page-heading">
               <div>
-                <small id="collection-eyebrow">CHARACTER NOTE</small>
-                <h3 id="collection-heading">만난 인물</h3>
+                <small id="collection-eyebrow">CARD FILE</small>
+                <h3 id="collection-heading">만난 카드</h3>
               </div>
-              <p id="collection-description">이야기 속에서 직접 만난 인물이 하나씩 기록됩니다.</p>
+              <p id="collection-description">여행 중 직접 만난 인물과 생물이 카드로 기록됩니다.</p>
             </div>
             <div class="collection-grid" id="collection-grid"></div>
           </section>
