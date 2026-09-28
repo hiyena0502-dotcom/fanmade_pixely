@@ -94,6 +94,7 @@
   let siteVersion=null;
   let siteFingerprint=null;
   let dismissedUpdate=null;
+  let pendingUpdateKey=null;
   let updateCheckTimer=null;
 
   function persist(){
@@ -308,7 +309,11 @@
     $("#collection-eyebrow").textContent=labels[collectionTab][0];
     $("#collection-heading").textContent=labels[collectionTab][1];
     $("#collection-description").textContent=labels[collectionTab][2];
-    $(".diary-tabs button").forEach(b=>b.classList.toggle("is-active",b.dataset.collectionTab===collectionTab));
+    $(".diary-tabs button").forEach(b=>{
+      const active=b.dataset.collectionTab===collectionTab;
+      b.classList.toggle("is-active",active);
+      b.setAttribute("aria-selected",active?"true":"false");
+    });
     $("#collection-owned").textContent=owned.size;
     $("#collection-total").textContent=items.length;
 
@@ -418,6 +423,7 @@
     if(!versionKey || dismissedUpdate===versionKey) return;
     const modal=$("#update-modal");
     if(!modal || !modal.hidden) return;
+    pendingUpdateKey=versionKey;
     modal.hidden=false;
   }
 
@@ -491,8 +497,9 @@
     $("#update-refresh-button")?.addEventListener("click",()=>{
       window.location.reload();
     });
-    $("#update-later-button")?.addEventListener("click",async()=>{
-      dismissedUpdate=(await getPublishedVersion())||siteFingerprint||"dismissed";
+    $("#update-later-button")?.addEventListener("click",()=>{
+      dismissedUpdate=pendingUpdateKey||"dismissed";
+      pendingUpdateKey=null;
       hideUpdatePrompt();
     });
 
