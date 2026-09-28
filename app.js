@@ -2,6 +2,7 @@
   "use strict";
 
   const STORAGE_KEY = "pixely-lost-sky-saves-v2";
+  const SESSION_SAVE_KEY = STORAGE_KEY+"-session-fallback";
   const WARDROBE_ASSET_KEY = "pixely-lost-sky-wardrobe-assets-v1";
   const DEV_CONTENT_KEY = "pixely-lost-sky-dev-content-v1";
   const SITE_VERSION = "24";
@@ -289,7 +290,12 @@
       savedLabel:typeof save.savedLabel==="string" ? save.savedLabel : "",
       unlockedChapters:[...new Set(["night",...oldChapters.filter(id=>id!=="prologue")])],
       completedChapters:strings(save.completedChapters),
-      missions:Array.isArray(save.missions) ? save.missions.filter(mission=>mission && typeof mission.id==="string" && typeof mission.title==="string").map(mission=>({id:mission.id,title:mission.title,done:Boolean(mission.done)})) : [{id:"explore-party-room",title:"파티방을 둘러보자",done:false}],
+      missions:(()=>{
+        const list=Array.isArray(save.missions)
+          ? save.missions.filter(mission=>mission && typeof mission.id==="string" && typeof mission.title==="string").map(mission=>({id:mission.id,title:mission.title,done:Boolean(mission.done)}))
+          : [];
+        return list.length?list:[{id:"explore-party-room",title:"파티방을 둘러보자",done:false}];
+      })(),
       story:{
         scene:typeof save.story?.scene==="string" ? save.story.scene : "party-room",
         inspected:strings(save.story?.inspected)
@@ -307,13 +313,26 @@
     };
   }
 
-  function readRoot(){
+  function parseRoot(rawValue){
     try{
-      const parsed=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");
-      if(!parsed||!Array.isArray(parsed.slots)) return freshRoot();
+      const parsed=JSON.parse(rawValue||"null");
+      if(!parsed||!Array.isArray(parsed.slots)) return null;
       const slots=[0,1,2].map(i=>normalizeSave(parsed.slots[i]));
       const activeSlot=parsed.activeSlot;
       return {activeSlot:Number.isInteger(activeSlot) && activeSlot>=0 && activeSlot<slots.length && slots[activeSlot] ? activeSlot : null,slots};
+    }catch{
+      return null;
+    }
+  }
+
+  function readRoot(){
+    // localStorage가 옷장 이미지 등으로 가득 찬 경우 직전 임시 세이브를 우선 복구합니다.
+    try{
+      const sessionRoot=parseRoot(sessionStorage.getItem(SESSION_SAVE_KEY));
+      if(sessionRoot) return sessionRoot;
+    }catch{}
+    try{
+      return parseRoot(localStorage.getItem(STORAGE_KEY))||freshRoot();
     }catch{
       return freshRoot();
     }
@@ -335,6 +354,7 @@
   let dismissedUpdate=null;
   let pendingUpdateKey=null;
   let storySelectedItem=null;
+  let saveFallbackWarned=false;
 
   function escapeHTML(value){
     return String(value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"})[char]);
@@ -348,16 +368,41 @@
   };
 
   function persist(){
-    const serialized=JSON.stringify(root);
-    try{ localStorage.setItem(STORAGE_KEY,serialized); }
+    let serialized;
+    try{serialized=JSON.stringify(root);}
     catch{
-      root=JSON.parse(lastSavedRoot);
-      toast("저장에 실패했습니다. 브라우저 저장 공간을 확인해 주세요.");
-      renderHome();
+      toast("저장 데이터를 정리하지 못했습니다.");
       return false;
     }
+
+    try{
+      localStorage.setItem(STORAGE_KEY,serialized);
+      try{sessionStorage.removeItem(SESSION_SAVE_KEY);}catch{}
+      lastSavedRoot=serialized;
+      renderHome();
+      return true;
+    }catch{}
+
+    // 옷장 이미지 등으로 localStorage 용량이 부족해도 게임 진행 자체가 막히지 않도록
+    // 같은 탭/브라우저 세션에서 유지되는 임시 저장소로 자동 우회합니다.
+    try{
+      sessionStorage.setItem(SESSION_SAVE_KEY,serialized);
+      lastSavedRoot=serialized;
+      renderHome();
+      if(!saveFallbackWarned){
+        saveFallbackWarned=true;
+        toast("브라우저 저장 공간이 부족해 현재 세션에 임시 저장 중이에요.");
+      }
+      return true;
+    }catch{}
+
+    // 두 저장소가 모두 막힌 극단적인 경우에도 새 이야기는 현재 탭에서 계속 진행합니다.
     lastSavedRoot=serialized;
     renderHome();
+    if(!saveFallbackWarned){
+      saveFallbackWarned=true;
+      toast("저장 공간을 사용할 수 없어 현재 탭에서만 진행됩니다.");
+    }
     return true;
   }
 
@@ -1521,9 +1566,47 @@
     });
   }
 
+  function runDiagnostics(){
+    const requiredIds=[
+      "new-game-button","save-modal","save-slot-list",
+      "story-room","story-current-objective","story-quick-inventory",
+      "story-inventory-list","story-mission-list","story-save-button",
+      "collection-grid","wardrobe-preview"
+    ];
+    const missing=requiredIds.filter(id=>!document.getElementById(id));
+    const result={
+      ok:missing.length===0,
+      missing,
+      activeSave:Boolean(activeSave()),
+      views:$("[data-view]").map(view=>view.dataset.view),
+      localSaveAvailable:(()=>{
+        try{
+          const key="__pixely_storage_test__";
+          localStorage.setItem(key,"1");
+          localStorage.removeItem(key);
+          return true;
+        }catch{return false;}
+      })(),
+      sessionSaveAvailable:(()=>{
+        try{
+          const key="__pixely_session_test__";
+          sessionStorage.setItem(key,"1");
+          sessionStorage.removeItem(key);
+          return true;
+        }catch{return false;}
+      })()
+    };
+    if(!result.ok) console.error("[PIXELY] UI diagnostics failed",result);
+    return result;
+  }
+
+  window.PixelyDiagnostics={run:runDiagnostics};
+
   function boot(){
     renderHome();
     bind();
+    const diagnostics=runDiagnostics();
+    if(!diagnostics.ok) toast("화면 구성 오류가 발견되었습니다. 새로고침해 주세요.");
     startUpdateWatcher();
   }
 
