@@ -7,8 +7,8 @@
   <meta name="theme-color" content="#111a3b" />
   <title>PIXELY : LOST SKY</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=11" />
-  <script src="app.js?v=11" defer></script>
+  <link rel="stylesheet" href="style.css?v=12" />
+  <script src="app.js?v=12" defer></script>
 </head>
 <body>
   <div class="game-root">
@@ -88,6 +88,38 @@
       </div>
     </section>
 
+    <section class="view story-view" data-view="story" hidden>
+      <header class="subpage-topbar story-topbar">
+        <button class="back-button" type="button" data-go-home aria-label="홈으로">←</button>
+        <div><small>CHAPTER 01 · THE NIGHT BEFORE</small><h2>생일 전날 밤</h2></div>
+        <span class="story-counter" id="story-counter">준비 0 / 3</span>
+      </header>
+      <main class="story-shell">
+        <div class="story-heading">
+          <div><small>PIXELY · BIRTHDAY PARTY</small><h3 id="story-heading">깜짝 파티 준비</h3></div>
+          <p id="story-objective">멤버들의 부탁을 듣고 준비물을 찾아 주세요.</p>
+        </div>
+        <div class="story-layout">
+          <section class="party-room" id="party-room" aria-label="생일 파티 준비 장소">
+            <div class="room-stars" aria-hidden="true">✦　·　✧　·　✦</div>
+            <div class="room-window" aria-hidden="true"><span>☾</span></div>
+            <div class="room-banner" aria-hidden="true">HAPPY BIRTHDAY</div>
+            <div class="room-table" aria-hidden="true"></div>
+            <div class="room-hotspots" id="room-hotspots"></div>
+          </section>
+          <aside class="story-sidebar">
+            <section class="story-panel game-window"><small>TO DO</small><h4>오늘 밤 할 일</h4><ul id="story-quests"></ul></section>
+            <section class="story-panel game-window"><small>BAG</small><h4>가방</h4><p class="bag-help">물건을 선택하고 필요한 멤버를 눌러 건네주세요.</p><div id="story-inventory" class="story-inventory"></div></section>
+          </aside>
+        </div>
+        <section class="story-dialogue game-window" aria-live="polite">
+          <span class="dialogue-speaker" id="dialogue-speaker">꿈뜰이</span>
+          <p id="dialogue-text"></p>
+          <div class="dialogue-actions" id="dialogue-actions"></div>
+        </section>
+      </main>
+    </section>
+
     <section class="view chapters-view" data-view="chapters" hidden>
       <div class="chapters-bg" aria-hidden="true"></div>
       <header class="subpage-topbar">
@@ -160,16 +192,6 @@
         </header>
         <p class="save-window-guide" id="save-modal-guide">사용할 세이브 슬롯을 선택하세요.</p>
         <div class="save-slot-list" id="save-slot-list"></div>
-      </section>
-    </div>
-
-    <div class="modal" id="notice-modal" hidden>
-      <button class="modal-backdrop" type="button" data-close-notice aria-label="닫기"></button>
-      <section class="notice-window game-window">
-        <small>STORY MODE</small>
-        <h2 id="notice-title">이야기 준비 중</h2>
-        <p id="notice-copy"></p>
-        <button type="button" class="notice-ok" data-close-notice>확인</button>
       </section>
     </div>
 
