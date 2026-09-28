@@ -45,7 +45,7 @@ function boot(saved,initialVersion="15",wardrobeAssets){
     result.dataset.wardrobeSlot=key;
     return result;
   });
-  const devTabs=["chapters","collection","dialogues","items"].map(key=>{
+  const devTabs=["chapters","collection","items"].map(key=>{
     const result=node(`dev-tab:${key}`);
     result.dataset.devSection=key;
     return result;
@@ -230,7 +230,7 @@ test("update prompt compares the loaded version on the first check and on later 
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
   assert.equal(state.requests[0].options.cache,"no-store");
-  state.setVersion("24");
+  state.setVersion("27");
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,false);
@@ -239,7 +239,7 @@ test("update prompt compares the loaded version on the first check and on later 
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
-  const stale=boot(undefined,"24");
+  const stale=boot(undefined,"27");
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(stale.node("#update-modal").hidden,false);
 });
@@ -281,7 +281,7 @@ test("developer wardrobe setup toggles multiple custom parts without a save slot
     layerOrder:["custom-eyes","custom-mouth"],
     setupOutfit:{layers:[]}
   };
-  const state=boot(undefined,"24",assets);
+  const state=boot(undefined,"27",assets);
   state.click("[data-open-wardrobe]");
   assert.equal(state.node("#wardrobe-slot-label").textContent,"DEV SETUP");
   const faceTab=state.node("wardrobe-tab:face");
@@ -307,13 +307,15 @@ test("simplified wardrobe editor keeps all four multi-select categories",()=>{
 });
 
 
-test("developer settings screen exposes chapters collection dialogues and items",()=>{
+test("developer settings screen exposes only chapters collection and items",()=>{
   const html=fs.readFileSync(path.join(directory,"index.html"),"utf8");
   assert.match(html,/data-open-dev/);
   assert.match(html,/data-view="dev"/);
-  for(const section of ["chapters","collection","dialogues","items"]){
+  for(const section of ["chapters","collection","items"]){
     assert.match(html,new RegExp('data-dev-section="'+section+'"'));
   }
+  assert.doesNotMatch(html,/data-dev-section="dialogues"/);
+  assert.doesNotMatch(app,/dialogues:\[/);
   assert.match(html,/id="dev-entry-list"/);
   assert.match(html,/id="dev-editor-fields"/);
   assert.match(app,/DEV_CONTENT_KEY/);
@@ -321,7 +323,7 @@ test("developer settings screen exposes chapters collection dialogues and items"
 });
 
 test("developer settings can create an item entry without touching source code",()=>{
-  const state=boot(undefined,"24");
+  const state=boot(undefined,"27");
   state.click("[data-open-dev]");
   const itemTab=state.node("dev-tab:items");
   state.node("#dev-settings-tabs").listeners.click({target:{closest(){return itemTab}}});
@@ -330,4 +332,28 @@ test("developer settings can create an item entry without touching source code",
   assert.equal(Array.isArray(stored.items),true);
   assert.equal(stored.items.some(item=>item.name==="새 아이템"),true);
   assert.equal(state.node("view:dev").hidden,false);
+});
+
+
+test("chapter editor provides nested interaction authoring",()=>{
+  const html=fs.readFileSync(path.join(directory,"index.html"),"utf8");
+  assert.match(html,/id="dev-chapter-interactions"/);
+  assert.match(html,/id="dev-add-interaction"/);
+  assert.match(html,/id="dev-interaction-list"/);
+  assert.match(html,/id="dev-interaction-fields"/);
+  assert.match(html,/상호작용 추가/);
+  assert.match(app,/const interactionSchema=/);
+  assert.match(app,/interactionsForChapter/);
+});
+
+test("developer can add an interaction inside the selected chapter",()=>{
+  const state=boot(undefined,"27");
+  state.click("[data-open-dev]");
+  assert.equal(state.node("#dev-chapter-interactions").hidden,false);
+  state.click("#dev-add-interaction");
+  const stored=JSON.parse(state.storage.get(devContentKey));
+  assert.equal(Array.isArray(stored.chapters[0].interactions),true);
+  assert.equal(stored.chapters[0].interactions.length,1);
+  assert.equal(stored.chapters[0].interactions[0].type,"inspect");
+  assert.equal(state.node("#dev-interaction-count").textContent,"1개");
 });
