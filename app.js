@@ -2,7 +2,7 @@
   "use strict";
 
   const STORAGE_KEY = "pixely-lost-sky-saves-v2";
-  const SITE_VERSION = "15";
+  const SITE_VERSION = "16";
   const $ = (q, root = document) => root.querySelector(q);
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 
@@ -45,13 +45,15 @@
     ]
   };
 
-  const wardrobeSlots=["outfit","headwear","accessory"];
+  const wardrobeSlots=["outfit","accessory","face","decoration"];
+  const singleWardrobeSlots=["outfit","accessory","face"];
   const wardrobeOptions={
-    outfit:[{id:"default",name:"기본 복장",symbol:"◇"},...catalogue.items.filter(item=>item.wardrobeSlot==="outfit")],
-    headwear:[{id:"none",name:"장식 없음",symbol:"·"},...catalogue.items.filter(item=>item.wardrobeSlot==="headwear")],
-    accessory:[{id:"none",name:"소품 없음",symbol:"·"},...catalogue.items.filter(item=>item.wardrobeSlot==="accessory")]
+    outfit:[{id:"default",name:"기본 옷",symbol:"◇"},...catalogue.items.filter(item=>item.wardrobeSlot==="outfit")],
+    accessory:[{id:"none",name:"소품 없음",symbol:"·"},...catalogue.items.filter(item=>item.wardrobeSlot==="accessory")],
+    face:[{id:"default",name:"기본 얼굴",symbol:"☺"},...catalogue.items.filter(item=>item.wardrobeSlot==="face")],
+    decoration:catalogue.items.filter(item=>item.wardrobeSlot==="decoration" || item.wardrobeSlot==="headwear")
   };
-  const defaultOutfit={outfit:"default",headwear:"none",accessory:"none"};
+  const defaultOutfit={outfit:"default",accessory:"none",face:"default",decorations:[]};
   const collectionFilters={
     cards:[{id:"all",label:"전체"},{id:"crew",label:"잠뜰 멤버"},{id:"roleplay",label:"상황극 인물"},{id:"fairy",label:"요정"},{id:"other",label:"기타 인물·생물"}],
     items:[{id:"all",label:"전체"},{id:"key",label:"중요 물건"},{id:"memento",label:"기념품"},{id:"gift",label:"선물·편지"},{id:"wardrobe",label:"꾸미기"},{id:"unknown",label:"미확인"}]
@@ -64,11 +66,21 @@
 
   function validOutfit(outfit,items){
     const owned=new Set(items);
-    return Object.fromEntries(wardrobeSlots.map(slot=>{
+    const normalized={outfit:"default",accessory:"none",face:"default",decorations:[]};
+    singleWardrobeSlots.forEach(slot=>{
       const choice=outfit?.[slot];
       const allowed=wardrobeOptions[slot].some(option=>option.id===choice && (choice==="none" || choice==="default" || owned.has(choice)));
-      return [slot,allowed?choice:defaultOutfit[slot]];
-    }));
+      normalized[slot]=allowed?choice:defaultOutfit[slot];
+    });
+    const requestedDecorations=Array.isArray(outfit?.decorations)
+      ? outfit.decorations
+      : outfit?.headwear && outfit.headwear!=="none"
+        ? [outfit.headwear]
+        : [];
+    normalized.decorations=[...new Set(requestedDecorations.map(String))].filter(choice=>
+      owned.has(choice) && wardrobeOptions.decoration.some(option=>option.id===choice)
+    );
+    return normalized;
   }
 
   const chapters = [
@@ -127,7 +139,7 @@
   let collectionTab="cards";
   let collectionFilter="all";
   let wardrobeSlot="outfit";
-  let outfitDraft={...defaultOutfit};
+  let outfitDraft={...defaultOutfit,decorations:[]};
   let saveMode="manage";
   let toastTimer=null;
   let dismissedUpdate=null;
@@ -175,7 +187,7 @@
       completedChapters:[],
       missions:[],
       collection:{cards:["dreamer"],items:[],postcards:[]},
-      outfit:{...defaultOutfit}
+      outfit:{...defaultOutfit,decorations:[]}
     };
   }
 
@@ -470,28 +482,48 @@
     }).join("");
   }
 
+  function wardrobeOptionName(slot,id){
+    return wardrobeOptions[slot].find(option=>option.id===id)?.name||"";
+  }
+
   function renderWardrobe(){
     const save=activeSave();
     const owned=new Set(save?.collection?.items||[]);
+    const decorationNames=(outfitDraft.decorations||[]).map(id=>wardrobeOptionName("decoration",id)).filter(Boolean);
+    const equipped=[
+      wardrobeOptionName("outfit",outfitDraft.outfit),
+      wardrobeOptionName("accessory",outfitDraft.accessory),
+      wardrobeOptionName("face",outfitDraft.face),
+      ...decorationNames
+    ].filter(Boolean);
     $("#wardrobe-slot-label").textContent=save?"SLOT "+(root.activeSlot+1):"NO SAVE";
-    $("#wardrobe-equipped").textContent=wardrobeSlots.map(slot=>wardrobeOptions[slot].find(option=>option.id===outfitDraft[slot])?.name).join(" · ");
+    $("#wardrobe-equipped").textContent=equipped.join(" · ")||"기본 모습";
     $("#wardrobe-save-button").disabled=!save;
-    $("#wardrobe-status").textContent=save?"선택한 모습은 저장 버튼을 누르면 이 슬롯에 기록됩니다.":"먼저 새 이야기를 시작하고 슬롯을 선택해 주세요.";
+    $("#wardrobe-status").textContent=save
+      ? wardrobeSlot==="decoration"
+        ? "장식은 여러 개를 동시에 선택할 수 있어요. 선택을 마치면 현재 슬롯에 저장하세요."
+        : "선택한 모습은 저장 버튼을 누르면 이 슬롯에 기록됩니다."
+      : "먼저 새 이야기를 시작하고 슬롯을 선택해 주세요.";
     $$("[data-wardrobe-slot]").forEach(button=>{
       const active=button.dataset.wardrobeSlot===wardrobeSlot;
       button.classList.toggle("is-active",active);
       button.setAttribute("aria-pressed",active?"true":"false");
     });
     const choices=wardrobeOptions[wardrobeSlot];
-    $("#wardrobe-options").innerHTML=choices.map(option=>{
+    const emptyMessage=wardrobeSlot==="decoration"
+      ? "아직 등록된 장식이 없어요. 나중에 얻은 장식은 이곳에서 여러 개 함께 고를 수 있습니다."
+      : "아직 이 파츠에 등록된 꾸미기 아이템이 없어요.";
+    $("#wardrobe-options").innerHTML=(choices.length?choices.map(option=>{
       const unlocked=option.id==="none" || option.id==="default" || owned.has(option.id);
-      const selected=outfitDraft[wardrobeSlot]===option.id;
+      const selected=wardrobeSlot==="decoration"
+        ? (outfitDraft.decorations||[]).includes(option.id)
+        : outfitDraft[wardrobeSlot]===option.id;
       return `<button type="button" data-wardrobe-item="${option.id}" class="wardrobe-option ${selected?"is-selected":""} ${unlocked?"":"is-locked"}" aria-pressed="${selected}" ${unlocked&&save?"":"disabled"}>
         <span class="wardrobe-option-art">${unlocked?escapeHTML(option.symbol):"?"}</span>
         <b>${unlocked?escapeHTML(option.name):"???"}</b>
-        <small>${selected?"착용 중":unlocked?"선택 가능":"여행 중 발견"}</small>
+        <small>${selected?(wardrobeSlot==="decoration"?"함께 착용 중":"착용 중"):unlocked?(wardrobeSlot==="decoration"?"눌러서 추가":"선택 가능"):"여행 중 발견"}</small>
       </button>`;
-    }).join("")+(choices.length===1?'<p class="wardrobe-empty">아직 이 부위에 등록된 꾸미기 아이템이 없어요.</p>':"");
+    }).join(""):"")+(choices.length<=(wardrobeSlot==="decoration"?0:1)?`<p class="wardrobe-empty">${emptyMessage}</p>`:"");
   }
 
   function saveOutfit(){
@@ -649,7 +681,14 @@
       if(!button || button.disabled || !activeSave()) return;
       const item=wardrobeOptions[wardrobeSlot].find(option=>option.id===button.dataset.wardrobeItem);
       if(!item || (item.id!=="default" && item.id!=="none" && !activeSave().collection.items.includes(item.id))) return;
-      outfitDraft[wardrobeSlot]=item.id;
+      if(wardrobeSlot==="decoration"){
+        const selected=new Set(outfitDraft.decorations||[]);
+        if(selected.has(item.id)) selected.delete(item.id);
+        else selected.add(item.id);
+        outfitDraft.decorations=[...selected];
+      }else{
+        outfitDraft[wardrobeSlot]=item.id;
+      }
       renderWardrobe();
     });
     $("#wardrobe-save-button").addEventListener("click",saveOutfit);

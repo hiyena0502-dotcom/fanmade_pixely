@@ -37,7 +37,7 @@ function boot(saved,initialVersion="15"){
     result.dataset.collectionTab=key;
     return result;
   });
-  const wardrobeTabs=["outfit","headwear","accessory"].map(key=>{
+  const wardrobeTabs=["outfit","accessory","face","decoration"].map(key=>{
     const result=node(`wardrobe-tab:${key}`);
     result.dataset.wardrobeSlot=key;
     return result;
@@ -176,6 +176,7 @@ test("wardrobe saves an earned item per slot and exposes equipment for future sc
   const option=id=>state.node("#wardrobe-options").listeners.click({target:{closest(){return {dataset:{wardrobeItem:id},disabled:false}}}});
   option("plush");
   assert.equal(avatar.outfitForActiveSave().accessory,"none");
+  assert.deepEqual(Array.from(avatar.outfitForActiveSave().decorations),[]);
   assert.equal(state.context.window.PixelyInventory.grantItem("plush"),true);
   state.node("#wardrobe-tabs").listeners.click({target:{closest(){return state.node("wardrobe-tab:accessory")}}});
   option("plush");
@@ -186,6 +187,7 @@ test("wardrobe saves an earned item per slot and exposes equipment for future sc
   assert.equal(avatar.outfitForActiveSave().accessory,"plush");
   const restored=boot(saved);
   assert.equal(restored.context.window.PixelyAvatar.outfitForActiveSave().accessory,"plush");
+  assert.deepEqual(Array.from(restored.context.window.PixelyAvatar.outfitForActiveSave().decorations),[]);
   assert.equal(restored.context.window.PixelyInventory.grantItem("not-a-real-item"),false);
 });
 

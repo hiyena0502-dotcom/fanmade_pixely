@@ -7,8 +7,8 @@
   <meta name="theme-color" content="#111a3b" />
   <title>PIXELY : LOST SKY</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=15" />
-  <script src="app.js?v=15" defer></script>
+  <link rel="stylesheet" href="style.css?v=16" />
+  <script src="app.js?v=16" defer></script>
 </head>
 <body>
   <div class="game-root">
@@ -29,6 +29,12 @@
         <h1>PIXELY<br><em>LOST SKY</em></h1>
         <p>잠뜰님 생일 축하하러 왔을 뿐인데... 꿈뜰이의 우당탕 생일 준비 대작전!!</p>
       </header>
+
+      <button class="wardrobe-shortcut" type="button" data-open-wardrobe aria-label="꿈뜰이 옷장 열기">
+        <span aria-hidden="true">✿</span>
+        <b>꿈뜰이 옷장</b>
+        <small>DRESS UP</small>
+      </button>
 
       <aside class="command-window game-window">
         <div class="window-caption"><span>MAIN MENU</span><i>✦</i></div>
@@ -58,11 +64,6 @@
           <span><b>COLLECTION</b><small>인물 · 아이템 · 엽서 기록</small></span>
         </button>
 
-        <button class="command-button" type="button" data-open-wardrobe>
-          <span class="command-cursor">▶</span>
-          <span><b>꿈뜰이 옷장</b><small>획득한 옷과 장식으로 꾸미기</small></span>
-        </button>
-
         <button class="command-button" type="button" id="save-manager-button">
           <span class="command-cursor">▶</span>
           <span><b>저장 관리</b><small>세이브 슬롯 확인</small></span>
@@ -88,7 +89,7 @@
 
       <div class="title-help">
         <span>클리어 전에는 새벽 밤하늘, 엔딩 후에는 맑은 하늘로 변합니다.</span>
-        <span>HOME · SAVE · CHAPTERS · COLLECTION</span>
+        <span>HOME · SAVE · CHAPTERS · COLLECTION · WARDROBE</span>
       </div>
     </section>
 
@@ -176,7 +177,12 @@
     </section>
 
     <section class="view wardrobe-view" data-view="wardrobe" hidden>
-      <div class="wardrobe-backdrop" aria-hidden="true"></div>
+      <div class="wardrobe-backdrop" aria-hidden="true">
+        <span class="wardrobe-rainbow"></span>
+        <span class="wardrobe-cloud wardrobe-cloud--one">☁</span>
+        <span class="wardrobe-cloud wardrobe-cloud--two">☁</span>
+        <span class="wardrobe-flowers">✿　❀　✾　❁　✿</span>
+      </div>
       <header class="subpage-topbar">
         <button class="back-button" type="button" data-go-home aria-label="홈으로 돌아가기">←</button>
         <div><small>CHARACTER CUSTOMIZE</small><h2>꿈뜰이 옷장</h2></div>
@@ -191,12 +197,14 @@
         <section class="wardrobe-panel game-window">
           <small class="wardrobe-kicker">YOUR OWN DREAMER</small>
           <h3>오늘은 어떤 모습으로 떠날까?</h3>
-          <p>여행에서 얻은 꾸미기 아이템은 아이템 컬렉션에도 기록됩니다. 획득한 의상과 소품을 고른 뒤 현재 슬롯에 저장하세요. 이미지는 나중에 적용됩니다.</p>
-          <nav class="wardrobe-tabs" id="wardrobe-tabs" aria-label="꾸미기 부위">
-            <button type="button" data-wardrobe-slot="outfit">의상</button>
-            <button type="button" data-wardrobe-slot="headwear">머리 장식</button>
+          <p>여행에서 얻은 꾸미기 아이템은 아이템 컬렉션에도 기록됩니다. 옷·소품·얼굴을 고르고, 장식은 원하는 만큼 함께 선택한 뒤 현재 슬롯에 저장하세요. 이미지는 나중에 적용됩니다.</p>
+          <nav class="wardrobe-tabs" id="wardrobe-tabs" aria-label="꾸미기 파츠">
+            <button type="button" data-wardrobe-slot="outfit">옷</button>
             <button type="button" data-wardrobe-slot="accessory">소품</button>
+            <button type="button" data-wardrobe-slot="face">얼굴</button>
+            <button type="button" data-wardrobe-slot="decoration">장식 <span>MULTI</span></button>
           </nav>
+          <p class="wardrobe-multi-note">장식은 하나만 고르는 슬롯이 아니라 여러 개를 동시에 켜고 끌 수 있어요.</p>
           <div class="wardrobe-options" id="wardrobe-options"></div>
           <div class="wardrobe-actions">
             <span id="wardrobe-status" role="status">슬롯을 선택하면 꾸밀 수 있어요.</span>
