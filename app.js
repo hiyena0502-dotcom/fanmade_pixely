@@ -6,21 +6,41 @@
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 
   const catalogue = {
-    characters: [
-      {id:"dreamer",symbol:"YOU",name:"꿈뜰이",type:"PLAYER",color:"#5d87a8",desc:"잠뜰님의 생일을 축하하기 위해 여행을 시작한 플레이어."},
-      {id:"jamtteul",symbol:"잠",name:"잠뜰",type:"CHARACTER",color:"#4f86b3",desc:"여행의 끝에서 가장 만나고 싶은 사람."},
-      {id:"rader",symbol:"라",name:"라더",type:"CHARACTER",color:"#8d5c68",desc:"이야기 속에서 만나면 기록됩니다."},
-      {id:"deokgae",symbol:"덕",name:"덕개",type:"CHARACTER",color:"#9b744d",desc:"이야기 속에서 만나면 기록됩니다."},
-      {id:"gakbyeol",symbol:"각",name:"각별",type:"CHARACTER",color:"#6e659c",desc:"이야기 속에서 만나면 기록됩니다."},
-      {id:"gongryong",symbol:"공",name:"공룡",type:"CHARACTER",color:"#4f7f61",desc:"이야기 속에서 만나면 기록됩니다."},
-      {id:"suhyeon",symbol:"수",name:"수현",type:"CHARACTER",color:"#607e98",desc:"이야기 속에서 만나면 기록됩니다."},
-      {id:"fairy",symbol:"✧",name:"요정들",type:"CHARACTER",color:"#638da0",desc:"이야기와 이야기 사이의 문을 발견하는 존재들."}
+    cards: [
+      {id:"dreamer",symbol:"YOU",name:"꿈뜰이",type:"PLAYER",color:"#5d87a8",desc:"잠뜰님의 생일을 축하하기 위해 여행을 시작한 플레이어.",memo:"생일 축하하러 왔을 뿐인데 일이 커졌다."},
+      {id:"jamtteul",symbol:"잠",name:"잠뜰",type:"PERSON",color:"#4f86b3",desc:"이번 여행에서 가장 먼저 찾아야 하는 사람.",memo:"생일의 주인공은 대체 어디에 있는 걸까?"},
+      {id:"rader",symbol:"라",name:"라더",type:"PERSON",color:"#8d5c68",desc:"생일 준비를 함께하는 멤버.",memo:"장식 쪽은 믿고 맡겨도 될 것 같다."},
+      {id:"deokgae",symbol:"덕",name:"덕개",type:"PERSON",color:"#9b744d",desc:"생일 준비를 함께하는 멤버.",memo:"케이크는 무사히 지킬 수 있겠지?"},
+      {id:"gakbyeol",symbol:"각",name:"각별",type:"PERSON",color:"#6e659c",desc:"생일 준비를 함께하는 멤버. 기계나 장치를 만지면 일이 생기곤 한다.",memo:"고친다고 했지 포탈을 열겠다고 하진 않았는데."},
+      {id:"gongryong",symbol:"공",name:"공룡",type:"PERSON",color:"#4f7f61",desc:"생일 준비를 함께하는 멤버.",memo:"폭죽 위치부터 기억해 줬으면 좋겠다."},
+      {id:"suhyeon",symbol:"수",name:"수현",type:"PERSON",color:"#607e98",desc:"생일 준비를 함께하는 멤버.",memo:"풍선 준비는 생각보다 손이 많이 간다."},
+      {id:"philip",symbol:"필",name:"필립",type:"FAIRY",color:"#6d91a8",desc:"이상한 물건을 발견한 요정 중 한 명.",memo:"뭔가 발견하면 일단 들고 오는 편인 것 같다."},
+      {id:"woojae",symbol:"우",name:"우재",type:"FAIRY",color:"#7997a3",desc:"이상한 물건을 발견한 요정 중 한 명.",memo:"이번 발견은 정말 평범하지 않았다."},
+      {id:"ttoni",symbol:"또",name:"또니",type:"FAIRY",color:"#8c83a6",desc:"이상한 물건을 발견한 요정 중 한 명.",memo:"말보다 표정이 먼저 수상함을 알려준다."},
+      {id:"titi",symbol:"티",name:"티티",type:"FAIRY",color:"#9a7f95",desc:"이상한 물건을 발견한 요정 중 한 명.",memo:"이상한 건 이상하다고 바로 말해주는 편."},
+      {id:"isin",symbol:"이",name:"이신",type:"FAIRY",color:"#687f9d",desc:"이상한 물건을 발견한 요정 중 한 명.",memo:"장치를 가까이서 본 사람 중 하나."},
+      {id:"hayul",symbol:"하",name:"하율",type:"FAIRY",color:"#77998d",desc:"이상한 물건을 발견한 요정 중 한 명.",memo:"아침부터 꽤 큰 사건을 만났다."},
+      {id:"yukto",symbol:"육",name:"육토",type:"FAIRY",color:"#8e856e",desc:"이상한 물건을 발견한 요정 중 한 명.",memo:"발견물보다 주변 반응이 더 재미있어 보인다."},
+      {id:"hoodie",symbol:"후",name:"후디",type:"FAIRY",color:"#657a8b",desc:"이상한 물건을 발견한 요정 중 한 명.",memo:"포탈이 열릴 줄은 아무도 몰랐다."},
+      {id:"fritz",symbol:"프",name:"프리츠",type:"FAIRY",color:"#8a7894",desc:"이상한 물건을 발견한 요정 중 한 명.",memo:"이상한 아침의 목격자가 되었다."},
+      {id:"pigeon",symbol:"◎",name:"수상한 비둘기",type:"CREATURE",color:"#7f8991",desc:"절대 눈을 마주치고 싶지 않은 비둘기.",memo:"왜 카드까지 생긴 거지?"}
     ],
     items: [
-      {id:"portal-device",symbol:"◇",name:"정체불명의 장치",type:"KEY ITEM",color:"#537a9a",desc:"요정들이 발견한 이상한 장치. 각별이 작동시키게 된다."},
-      {id:"unknown-piece",symbol:"?",name:"의미를 알 수 없는 물건",type:"UNKNOWN",color:"#6b7191",desc:"여러 세계를 돌아다니다 우연히 발견하게 되는 물건."},
-      {id:"birthday-gift",symbol:"□",name:"생일 선물",type:"GIFT",color:"#9a7c5a",desc:"상황극 세계에서 현실 잠뜰님께 전해달라고 받은 선물."},
-      {id:"letter",symbol:"✉",name:"축하 편지",type:"GIFT",color:"#73849b",desc:"여행 중 모이게 될 여러 세계의 축하 메시지."}
+      {id:"portal-device",symbol:"◇",name:"정체불명의 장치",type:"KEY ITEM",color:"#537a9a",desc:"요정들이 발견한 이상한 장치. 고친 뒤에는 포탈을 만들어낸다."},
+      {id:"plush",symbol:"✦",name:"치명적으로 귀여운 봉제인형",type:"MEMENTO",color:"#9c8295",desc:"창고 어딘가에서 발견한 작은 봉제인형. 특별한 쓰임은 없어 보인다."},
+      {id:"plant-seed",symbol:"❧",name:"이상한 씨앗",type:"MEMENTO",color:"#698b72",desc:"원하는 모습으로 자랄 것만 같은 수상한 씨앗."},
+      {id:"pigeon-feather",symbol:"〆",name:"비둘기 깃털",type:"MEMENTO",color:"#7a858f",desc:"싸운 적도 없는데 전리품처럼 손에 들어왔다."},
+      {id:"ticket-scrap",symbol:"券",name:"놀이공원 티켓 조각",type:"MEMENTO",color:"#9a745d",desc:"오래된 게임쇼의 흔적처럼 보이는 낡은 티켓 조각."},
+      {id:"gold-button",symbol:"▣",name:"골드버튼 미니어처",type:"MEMENTO",color:"#a68b57",desc:"어딘가 익숙한 금빛 기념품. 반짝임은 아직 선명하다."},
+      {id:"unknown-piece",symbol:"?",name:"의미를 알 수 없는 물건",type:"UNKNOWN",color:"#6b7191",desc:"여행 중 우연히 발견한 정체불명의 조각."},
+      {id:"birthday-gift",symbol:"□",name:"생일 선물",type:"GIFT",color:"#9a7c5a",desc:"누군가가 잠뜰님께 전해달라며 건넨 선물."},
+      {id:"letter",symbol:"✉",name:"축하 편지",type:"GIFT",color:"#73849b",desc:"여행 중 손에 들어온 축하 메시지."}
+    ],
+    postcards: [
+      {id:"birthday-prep",symbol:"✦",name:"생일 준비 완료!",type:"CHAPTER POSTCARD",color:"#9a7c67",desc:"밤늦게까지 모두와 함께 생일 파티 준비를 마무리한 순간.",caption:"내일이면 잠뜰님도 좋아하시겠지?"},
+      {id:"morning-guests",symbol:"☀",name:"생일날의 손님들",type:"EVENT POSTCARD",color:"#7894a5",desc:"아침부터 여기저기 돌아다니며 만난 반가운 얼굴들.",caption:"정작 생일의 주인공만 보이지 않는다."},
+      {id:"pigeon-stare",symbol:"!",name:"눈을 마주치지 마시오",type:"SECRET POSTCARD",color:"#777d84",desc:"굳이 끝까지 비둘기를 건드린 사람만 남길 수 있는 한 장.",caption:"다시는 눈을 마주치지 말자."},
+      {id:"first-portal",symbol:"◇",name:"처음 열린 문",type:"STORY POSTCARD",color:"#596f91",desc:"고쳐진 장치가 처음으로 낯선 세계의 문을 열어젖힌 순간.",caption:"이 문 너머에 잠뜰님이 있을까?"}
     ]
   };
 
@@ -43,8 +63,13 @@
       unlockedChapters:Array.isArray(save.unlockedChapters) ? save.unlockedChapters : ["prologue"],
       completedChapters:Array.isArray(save.completedChapters) ? save.completedChapters : [],
       collection:{
-        characters:Array.isArray(save.collection?.characters) ? save.collection.characters : ["dreamer"],
-        items:Array.isArray(save.collection?.items) ? save.collection.items : []
+        cards:Array.isArray(save.collection?.cards)
+          ? save.collection.cards
+          : Array.isArray(save.collection?.characters)
+            ? save.collection.characters
+            : ["dreamer"],
+        items:Array.isArray(save.collection?.items) ? save.collection.items : [],
+        postcards:Array.isArray(save.collection?.postcards) ? save.collection.postcards : []
       }
     };
   }
@@ -63,7 +88,7 @@
   }
 
   let root=readRoot();
-  let collectionTab="characters";
+  let collectionTab="cards";
   let saveMode="manage";
   let toastTimer=null;
 
@@ -88,7 +113,7 @@
       completedGame:false,
       unlockedChapters:["prologue"],
       completedChapters:[],
-      collection:{characters:["dreamer"],items:[]}
+      collection:{cards:["dreamer"],items:[],postcards:[]}
     };
   }
 
@@ -268,27 +293,52 @@
   }
 
   function renderCollection(){
-    const items=catalogue[collectionTab];
+    const items=catalogue[collectionTab]||[];
     const owned=collectionOwnedSet();
     const labels={
-      characters:["CHARACTER NOTE","만난 인물","이야기 속에서 직접 만난 인물이 하나씩 다이어리에 기록됩니다."],
-      items:["ITEM NOTE","발견한 아이템","조사하거나 누군가에게 받은 물건을 한 장씩 붙여둡니다."]
+      cards:["CARD FILE","만난 카드","여행 중 직접 만난 인물과 생물이 카드로 기록됩니다."],
+      items:["ITEM SCRAP","손에 넣은 아이템","주운 물건과 받은 기념품을 스크랩처럼 한 장씩 남겨둡니다."],
+      postcards:["POSTCARD ALBUM","모아둔 엽서","챕터의 끝이나 특별한 이벤트에서 남은 순간을 엽서로 보관합니다."]
     };
 
     $("#collection-eyebrow").textContent=labels[collectionTab][0];
     $("#collection-heading").textContent=labels[collectionTab][1];
     $("#collection-description").textContent=labels[collectionTab][2];
-    $$(".diary-tabs button").forEach(b=>b.classList.toggle("is-active",b.dataset.collectionTab===collectionTab));
+    $(".diary-tabs button").forEach(b=>b.classList.toggle("is-active",b.dataset.collectionTab===collectionTab));
     $("#collection-owned").textContent=owned.size;
     $("#collection-total").textContent=items.length;
 
-    $("#collection-grid").innerHTML=items.map(item=>{
+    const grid=$("#collection-grid");
+    grid.className="collection-grid collection-grid--"+collectionTab;
+
+    grid.innerHTML=items.map(item=>{
       const open=owned.has(item.id);
-      return `<article class="collection-card ${open?"":"is-locked"}">
-        <div class="card-art" style="--card:${open?item.color:"#b9b0a5"}">${open?item.symbol:"?"}</div>
+
+      if(collectionTab==="postcards"){
+        return `<article class="collection-card collection-card--postcard ${open?"":"is-locked"}">
+          <div class="postcard-art" style="--card:${open?item.color:"#b9b0a5"}">
+            <span class="postcard-stamp">${open?"POST":"LOCKED"}</span>
+            <strong>${open?item.symbol:"?"}</strong>
+            <i aria-hidden="true"></i>
+          </div>
+          <div class="postcard-copy">
+            <small>${open?item.type:"POSTCARD"}</small>
+            <b>${open?item.name:"아직 남기지 못한 순간"}</b>
+            <p>${open?item.desc:"특별한 장면을 만나면 이 자리에 엽서가 꽂힙니다."}</p>
+            ${open&&item.caption?`<blockquote>${item.caption}</blockquote>`:""}
+          </div>
+        </article>`;
+      }
+
+      return `<article class="collection-card collection-card--${collectionTab==="cards"?"card":"item"} ${open?"":"is-locked"}">
+        <div class="card-art" style="--card:${open?item.color:"#b9b0a5"}">
+          <span class="card-symbol">${open?item.symbol:"?"}</span>
+          <span class="card-kind">${open?item.type:"LOCKED"}</span>
+        </div>
         <small>${open?item.type:"LOCKED"}</small>
         <b>${open?item.name:"아직 기록되지 않았습니다"}</b>
-        <p>${open?item.desc:"이야기를 진행하면 이 페이지가 채워집니다."}</p>
+        <p>${open?item.desc:"여행을 진행하고 주변을 조사하면 이 페이지가 채워집니다."}</p>
+        ${collectionTab==="cards"&&open&&item.memo?`<p class="card-memo"><span>꿈뜰이 메모</span>${item.memo}</p>`:""}
       </article>`;
     }).join("");
   }
