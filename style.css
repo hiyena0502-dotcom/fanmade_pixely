@@ -1523,3 +1523,79 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
   .wardrobe-part-steps{grid-template-columns:1fr}
   .wardrobe-file-action--part{height:38px}
 }
+
+
+/* =========================================================
+   WARDROBE ALL-MULTI + LAYER ORDER v22
+   ========================================================= */
+.wardrobe-option-group{
+  display:inline-flex;
+  align-items:center;
+  min-height:18px;
+  padding:2px 7px;
+  border-radius:999px;
+  background:#eef8fb;
+  color:#6c8796;
+  font-size:7px;
+  font-style:normal;
+  font-weight:900;
+}
+.wardrobe-upload-status{
+  margin:9px 0 0!important;
+  padding:8px 10px;
+  border-radius:8px;
+  background:#f3f8fa;
+  color:#6e8795!important;
+  font-size:8px!important;
+  line-height:1.5!important;
+}
+.wardrobe-upload-status[data-state="ok"]{background:#eef9f1;color:#5f8569!important}
+.wardrobe-upload-status[data-state="busy"]{background:#fff8e7;color:#9b8052!important}
+.wardrobe-upload-status[data-state="error"]{background:#fff0f3;color:#a85d72!important}
+.wardrobe-part-steps{
+  grid-template-columns:.72fr .82fr 1fr .72fr;
+}
+.wardrobe-layer-order-box{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-top:12px;
+  padding:10px 11px;
+  border:1px solid rgba(99,143,161,.16);
+  border-radius:10px;
+  background:#f8fcfd;
+}
+.wardrobe-layer-order-box>span{
+  color:#6e8997;
+  font-size:8px;
+  line-height:1.5;
+}
+.wardrobe-layer-order-actions{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  gap:5px;
+}
+.wardrobe-layer-order-actions button{
+  padding:7px 8px;
+  border:1px solid rgba(95,139,157,.18);
+  border-radius:7px;
+  background:#fff;
+  color:#5f7f90;
+  font-size:8px;
+  font-weight:900;
+  cursor:pointer;
+}
+.wardrobe-layer-order-actions button:disabled{
+  opacity:.35;
+  cursor:default;
+}
+@media(max-width:900px){
+  .wardrobe-part-steps{grid-template-columns:1fr 1fr}
+}
+@media(max-width:680px){
+  .wardrobe-part-steps{grid-template-columns:1fr}
+  .wardrobe-layer-order-box{align-items:flex-start;flex-direction:column}
+  .wardrobe-layer-order-actions{justify-content:flex-start}
+}
