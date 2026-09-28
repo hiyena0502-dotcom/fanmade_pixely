@@ -3,7 +3,7 @@
 
   const STORAGE_KEY = "pixely-lost-sky-saves-v2";
   const WARDROBE_ASSET_KEY = "pixely-lost-sky-wardrobe-assets-v1";
-  const SITE_VERSION = "19";
+  const SITE_VERSION = "20";
   const $ = (q, root = document) => root.querySelector(q);
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 
