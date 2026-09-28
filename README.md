@@ -12,7 +12,7 @@
 - **GAME MENU** — 미션·인벤토리 인터페이스. 새 이야기 또는 이어하기로 엽니다. 새 세이브에는 미션과 아이템이 없습니다.
 - **CHAPTERS** — 챕터 진행 기록
 - **COLLECTION** — 인물 카드, 아이템, 엽서 다이어리
-- **WARDROBE** — 보유한 꾸미기 아이템을 슬롯별로 선택·저장하는 화면. 이미지 소재는 아직 등록되지 않았습니다.
+- **WARDROBE** — 홈 오른쪽 위의 별도 버튼으로 여는 밝은 꾸미기 화면. 옷·소품·얼굴은 한 개씩, 장식은 여러 개를 동시에 선택해 저장할 수 있습니다. 이미지 소재는 아직 등록되지 않았습니다.
 
 기존 세이브는 그대로 읽지만, 이전 버전에서 잠시 추가됐던 챕터 1 장면과 퀘스트는 더 이상 실행되지 않습니다.
 
@@ -27,7 +27,7 @@
 
 컬렉션의 카드 목록은 잠뜰 멤버·상황극 인물·요정·기타로 분류됩니다. 앞으로 카드 항목에 `world` 문자열을 추가하면 해당 작품 필터도 자동으로 나타납니다. 아직 작품별 캐릭터 데이터는 입력하지 않았습니다. 아이템은 중요 물건·기념품·선물·꾸미기·미확인으로 나뉩니다. 엽서는 기존 한 목록을 유지합니다.
 
-새 게임의 인벤토리는 비어 있습니다. 기존 봉제인형을 획득하면 옷장에서 소품으로 장착할 수 있습니다. 추후 `catalogue.items`에 `wardrobeSlot`(`outfit`, `headwear`, `accessory`)이 지정된 아이템을 추가하고 스토리에서 `window.PixelyInventory.grantItem(itemId)`로 지급하면 선택 항목이 늘어납니다. 선택 결과는 현재 세이브 슬롯의 `outfit`에 저장됩니다. 이미지 소재가 들어온 뒤 대화 화면은 `window.PixelyAvatar.outfitForActiveSave()`에서 장착 상태를 읽어 사용자 이미지에 적용할 수 있습니다.
+새 게임의 인벤토리는 비어 있습니다. 기존 봉제인형을 획득하면 옷장에서 소품으로 장착할 수 있습니다. 추후 `catalogue.items`에 `wardrobeSlot`(`outfit`, `accessory`, `face`, `decoration`)이 지정된 아이템을 추가하고 스토리에서 `window.PixelyInventory.grantItem(itemId)`로 지급하면 선택 항목이 늘어납니다. `outfit`·`accessory`·`face`는 한 개씩 선택되고 `decoration`은 복수 선택되어 현재 세이브 슬롯의 `outfit.decorations` 배열에 저장됩니다. 예전 `headwear` 세이브가 있으면 장식으로 읽어 호환합니다. 이미지 소재가 들어온 뒤 대화 화면은 `window.PixelyAvatar.outfitForActiveSave()`에서 장착 상태를 읽어 사용자 이미지에 적용할 수 있습니다.
 
 ## 배포할 때
 
