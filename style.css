@@ -3531,3 +3531,181 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
     grid-column:1;
   }
 }
+
+
+/* =========================================================
+   CHAPTER 01 INTRO v31
+   검은 도입 → 포근한 집 → 챕터 타이틀
+   ========================================================= */
+.story-intro-overlay{
+  position:absolute;
+  z-index:90;
+  inset:0;
+  overflow:hidden;
+  background:#090b12;
+  color:#fff;
+}
+.story-intro-backdrop{
+  position:absolute;
+  inset:0;
+  opacity:0;
+  transition:opacity .7s ease,filter .7s ease;
+  background:
+    radial-gradient(circle at 76% 16%,rgba(255,243,204,.55),transparent 13%),
+    linear-gradient(180deg,#9fcae0 0%,#cbe5e5 47%,#e9d7b0 100%);
+}
+.story-intro-overlay.is-exterior .story-intro-backdrop{opacity:1}
+.story-intro-overlay.is-chapter .story-intro-backdrop{opacity:.16;filter:blur(5px) saturate(.45)}
+.story-intro-overlay.is-dark .story-intro-backdrop{opacity:0}
+
+.intro-ground{
+  position:absolute;
+  left:-5%;right:-5%;bottom:-8%;height:38%;
+  background:
+    radial-gradient(circle at 18% 24%,#76966b 0 4%,transparent 4.5%),
+    radial-gradient(circle at 80% 16%,#82a171 0 5%,transparent 5.5%),
+    linear-gradient(180deg,#9dbd83,#719464);
+  border-radius:50% 50% 0 0/18% 18% 0 0;
+}
+.intro-cloud{
+  position:absolute;
+  width:190px;height:54px;border-radius:999px;
+  background:rgba(255,255,255,.64);
+  filter:blur(.3px);
+}
+.intro-cloud::before,.intro-cloud::after{
+  content:"";position:absolute;border-radius:50%;background:inherit;
+}
+.intro-cloud::before{width:76px;height:76px;left:34px;bottom:4px}
+.intro-cloud::after{width:100px;height:88px;right:24px;bottom:2px}
+.intro-cloud--one{left:6%;top:12%;transform:scale(.75)}
+.intro-cloud--two{right:8%;top:18%;transform:scale(.55);opacity:.72}
+
+.intro-house{
+  position:absolute;
+  left:50%;bottom:14%;
+  width:min(470px,54vw);height:min(420px,54vh);
+  transform:translateX(-50%);
+  filter:drop-shadow(0 24px 26px rgba(47,55,54,.22));
+}
+.intro-house-body{
+  position:absolute;
+  left:12%;right:12%;bottom:0;height:62%;
+  border:4px solid #72513f;
+  border-radius:3px;
+  background:
+    repeating-linear-gradient(90deg,rgba(172,132,92,.06) 0 2px,transparent 2px 24px),
+    #fff2d6;
+}
+.intro-house-roof{
+  position:absolute;
+  left:50%;top:6%;width:78%;height:48%;
+  transform:translateX(-50%) rotate(45deg);
+  border:4px solid #79483b;
+  border-radius:14px 5px 5px 5px;
+  background:#d97863;
+}
+.intro-house-body::before{
+  content:"";position:absolute;left:50%;top:-38%;width:46%;height:58%;
+  transform:translateX(-50%);
+  border:4px solid #72513f;border-bottom:0;
+  background:#fff2d6;
+  clip-path:polygon(50% 0,100% 60%,100% 100%,0 100%,0 60%);
+}
+.intro-house-door{
+  position:absolute;left:50%;bottom:0;width:20%;height:55%;
+  transform:translateX(-50%);
+  border:4px solid #644838;border-bottom:0;border-radius:44px 44px 0 0;
+  background:#a96f56;
+}
+.intro-house-door::after{
+  content:"";position:absolute;right:12%;top:54%;width:6px;height:6px;border-radius:50%;
+  background:#f5d68d;
+}
+.intro-house-window{
+  position:absolute;bottom:27%;width:18%;height:29%;
+  border:4px solid #70503d;border-radius:50% 50% 8px 8px;
+  background:
+    linear-gradient(90deg,transparent 47%,#765442 48% 52%,transparent 53%),
+    linear-gradient(180deg,transparent 47%,#765442 48% 52%,transparent 53%),
+    linear-gradient(#ffeab0,#ffd780);
+  box-shadow:0 0 22px rgba(255,215,128,.35);
+}
+.intro-house-window--left{left:16%}.intro-house-window--right{right:16%}
+.intro-house-bush{
+  position:absolute;bottom:-3%;width:30%;height:18%;border-radius:50%;
+  background:radial-gradient(circle at 28% 40%,#e8b6a2 0 4%,transparent 5%),radial-gradient(circle at 61% 22%,#f5d6a8 0 4%,transparent 5%),#648e62;
+}
+.intro-house-bush--one{left:0}.intro-house-bush--two{right:0;transform:scaleX(-1)}
+.intro-house-path{
+  position:absolute;left:50%;bottom:-20%;width:30%;height:27%;
+  transform:translateX(-50%) perspective(280px) rotateX(58deg);
+  background:repeating-linear-gradient(180deg,#dbcba8 0 18px,#bfae8c 18px 21px);
+  clip-path:polygon(36% 0,64% 0,100% 100%,0 100%);
+}
+
+.story-intro-next{
+  position:absolute;z-index:2;inset:0;
+  width:100%;height:100%;padding:0;border:0;background:transparent;color:inherit;
+  cursor:pointer;text-align:center;
+}
+.story-intro-copy{
+  position:absolute;left:50%;top:52%;width:min(760px,calc(100% - 70px));
+  transform:translate(-50%,-50%);
+  text-shadow:0 3px 18px rgba(0,0,0,.55);
+}
+.story-intro-copy small{
+  display:block;min-height:18px;margin-bottom:10px;
+  color:#eed397;font-size:10px;font-weight:1000;letter-spacing:.22em;
+}
+.story-intro-copy h2{
+  margin:0;color:#fff4d5;font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(42px,6vw,82px);font-weight:500;letter-spacing:.03em;
+}
+.story-intro-copy p{
+  margin:0 auto;max-width:720px;color:#f6f2ea;
+  font-size:clamp(17px,1.65vw,25px);font-weight:600;line-height:1.85;
+  word-break:keep-all;
+}
+.story-intro-overlay.is-exterior .story-intro-copy{
+  top:auto;bottom:8%;transform:translateX(-50%);
+  padding:18px 28px;border-radius:14px;
+  background:linear-gradient(90deg,transparent,rgba(28,32,33,.52) 18%,rgba(28,32,33,.52) 82%,transparent);
+}
+.story-intro-overlay.is-chapter .story-intro-copy{
+  top:50%;bottom:auto;transform:translate(-50%,-50%);
+  background:none;padding:0;
+}
+.story-intro-overlay.is-chapter .story-intro-copy small{color:#e2c67f;font-size:12px}
+.story-intro-overlay.is-chapter .story-intro-copy h2{
+  font-size:clamp(54px,7vw,100px);
+}
+.story-intro-voices{
+  display:grid;gap:8px;margin:0 auto;max-width:560px;
+}
+.story-intro-voices p{
+  margin:0;padding:7px 14px;border-radius:8px;
+  background:rgba(16,20,23,.44);color:#fff4e4;
+  font-size:clamp(14px,1.3vw,19px);font-weight:700;
+}
+.story-intro-hint{
+  position:absolute;right:28px;bottom:22px;
+  display:flex;align-items:center;gap:8px;
+  color:rgba(255,255,255,.53);font-size:8px;font-weight:900;letter-spacing:.14em;
+}
+.story-intro-hint i{
+  width:7px;height:7px;border-radius:50%;background:#e5ca86;
+  box-shadow:0 0 12px rgba(229,202,134,.65);
+  animation:intro-hint-pulse 1.4s ease-in-out infinite;
+}
+@keyframes intro-hint-pulse{
+  50%{transform:scale(1.45);opacity:.55}
+}
+@media(max-width:680px){
+  .intro-house{width:82vw;height:44vh;bottom:19%}
+  .story-intro-copy{width:calc(100% - 34px)}
+  .story-intro-overlay.is-exterior .story-intro-copy{bottom:11%;padding:14px 12px}
+  .story-intro-copy p{font-size:16px}
+  .story-intro-voices p{font-size:13px}
+  .story-intro-hint{right:16px;bottom:14px;font-size:7px}
+}

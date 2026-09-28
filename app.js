@@ -5,7 +5,7 @@
   const SESSION_SAVE_KEY = STORAGE_KEY+"-session-fallback";
   const WARDROBE_ASSET_KEY = "pixely-lost-sky-wardrobe-assets-v1";
   const DEV_CONTENT_KEY = "pixely-lost-sky-dev-content-v1";
-  const SITE_VERSION = "30";
+  const SITE_VERSION = "31";
   const $ = (q, root = document) => root.querySelector(q);
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 
@@ -324,7 +324,8 @@
       })(),
       story:{
         scene:typeof save.story?.scene==="string" ? save.story.scene : "party-room",
-        inspected:strings(save.story?.inspected)
+        inspected:strings(save.story?.inspected),
+        introSeen:typeof save.story?.introSeen==="boolean" ? save.story.introSeen : true
       },
       collection:{
         cards:Array.isArray(save.collection?.cards)
@@ -384,6 +385,8 @@
   let dismissedUpdate=null;
   let pendingUpdateKey=null;
   let storySelectedItem=null;
+  let storyIntroIndex=0;
+  let storyIntroActive=false;
   let saveFallbackWarned=false;
 
   function escapeHTML(value){
@@ -453,7 +456,7 @@
       unlockedChapters:["night"],
       completedChapters:[],
       missions:[{id:"explore-party-room",title:"파티방을 둘러보자",done:false}],
-      story:{scene:"party-room",inspected:[]},
+      story:{scene:"party-room",inspected:[],introSeen:false},
       collection:{cards:["dreamer"],items:[],postcards:[]},
       outfit:{layers:[]}
     };
@@ -635,10 +638,88 @@
     openStory();
   }
 
-  function openStory(){
-    if(!activeSave()) return;
-    showView("story");
+  const storyIntroSteps=[
+    {phase:"dark",text:"내일은 잠뜰님의 생일이다."},
+    {phase:"dark",text:"그래서 나는 오늘, 조금 일찍 이곳에 왔다."},
+    {phase:"dark",text:"이유는 간단하다."},
+    {phase:"dark",text:"생일 축하하러 왔을 뿐이다."},
+    {phase:"dark",text:"……정말 그것뿐이었는데."},
+    {phase:"exterior",kicker:"꿈뜰",text:"여기 맞겠지?"},
+    {phase:"exterior",kicker:"꿈뜰",text:"생각보다 조용한데……."},
+    {phase:"exterior",voices:["???　“잠깐만요!”","???　“그거 거기 두면 안 된다니까!”","???　“아니 내가 안 뒀어!”"]},
+    {phase:"exterior",text:"익숙한 소음과 친근한 목소리다……"},
+    {phase:"exterior",text:"…잘 찾아온 것 같다."},
+    {phase:"chapter",kicker:"CHAPTER 1",title:"생일 전날",text:""}
+  ];
+
+  function shouldPlayStoryIntro(save){
+    return Boolean(save && save.story?.introSeen===false && !currentDevStoryChapter());
+  }
+
+  function renderStoryIntroStep(){
+    const overlay=$("#story-intro");
+    const step=storyIntroSteps[storyIntroIndex];
+    if(!overlay||!step) return;
+
+    overlay.classList.toggle("is-exterior",step.phase==="exterior");
+    overlay.classList.toggle("is-chapter",step.phase==="chapter");
+    overlay.classList.toggle("is-dark",step.phase==="dark");
+
+    $("#story-intro-kicker").textContent=step.kicker||"";
+    $("#story-intro-title").textContent=step.title||"";
+    $("#story-intro-text").textContent=step.text||"";
+    $("#story-intro-voices").innerHTML=(step.voices||[]).map(line=>"<p>"+escapeHTML(line)+"</p>").join("");
+  }
+
+  function startStoryIntro(){
+    const overlay=$("#story-intro");
+    if(!overlay) return;
+    closeStoryPanels();
+    const dialogue=$("#story-dialogue");
+    if(dialogue) dialogue.hidden=true;
+    storyIntroIndex=0;
+    storyIntroActive=true;
+    overlay.hidden=false;
+    renderStoryIntroStep();
+  }
+
+  function finishStoryIntro(){
+    const overlay=$("#story-intro");
+    storyIntroActive=false;
+    storyIntroIndex=0;
+    if(overlay) overlay.hidden=true;
+
+    const save=activeSave();
+    if(save){
+      save.story=save.story||{scene:"party-room",inspected:[]};
+      save.story.introSeen=true;
+      save.savedAt=Date.now();
+      save.savedLabel=nowLabel();
+      persist();
+    }
     renderGameUI();
+  }
+
+  function advanceStoryIntro(){
+    if(!storyIntroActive) return;
+    if(storyIntroIndex<storyIntroSteps.length-1){
+      storyIntroIndex+=1;
+      renderStoryIntroStep();
+      return;
+    }
+    finishStoryIntro();
+  }
+
+  function openStory(){
+    const save=activeSave();
+    if(!save) return;
+    showView("story");
+    if(shouldPlayStoryIntro(save)) startStoryIntro();
+    else{
+      const overlay=$("#story-intro");
+      if(overlay) overlay.hidden=true;
+      storyIntroActive=false;
+    }
   }
 
   const storyHotspots={
@@ -1754,6 +1835,7 @@
     Array.from(document.querySelectorAll("[data-story-drawer]")).forEach(button=>button.addEventListener("click",()=>toggleStoryPanel(button.dataset.storyDrawer)));
     Array.from(document.querySelectorAll("[data-story-close-panel]")).forEach(button=>button.addEventListener("click",closeStoryPanels));
     $("#story-dialogue-close")?.addEventListener("click",()=>$("#story-dialogue").hidden=true);
+    $("#story-intro-next")?.addEventListener("click",advanceStoryIntro);
     $("#story-save-button")?.addEventListener("click",quickStorySave);
     $("#story-quick-inventory")?.addEventListener("click",event=>{
       const button=event.target.closest("[data-story-item-id]");
@@ -1922,6 +2004,11 @@
     });
 
     document.addEventListener("keydown",event=>{
+      if(storyIntroActive && (event.key===" " || event.key==="Enter")){
+        event.preventDefault();
+        advanceStoryIntro();
+        return;
+      }
       if(event.key!=="Escape") return;
       if(!$("#save-modal").hidden) closeSaveModal();
       else if(!$("#story-inventory-panel")?.hidden || !$("#story-missions-panel")?.hidden || !$("#story-map-panel")?.hidden){closeStoryPanels();}

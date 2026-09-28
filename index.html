@@ -7,8 +7,8 @@
   <meta name="theme-color" content="#111a3b" />
   <title>PIXELY : LOST SKY</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=30" />
-  <script src="app.js?v=30" defer></script>
+  <link rel="stylesheet" href="style.css?v=31" />
+  <script src="app.js?v=31" defer></script>
 </head>
 <body>
   <div class="game-root">
@@ -201,6 +201,36 @@
             </div>
           </aside>
         </div>
+
+
+        <section class="story-intro-overlay" id="story-intro" hidden aria-live="polite">
+          <div class="story-intro-backdrop" aria-hidden="true">
+            <div class="intro-cloud intro-cloud--one"></div>
+            <div class="intro-cloud intro-cloud--two"></div>
+            <div class="intro-house">
+              <div class="intro-house-roof"></div>
+              <div class="intro-house-body">
+                <div class="intro-house-window intro-house-window--left"></div>
+                <div class="intro-house-door"></div>
+                <div class="intro-house-window intro-house-window--right"></div>
+              </div>
+              <div class="intro-house-bush intro-house-bush--one"></div>
+              <div class="intro-house-bush intro-house-bush--two"></div>
+              <div class="intro-house-path"></div>
+            </div>
+            <div class="intro-ground"></div>
+          </div>
+
+          <button class="story-intro-next" id="story-intro-next" type="button" aria-label="인트로 다음 장면">
+            <div class="story-intro-copy">
+              <small id="story-intro-kicker"></small>
+              <h2 id="story-intro-title"></h2>
+              <p id="story-intro-text"></p>
+              <div class="story-intro-voices" id="story-intro-voices"></div>
+            </div>
+            <span class="story-intro-hint"><i></i> CLICK / SPACE</span>
+          </button>
+        </section>
 
         <footer class="story-toolbar">
           <button class="story-bag-button" type="button" data-story-drawer="inventory">
