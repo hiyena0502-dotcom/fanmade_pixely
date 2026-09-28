@@ -96,6 +96,10 @@
     continueBtn.classList.toggle("is-disabled", recent === null);
     continueBtn.setAttribute("aria-disabled", recent === null ? "true" : "false");
     $("#continue-subtitle").textContent = recent === null ? "저장된 이야기가 없습니다" : "SLOT " + (recent + 1) + " · " + root.slots[recent].chapter;
+    const quickSaveBtn = $("#quick-save-button");
+    quickSaveBtn.classList.toggle("is-disabled", !save);
+    quickSaveBtn.setAttribute("aria-disabled", save ? "false" : "true");
+    $("#quick-save-subtitle").textContent = save ? "SLOT " + (root.activeSlot + 1) + "에 현재 진행 저장" : "먼저 새 이야기를 시작하세요";
 
     if(!save){
       $("#current-slot-label").textContent = "NO DATA";
@@ -251,6 +255,10 @@
   function bind(){
     $("#continue-button").addEventListener("click",continueStory);
     $("#new-game-button").addEventListener("click",() => openSaveModal("new"));
+    $("#quick-save-button").addEventListener("click",() => {
+      if(!activeSave()){ toast("먼저 새 이야기를 시작하세요."); return; }
+      openSaveModal("save");
+    });
     $("#save-manager-button").addEventListener("click",() => openSaveModal("manage"));
     $$("[data-open-collection]").forEach(b => b.addEventListener("click",() => showView("collection")));
     $$("[data-go-home]").forEach(b => b.addEventListener("click",() => showView("home")));
