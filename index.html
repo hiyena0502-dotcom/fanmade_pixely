@@ -7,8 +7,8 @@
   <meta name="theme-color" content="#111a3b" />
   <title>PIXELY : LOST SKY</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=16" />
-  <script src="app.js?v=16" defer></script>
+  <link rel="stylesheet" href="style.css?v=17" />
+  <script src="app.js?v=17" defer></script>
 </head>
 <body>
   <div class="game-root">
@@ -191,7 +191,9 @@
       <main class="wardrobe-shell">
         <section class="wardrobe-stage game-window">
           <div class="wardrobe-stage-top"><span>MY CHARACTER</span><span>✦ DRESS UP ✦</span></div>
-          <div class="wardrobe-portrait" id="wardrobe-preview"><span aria-hidden="true">✧</span><p>꿈뜰이 이미지가 들어갈 자리</p><small>이미지는 직접 추가할 수 있도록 비워뒀어요.</small></div>
+          <div class="wardrobe-portrait" id="wardrobe-preview">
+            <div class="wardrobe-preview-empty"><span aria-hidden="true">✧</span><p>베이스 이미지를 먼저 추가해 주세요.</p><small>PNG 투명 배경을 그대로 겹쳐서 사용할 수 있어요.</small></div>
+          </div>
           <div class="wardrobe-stage-bottom"><strong>꿈뜰이</strong><span id="wardrobe-equipped">기본 복장</span></div>
         </section>
         <section class="wardrobe-panel game-window">
@@ -206,6 +208,26 @@
           </nav>
           <p class="wardrobe-multi-note">장식은 하나만 고르는 슬롯이 아니라 여러 개를 동시에 켜고 끌 수 있어요.</p>
           <div class="wardrobe-options" id="wardrobe-options"></div>
+          <section class="wardrobe-image-tools" aria-labelledby="wardrobe-image-tools-title">
+            <header>
+              <div><small>IMAGE EDITOR</small><h4 id="wardrobe-image-tools-title">이미지 추가 · 위치 조정</h4></div>
+              <p>투명 PNG 권장 · 이미지당 최대 1.8MB</p>
+            </header>
+            <div class="wardrobe-upload-grid">
+              <label class="wardrobe-upload-button"><span>베이스 이미지</span><b>추가 / 교체</b><input type="file" id="wardrobe-base-file" accept="image/png,image/webp,image/jpeg"></label>
+              <label class="wardrobe-part-upload"><span>현재 탭에 새 이미지 추가</span><input type="text" id="wardrobe-image-name" maxlength="40" placeholder="파츠 이름"><b>이미지 선택</b><input type="file" id="wardrobe-image-file" accept="image/png,image/webp,image/jpeg"></label>
+            </div>
+            <div class="wardrobe-transform-editor">
+              <label class="wardrobe-layer-picker"><span>조정할 레이어</span><select id="wardrobe-layer-select"><option value="base">베이스 이미지</option></select></label>
+              <div class="wardrobe-sliders">
+                <label><span>좌우 <output data-wardrobe-transform-value="x">0</output></span><input type="range" min="-100" max="100" step="1" value="0" data-wardrobe-transform="x"></label>
+                <label><span>위아래 <output data-wardrobe-transform-value="y">0</output></span><input type="range" min="-100" max="100" step="1" value="0" data-wardrobe-transform="y"></label>
+                <label><span>크기 <output data-wardrobe-transform-value="scale">100%</output></span><input type="range" min="20" max="300" step="1" value="100" data-wardrobe-transform="scale"></label>
+                <label><span>회전 <output data-wardrobe-transform-value="rotation">0°</output></span><input type="range" min="-180" max="180" step="1" value="0" data-wardrobe-transform="rotation"></label>
+              </div>
+              <div class="wardrobe-editor-actions"><button type="button" id="wardrobe-reset-transform">위치 초기화</button><button type="button" id="wardrobe-delete-image">선택 이미지 삭제</button></div>
+            </div>
+          </section>
           <div class="wardrobe-actions">
             <span id="wardrobe-status" role="status">슬롯을 선택하면 꾸밀 수 있어요.</span>
             <button type="button" id="wardrobe-save-button">이 모습 저장하기 ✦</button>
