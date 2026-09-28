@@ -3,276 +3,138 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="꿈뜰이와 함께 모든 세계에서 사라진 잠뜰의 흔적을 찾는 비공식 팬메이드 미스터리 어드벤처." />
-  <meta name="theme-color" content="#091225" />
+  <meta name="description" content="잠뜰님의 생일을 준비하며 여러 이야기의 세계를 여행하는 비공식 팬메이드 포인트앤클릭 어드벤처." />
+  <meta name="theme-color" content="#0a1220" />
   <title>PIXELY : LOST SKY</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=1" />
-  <script src="app.js?v=1" defer></script>
+  <link rel="stylesheet" href="style.css?v=2" />
+  <script src="app.js?v=2" defer></script>
 </head>
 <body>
-  <div class="sky-bg" aria-hidden="true">
-    <span class="sky-orb sky-orb--one"></span>
-    <span class="sky-orb sky-orb--two"></span>
-    <span class="sky-grid"></span>
-    <span class="sky-stars"></span>
-  </div>
-
-  <div class="game-shell">
-    <header class="topbar">
-      <button class="brand" type="button" data-route="home" aria-label="홈으로">
-        <span class="brand-mark">P</span>
-        <span class="brand-copy">
-          <strong>PIXELY : LOST SKY</strong>
-          <small>FANMADE MYSTERY ADVENTURE</small>
-        </span>
-      </button>
-
-      <nav class="main-nav" aria-label="게임 메뉴">
-        <button class="nav-item is-active" type="button" data-route="home"><span>⌂</span><b>HOME</b></button>
-        <button class="nav-item" type="button" data-route="story"><span>▣</span><b>STORY</b></button>
-        <button class="nav-item" type="button" data-route="click"><span>✦</span><b>CLICK</b></button>
-        <button class="nav-item" type="button" data-route="capsule"><span>◈</span><b>CAPSULE</b></button>
-        <button class="nav-item" type="button" data-route="archive"><span>▦</span><b>ARCHIVE</b></button>
-      </nav>
-
-      <div class="hud">
-        <div class="hud-item">
-          <span class="hud-icon">✦</span>
-          <span><small>별가루</small><b data-dust>0</b></span>
-        </div>
-        <div class="hud-item">
-          <span class="hud-icon">◆</span>
-          <span><small>기억 조각</small><b data-shards>0</b></span>
+  <div class="game-root">
+    <section class="view title-view is-active" data-view="home">
+      <div class="title-backdrop" aria-hidden="true">
+        <div class="backdrop-sky"></div>
+        <div class="backdrop-grid"></div>
+        <div class="backdrop-stars"></div>
+        <div class="art-placeholder">
+          <span>MAIN VISUAL</span>
+          <small>나중에 직접 그린 메인 일러스트가 들어갈 자리</small>
         </div>
       </div>
-    </header>
 
-    <main class="screen-stage">
-      <section class="screen is-active" data-screen="home">
-        <div class="home-layout">
-          <article class="hero-panel panel">
-            <div class="eyebrow"><span></span> CASE 00 · PROLOGUE</div>
-            <div class="hero-copy">
-              <p class="hero-kicker">모든 세계에서 사라진 단 한 사람</p>
-              <h1>잠뜰을<br /><em>찾아주세요.</em></h1>
-              <p class="hero-description">
-                미스터리 수사반을 비롯한 여러 이야기의 세계는 그대로인데,
-                이상하게도 모든 세계의 ‘잠뜰’만 흔적 없이 사라졌습니다.
-                꿈뜰이가 되어 사람들의 이야기를 듣고 남겨진 물건을 조사하세요.
-              </p>
-            </div>
-            <div class="hero-actions">
-              <button class="primary-button" type="button" id="home-story-action">
-                <span>▣</span><span><b>첫 조사 시작</b><small>미스터리 수사반 · 하늘 경찰청</small></span><i>→</i>
-              </button>
-              <button class="text-button" type="button" data-route="archive">사건 기록 확인 <span>↗</span></button>
-            </div>
-            <div class="hero-decoration" aria-hidden="true">
-              <span class="missing-stamp">MISSING</span>
-              <span class="case-number">00</span>
-            </div>
-          </article>
+      <header class="title-brand">
+        <small>UNOFFICIAL FANMADE ADVENTURE</small>
+        <h1>PIXELY<br><em>LOST SKY</em></h1>
+        <p>잠뜰님의 생일을 준비하며 여러 이야기 속을 여행하는 포인트앤클릭 어드벤처</p>
+      </header>
 
-          <aside class="home-side">
-            <section class="panel status-panel">
-              <header class="panel-header">
-                <div><small>CURRENT CASE</small><h2>사라진 잠뜰들</h2></div>
-                <span class="status-dot">OPEN</span>
-              </header>
-              <div class="case-progress">
-                <div class="progress-copy"><span>프롤로그 조사</span><b id="home-progress-copy">0%</b></div>
-                <div class="progress-track"><i id="home-progress-bar"></i></div>
-              </div>
-              <dl class="case-stats">
-                <div><dt>확보한 단서</dt><dd data-clue-count>0</dd></div>
-                <div><dt>조사 물건</dt><dd data-item-count>0</dd></div>
-                <div><dt>수집 기록</dt><dd data-owned-count>0</dd></div>
-              </dl>
-            </section>
-
-            <section class="panel quick-panel">
-              <header class="panel-header compact">
-                <div><small>QUICK ACCESS</small><h2>다른 활동</h2></div>
-              </header>
-              <div class="quick-grid">
-                <button type="button" data-route="click"><span class="quick-icon">✦</span><b>별가루 모으기</b><small>짧게 클릭하고 쉬어가기</small></button>
-                <button type="button" data-route="capsule"><span class="quick-icon">◈</span><b>기억 캡슐</b><small>수집 기록 뽑기</small></button>
-              </div>
-            </section>
-          </aside>
+      <aside class="command-window game-window">
+        <div class="window-caption">
+          <span>MAIN MENU</span>
+          <i>◆</i>
         </div>
-      </section>
+        <button class="command-button command-button--continue" type="button" id="continue-button">
+          <span class="command-cursor">▶</span>
+          <span><b>이어하기</b><small id="continue-subtitle">저장된 이야기가 없습니다</small></span>
+        </button>
+        <button class="command-button" type="button" id="new-game-button">
+          <span class="command-cursor">▶</span>
+          <span><b>새 이야기</b><small>처음부터 시작합니다</small></span>
+        </button>
+        <button class="command-button" type="button" data-open-collection>
+          <span class="command-cursor">▶</span>
+          <span><b>COLLECTION</b><small>인물 · 아이템 · 기록</small></span>
+        </button>
+        <button class="command-button" type="button" id="save-manager-button">
+          <span class="command-cursor">▶</span>
+          <span><b>저장 관리</b><small>세이브 슬롯 확인</small></span>
+        </button>
+      </aside>
 
-      <section class="screen" data-screen="story" hidden>
-        <div class="story-layout">
-          <aside class="panel character-panel">
-            <header class="panel-header compact">
-              <div><small>PEOPLE HERE</small><h2>등장 인물</h2></div>
-            </header>
-            <div class="character-list" id="character-list"></div>
-          </aside>
-
-          <section class="story-center">
-            <article class="scene-card panel">
-              <div class="scene-art">
-                <div class="scene-topline">
-                  <span id="scene-location">하늘 경찰청 · 미스터리 수사반</span>
-                  <span class="scene-time">CASE 00</span>
-                </div>
-                <div class="scene-room" aria-hidden="true">
-                  <span class="window-glow"></span>
-                  <span class="desk-shape"></span>
-                  <span class="chair-shape missing"></span>
-                  <span class="evidence-line evidence-line--one"></span>
-                  <span class="evidence-line evidence-line--two"></span>
-                  <span class="evidence-pin evidence-pin--one"></span>
-                  <span class="evidence-pin evidence-pin--two"></span>
-                </div>
-                <button class="inspect-hotspot" type="button" id="inspect-desk">
-                  <span>⌕</span><b>잠뜰 경위의 책상 조사</b>
-                </button>
-              </div>
-
-              <div class="dialogue-box">
-                <div class="speaker-avatar" id="speaker-avatar">?</div>
-                <div class="dialogue-copy">
-                  <div class="speaker-name" id="speaker-name">수사 기록</div>
-                  <p id="dialogue-text">잠뜰 경위의 자리가 비어 있다. 다른 멤버들은 모두 남아 있지만, 누구도 경위가 어디로 갔는지 알지 못한다.</p>
-                </div>
-              </div>
-
-              <div class="choice-list" id="choice-list"></div>
-            </article>
-          </section>
-
-          <aside class="story-side">
-            <section class="panel objective-panel">
-              <header class="panel-header compact">
-                <div><small>OBJECTIVE</small><h2>현재 목표</h2></div>
-                <span class="objective-mark">⌖</span>
-              </header>
-              <p id="story-objective">사무실에 남은 사람들에게 말을 걸고 잠뜰 경위의 책상을 조사하자.</p>
-            </section>
-
-            <section class="panel notebook-panel">
-              <div class="notebook-tabs">
-                <button class="is-active" type="button" data-notebook="items">물건</button>
-                <button type="button" data-notebook="clues">단서</button>
-              </div>
-              <div class="notebook-list" id="notebook-list"></div>
-            </section>
-
-            <button class="story-next-button" id="finish-prologue" type="button" hidden>
-              <span><small>NEXT</small><b>첫 번째 세계의 흔적 확인</b></span><i>→</i>
-            </button>
-          </aside>
+      <section class="save-summary game-window">
+        <div class="summary-label">
+          <span>CURRENT SAVE</span>
+          <b id="current-slot-label">NO DATA</b>
         </div>
-      </section>
-
-      <section class="screen" data-screen="click" hidden>
-        <div class="activity-layout">
-          <section class="panel activity-info">
-            <div class="eyebrow"><span></span> SIDE ACTIVITY</div>
-            <h1>별가루<br />모으기</h1>
-            <p>스토리 진행에는 필수가 아니에요. 잠깐 쉬어가고 싶을 때 별을 눌러 기억 캡슐에 사용할 별가루를 모아보세요.</p>
-            <div class="activity-stats">
-              <div><small>TOUCH</small><b>+<span id="click-power">1</span></b></div>
-              <div><small>BEST COMBO</small><b id="best-combo">0</b></div>
-              <div><small>TOTAL CLICK</small><b id="total-clicks">0</b></div>
-            </div>
-          </section>
-
-          <section class="panel click-zone">
-            <div class="combo-pill" id="combo-pill">READY</div>
-            <button class="star-button" id="star-button" type="button" aria-label="별가루 모으기">
-              <span class="star-halo"></span>
-              <span class="star-core">✦</span>
-              <b>CLICK</b>
-              <small id="star-gain">+1 STAR DUST</small>
-            </button>
-            <p>빠르게 이어서 누르면 콤보가 올라가요.</p>
-          </section>
+        <div class="summary-progress">
+          <small>진행도</small>
+          <div class="summary-track"><i id="summary-progress-bar"></i></div>
+          <b id="summary-progress-text">0%</b>
         </div>
+        <dl>
+          <div><dt>현재 위치</dt><dd id="summary-location">―</dd></div>
+          <div><dt>플레이 시간</dt><dd id="summary-playtime">00:00</dd></div>
+          <div><dt>마지막 저장</dt><dd id="summary-saved-at">―</dd></div>
+        </dl>
       </section>
 
-      <section class="screen" data-screen="capsule" hidden>
-        <div class="activity-layout capsule-layout">
-          <section class="panel activity-info">
-            <div class="eyebrow"><span></span> MEMORY CAPSULE</div>
-            <h1>기억<br />캡슐</h1>
-            <p>별가루 100개로 캡슐 하나를 열 수 있어요. 인물, 물건, 장면의 작은 기록은 ARCHIVE에 자동으로 저장됩니다.</p>
-            <div class="capsule-rate">
-              <div><span class="rarity rarity--memory"></span><b>MEMORY</b><small>60%</small></div>
-              <div><span class="rarity rarity--sky"></span><b>SKY</b><small>30%</small></div>
-              <div><span class="rarity rarity--star"></span><b>STAR</b><small>10%</small></div>
-            </div>
-            <p class="tiny-note">중복 기록은 기억 조각으로 변환됩니다.</p>
-          </section>
-
-          <section class="panel capsule-zone">
-            <div class="capsule-machine" aria-hidden="true">
-              <div class="machine-glass">
-                <i></i><i></i><i></i><i></i><i></i>
-                <span>MEMORY</span>
-              </div>
-              <div class="machine-body">
-                <span class="machine-wheel">✦</span>
-                <span class="machine-slot"></span>
-              </div>
-            </div>
-            <button class="primary-button draw-button" id="draw-button" type="button">
-              <span>◈</span><span><b>캡슐 열기</b><small>별가루 100 사용</small></span><i>→</i>
-            </button>
-            <p id="capsule-message">어떤 기억이 기다리고 있을까요?</p>
-          </section>
-        </div>
-      </section>
-
-      <section class="screen" data-screen="archive" hidden>
-        <section class="panel archive-shell">
-          <header class="archive-header">
-            <div>
-              <div class="eyebrow"><span></span> INVESTIGATION ARCHIVE</div>
-              <h1>사건 기록 보관소</h1>
-              <p>조사하면서 만난 물건과 단서, 캡슐에서 얻은 기억이 이곳에 정리됩니다.</p>
-            </div>
-            <div class="archive-summary">
-              <small>COLLECTION</small>
-              <b><span data-owned-count>0</span> / <span id="archive-total">0</span></b>
-            </div>
-          </header>
-
-          <div class="archive-tabs">
-            <button class="is-active" type="button" data-archive-tab="memories">기억</button>
-            <button type="button" data-archive-tab="case">사건 단서</button>
-            <button type="button" data-archive-tab="worlds">세계 기록</button>
-          </div>
-          <div class="archive-grid" id="archive-grid"></div>
-        </section>
-      </section>
-    </main>
-
-    <footer class="game-footer">
-      <span>UNOFFICIAL FANMADE PROJECT</span>
-      <span>PIXELY : LOST SKY</span>
-      <span>팬이 만든 비공식 창작 게임입니다.</span>
-    </footer>
-  </div>
-
-  <div class="result-modal" id="result-modal" hidden>
-    <button class="modal-backdrop" type="button" data-close-modal aria-label="닫기"></button>
-    <section class="result-card">
-      <small id="result-rarity">NEW MEMORY</small>
-      <div class="result-symbol" id="result-symbol">✦</div>
-      <h2 id="result-title">새로운 기억!</h2>
-      <p id="result-copy"></p>
-      <button class="primary-button modal-button" type="button" data-close-modal>
-        <span>✓</span><span><b>ARCHIVE에 저장</b><small>기록 확인하기</small></span><i>→</i>
-      </button>
+      <div class="title-help">
+        <span>마우스로 메뉴를 선택하세요.</span>
+        <span>※ 현재는 HOME / SAVE / COLLECTION 시스템부터 제작 중입니다.</span>
+      </div>
     </section>
-  </div>
 
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <section class="view collection-view" data-view="collection" hidden>
+      <div class="collection-bg" aria-hidden="true"></div>
+      <header class="collection-topbar">
+        <button class="back-button" type="button" data-go-home>←</button>
+        <div>
+          <small>PLAYER ARCHIVE</small>
+          <h2>COLLECTION</h2>
+        </div>
+        <div class="collection-count">
+          <small>DISCOVERED</small>
+          <b><span id="collection-owned">0</span> / <span id="collection-total">0</span></b>
+        </div>
+      </header>
+
+      <div class="collection-shell">
+        <nav class="collection-tabs game-window" aria-label="컬렉션 분류">
+          <button class="is-active" type="button" data-collection-tab="characters">인물</button>
+          <button type="button" data-collection-tab="items">아이템</button>
+          <button type="button" data-collection-tab="records">기록</button>
+        </nav>
+
+        <section class="collection-panel game-window">
+          <div class="collection-intro">
+            <div>
+              <small id="collection-eyebrow">CHARACTER FILE</small>
+              <h3 id="collection-heading">만난 인물</h3>
+            </div>
+            <p id="collection-description">이야기 속에서 직접 만난 인물이 하나씩 기록됩니다.</p>
+          </div>
+          <div class="collection-grid" id="collection-grid"></div>
+        </section>
+      </div>
+    </section>
+
+    <div class="modal" id="save-modal" hidden>
+      <button class="modal-backdrop" type="button" data-close-modal aria-label="닫기"></button>
+      <section class="save-window game-window">
+        <header class="save-window-header">
+          <div>
+            <small>SAVE DATA</small>
+            <h2 id="save-modal-title">저장 관리</h2>
+          </div>
+          <button type="button" class="close-button" data-close-modal>×</button>
+        </header>
+        <p class="save-window-guide" id="save-modal-guide">사용할 세이브 슬롯을 선택하세요.</p>
+        <div class="save-slot-list" id="save-slot-list"></div>
+      </section>
+    </div>
+
+    <div class="modal" id="notice-modal" hidden>
+      <button class="modal-backdrop" type="button" data-close-notice aria-label="닫기"></button>
+      <section class="notice-window game-window">
+        <small>STORY MODE</small>
+        <h2 id="notice-title">이야기 준비 중</h2>
+        <p id="notice-copy"></p>
+        <button type="button" class="notice-ok" data-close-notice>확인</button>
+      </section>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </div>
 </body>
 </html>
