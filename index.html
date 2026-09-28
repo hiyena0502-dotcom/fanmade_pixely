@@ -7,8 +7,8 @@
   <meta name="theme-color" content="#111a3b" />
   <title>PIXELY : LOST SKY</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=8" />
-  <script src="app.js?v=6" defer></script>
+  <link rel="stylesheet" href="style.css?v=9" />
+  <script src="app.js?v=7" defer></script>
 </head>
 <body>
   <div class="game-root">
@@ -123,10 +123,10 @@
             <h3>여행 다이어리</h3>
             <p class="diary-note">여행 중 만난 인물과 손에 넣은 물건, 기억에 남는 순간을 한 장씩 기록해둡니다.</p>
 
-            <nav class="diary-tabs" aria-label="컬렉션 분류">
-              <button class="is-active" type="button" data-collection-tab="cards"><span>CARD</span>카드</button>
-              <button type="button" data-collection-tab="items"><span>ITEM</span>아이템</button>
-              <button type="button" data-collection-tab="postcards"><span>POST</span>엽서</button>
+            <nav class="diary-tabs" aria-label="컬렉션 분류" role="tablist">
+              <button class="is-active" type="button" role="tab" aria-selected="true" data-collection-tab="cards"><span>CARD</span>카드</button>
+              <button type="button" role="tab" aria-selected="false" data-collection-tab="items"><span>ITEM</span>아이템</button>
+              <button type="button" role="tab" aria-selected="false" data-collection-tab="postcards"><span>POST</span>엽서</button>
             </nav>
 
             <div class="diary-decoration" aria-hidden="true">
