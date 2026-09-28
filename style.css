@@ -1363,3 +1363,25 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
 .wardrobe-file-button b{margin:0;color:#986078;font-size:9px}
 .wardrobe-file-button input[type="file"]{position:absolute;inset:0!important;width:100%!important;height:100%!important;opacity:0;cursor:pointer}
 .wardrobe-part-upload>.wardrobe-file-button{grid-column:2;grid-row:2}
+
+
+/* =========================================================
+   WARDROBE PREVIEW FIT v18 — smaller art, safer layer bounds
+   ========================================================= */
+.wardrobe-stage::before{z-index:0}
+.wardrobe-stage::after{z-index:0}
+.wardrobe-portrait{
+  inset:7% 5% 8%;
+  z-index:1;
+  overflow:visible;
+  border-radius:18px;
+}
+.wardrobe-image-layer{
+  top:48%;
+  width:82%;
+  height:82%;
+}
+@media(max-width:680px){
+  .wardrobe-portrait{inset:7% 10% 9%}
+  .wardrobe-image-layer{width:80%;height:80%}
+}
