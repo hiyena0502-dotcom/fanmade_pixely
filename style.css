@@ -916,3 +916,77 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
   .update-window{padding:26px 20px 21px}
   .update-actions{grid-template-columns:1fr}
 }
+
+
+/* =========================================================
+   DIARY TAB STATE v9 — selected tab follows current screen
+   ========================================================= */
+
+/* 모든 탭의 기본 상태는 완전히 동일 */
+.diary-tabs button,
+.diary-tabs button[aria-selected="false"]{
+  position:relative;
+  background:rgba(255,251,244,.60);
+  border:1px solid rgba(112,88,65,.14);
+  color:#71675e;
+  box-shadow:none;
+}
+.diary-tabs button span,
+.diary-tabs button[aria-selected="false"] span{
+  color:#9d8d7d;
+}
+.diary-tabs button::after,
+.diary-tabs button[aria-selected="false"]::after{
+  background:rgba(215,196,170,.58);
+}
+
+/* 현재 보고 있는 분류만 같은 방식으로 강조 */
+.diary-tabs button.is-active,
+.diary-tabs button[aria-selected="true"]{
+  background:
+    linear-gradient(180deg,rgba(38,63,87,.97),rgba(29,51,74,.98));
+  border-color:rgba(229,202,134,.38);
+  color:#fff8e8;
+  box-shadow:
+    inset 3px 0 0 #e5ca86,
+    0 7px 16px rgba(41,55,66,.16);
+  transform:translateX(6px);
+}
+.diary-tabs button.is-active span,
+.diary-tabs button[aria-selected="true"] span{
+  color:#d7e8f2;
+}
+.diary-tabs button.is-active::before,
+.diary-tabs button[aria-selected="true"]::before{
+  content:"✦";
+  position:absolute;
+  right:13px;
+  top:50%;
+  transform:translateY(-50%);
+  color:#e5ca86;
+  font-size:8px;
+}
+.diary-tabs button.is-active::after,
+.diary-tabs button[aria-selected="true"]::after{
+  background:#e5ca86;
+}
+
+/* hover는 선택 상태와 헷갈리지 않게 약하게만 */
+.diary-tabs button:not(.is-active):hover{
+  background:#fffaf1;
+  border-color:rgba(112,88,65,.20);
+  color:#61574f;
+  transform:translateX(2px);
+}
+
+@media(max-width:680px){
+  .diary-tabs button.is-active,
+  .diary-tabs button[aria-selected="true"]{
+    transform:translateY(-2px);
+  }
+  .diary-tabs button.is-active::before,
+  .diary-tabs button[aria-selected="true"]::before{
+    right:7px;
+    font-size:7px;
+  }
+}
