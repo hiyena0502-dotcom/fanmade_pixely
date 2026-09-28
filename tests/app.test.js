@@ -230,7 +230,7 @@ test("update prompt compares the loaded version on the first check and on later 
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
   assert.equal(state.requests[0].options.cache,"no-store");
-  state.setVersion("28");
+  state.setVersion("29");
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,false);
@@ -239,7 +239,7 @@ test("update prompt compares the loaded version on the first check and on later 
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
-  const stale=boot(undefined,"28");
+  const stale=boot(undefined,"29");
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(stale.node("#update-modal").hidden,false);
 });
@@ -281,7 +281,7 @@ test("developer wardrobe setup toggles multiple custom parts without a save slot
     layerOrder:["custom-eyes","custom-mouth"],
     setupOutfit:{layers:[]}
   };
-  const state=boot(undefined,"28",assets);
+  const state=boot(undefined,"29",assets);
   state.click("[data-open-wardrobe]");
   assert.equal(state.node("#wardrobe-slot-label").textContent,"DEV SETUP");
   const faceTab=state.node("wardrobe-tab:face");
@@ -323,7 +323,7 @@ test("developer settings screen exposes only chapters collection and items",()=>
 });
 
 test("developer settings can create an item entry without touching source code",()=>{
-  const state=boot(undefined,"28");
+  const state=boot(undefined,"29");
   state.click("[data-open-dev]");
   const itemTab=state.node("dev-tab:items");
   state.node("#dev-settings-tabs").listeners.click({target:{closest(){return itemTab}}});
@@ -347,7 +347,7 @@ test("chapter editor provides nested interaction authoring",()=>{
 });
 
 test("developer can add an interaction inside the selected chapter",()=>{
-  const state=boot(undefined,"28");
+  const state=boot(undefined,"29");
   state.click("[data-open-dev]");
   assert.equal(state.node("#dev-chapter-interactions").hidden,false);
   state.click("#dev-add-interaction");
@@ -365,4 +365,14 @@ test("desktop chapters and collection use wide-screen layout rules",()=>{
   assert.match(css,/\.chapters-shell\{[\s\S]*grid-template-columns:minmax\(260px,330px\) minmax\(0,1fr\)/);
   assert.match(css,/\.diary-wrap\{[\s\S]*width:min\(1500px,calc\(100vw - 80px\)\)/);
   assert.match(css,/\.collection-grid\{[\s\S]*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
+});
+
+
+test("desktop wardrobe uses a wide balanced workspace",()=>{
+  const css=fs.readFileSync(path.join(directory,"style.css"),"utf8");
+  assert.match(css,/DESKTOP WARDROBE WORKSPACE v29/);
+  assert.match(css,/width:min\(1520px,calc\(100vw - 64px\)\)/);
+  assert.match(css,/grid-template-columns:minmax\(440px,520px\) minmax\(0,1fr\)/);
+  assert.match(css,/\.wardrobe-dev-panel>[\s\S]*grid-template-columns:minmax\(0,1fr\) minmax\(0,1fr\)/);
+  assert.match(css,/height:auto !important;[\s\S]*min-height:640px !important/);
 });

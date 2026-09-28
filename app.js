@@ -5,7 +5,7 @@
   const SESSION_SAVE_KEY = STORAGE_KEY+"-session-fallback";
   const WARDROBE_ASSET_KEY = "pixely-lost-sky-wardrobe-assets-v1";
   const DEV_CONTENT_KEY = "pixely-lost-sky-dev-content-v1";
-  const SITE_VERSION = "28";
+  const SITE_VERSION = "29";
   const $ = (q, root = document) => root.querySelector(q);
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 
