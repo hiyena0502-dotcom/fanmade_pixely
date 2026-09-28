@@ -2,7 +2,7 @@
   "use strict";
 
   const STORAGE_KEY = "pixely-lost-sky-saves-v2";
-  const SITE_VERSION = "13";
+  const SITE_VERSION = "14";
   const $ = (q, root = document) => root.querySelector(q);
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 
@@ -28,7 +28,7 @@
     ],
     items: [
       {id:"portal-device",symbol:"◇",name:"정체불명의 장치",type:"KEY ITEM",color:"#537a9a",desc:"요정들이 발견한 이상한 장치. 고친 뒤에는 포탈을 만들어낸다."},
-      {id:"plush",symbol:"✦",name:"치명적으로 귀여운 봉제인형",type:"MEMENTO",color:"#9c8295",desc:"창고 어딘가에서 발견한 작은 봉제인형. 특별한 쓰임은 없어 보인다."},
+      {id:"plush",symbol:"✦",name:"치명적으로 귀여운 봉제인형",type:"MEMENTO",color:"#9c8295",desc:"창고 어딘가에서 발견한 작은 봉제인형. 옷장에선 소품으로 들 수 있다.",wardrobeSlot:"accessory"},
       {id:"plant-seed",symbol:"❧",name:"이상한 씨앗",type:"MEMENTO",color:"#698b72",desc:"원하는 모습으로 자랄 것만 같은 수상한 씨앗."},
       {id:"pigeon-feather",symbol:"〆",name:"비둘기 깃털",type:"MEMENTO",color:"#7a858f",desc:"싸운 적도 없는데 전리품처럼 손에 들어왔다."},
       {id:"ticket-scrap",symbol:"券",name:"놀이공원 티켓 조각",type:"MEMENTO",color:"#9a745d",desc:"오래된 게임쇼의 흔적처럼 보이는 낡은 티켓 조각."},
@@ -44,6 +44,32 @@
       {id:"first-portal",symbol:"◇",name:"처음 열린 문",type:"STORY POSTCARD",color:"#596f91",desc:"고쳐진 장치가 처음으로 낯선 세계의 문을 열어젖힌 순간.",caption:"이 문 너머에 잠뜰님이 있을까?"}
     ]
   };
+
+  const wardrobeSlots=["outfit","headwear","accessory"];
+  const wardrobeOptions={
+    outfit:[{id:"default",name:"기본 복장",symbol:"◇"},...catalogue.items.filter(item=>item.wardrobeSlot==="outfit")],
+    headwear:[{id:"none",name:"장식 없음",symbol:"·"},...catalogue.items.filter(item=>item.wardrobeSlot==="headwear")],
+    accessory:[{id:"none",name:"소품 없음",symbol:"·"},...catalogue.items.filter(item=>item.wardrobeSlot==="accessory")]
+  };
+  const defaultOutfit={outfit:"default",headwear:"none",accessory:"none"};
+  const collectionFilters={
+    cards:[{id:"all",label:"전체"},{id:"crew",label:"잠뜰 멤버"},{id:"roleplay",label:"상황극 인물"},{id:"fairy",label:"요정"},{id:"other",label:"기타 인물·생물"}],
+    items:[{id:"all",label:"전체"},{id:"key",label:"중요 물건"},{id:"memento",label:"기념품"},{id:"gift",label:"선물·편지"},{id:"wardrobe",label:"꾸미기"},{id:"unknown",label:"미확인"}]
+  };
+
+  function categoryFor(item,tab){
+    if(tab==="cards") return item.world?"roleplay":item.type==="FAIRY"?"fairy":item.type==="CREATURE" || item.id==="dreamer"?"other":"crew";
+    return item.wardrobeSlot?"wardrobe":({"KEY ITEM":"key",MEMENTO:"memento",GIFT:"gift",UNKNOWN:"unknown"}[item.type]||"unknown");
+  }
+
+  function validOutfit(outfit,items){
+    const owned=new Set(items);
+    return Object.fromEntries(wardrobeSlots.map(slot=>{
+      const choice=outfit?.[slot];
+      const allowed=wardrobeOptions[slot].some(option=>option.id===choice && (choice==="none" || choice==="default" || owned.has(choice)));
+      return [slot,allowed?choice:defaultOutfit[slot]];
+    }));
+  }
 
   const chapters = [
     {id:"night",no:"01",title:"생일 전날 밤",label:"CHAPTER 01",desc:"내용 준비 중"},
@@ -79,7 +105,8 @@
             : ["dreamer"],
         items:strings(save.collection?.items),
         postcards:strings(save.collection?.postcards)
-      }
+      },
+      outfit:validOutfit(save.outfit,strings(save.collection?.items))
     };
   }
 
@@ -98,6 +125,9 @@
   let root=readRoot();
   let lastSavedRoot=JSON.stringify(root);
   let collectionTab="cards";
+  let collectionFilter="all";
+  let wardrobeSlot="outfit";
+  let outfitDraft={...defaultOutfit};
   let saveMode="manage";
   let toastTimer=null;
   let dismissedUpdate=null;
@@ -106,6 +136,12 @@
   function escapeHTML(value){
     return String(value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"})[char]);
   }
+
+  // Future dialogue scenes can read the saved equipment and apply the user's images.
+  window.PixelyAvatar={
+    outfitForSave:save=>validOutfit(save?.outfit,save?.collection?.items||[]),
+    outfitForActiveSave:()=>validOutfit(activeSave()?.outfit,activeSave()?.collection?.items||[])
+  };
 
   function persist(){
     const serialized=JSON.stringify(root);
@@ -138,7 +174,8 @@
       unlockedChapters:["night"],
       completedChapters:[],
       missions:[],
-      collection:{cards:["dreamer"],items:[],postcards:[]}
+      collection:{cards:["dreamer"],items:[],postcards:[]},
+      outfit:{...defaultOutfit}
     };
   }
 
@@ -209,6 +246,10 @@
     });
     if(name==="collection") renderCollection();
     if(name==="chapters") renderChapters();
+    if(name==="wardrobe"){
+      outfitDraft={...validOutfit(activeSave()?.outfit,activeSave()?.collection?.items||[])};
+      renderWardrobe();
+    }
     window.scrollTo(0,0);
   }
 
@@ -355,7 +396,17 @@
   }
 
   function renderCollection(){
-    const items=catalogue[collectionTab]||[];
+    const allItems=catalogue[collectionTab]||[];
+    const filters=collectionFilters[collectionTab]||[];
+    const worlds=[...new Set(allItems.filter(item=>item.world).map(item=>item.world))];
+    const filterOptions=collectionTab==="cards"
+      ? [...filters,...worlds.map(world=>({id:"world:"+world,label:"↳ "+world}))]
+      : filters;
+    const items=collectionFilter==="all" || collectionTab==="postcards"
+      ? allItems
+      : allItems.filter(item=>collectionFilter.startsWith("world:")
+        ? item.world===collectionFilter.slice(6)
+        : categoryFor(item,collectionTab)===collectionFilter);
     const owned=collectionOwnedSet();
     const labels={
       cards:["CARD FILE","만난 카드","여행 중 직접 만난 인물과 생물이 카드로 기록됩니다."],
@@ -371,11 +422,21 @@
       b.classList.toggle("is-active",active);
       b.setAttribute("aria-selected",active?"true":"false");
     });
-    $("#collection-owned").textContent=owned.size;
+    $("#collection-filters").hidden=collectionTab==="postcards";
+    $("#collection-filters").innerHTML=filterOptions.map(filter=>{
+      const count=filter.id==="all"?allItems.length:allItems.filter(item=>filter.id.startsWith("world:")?item.world===filter.id.slice(6):categoryFor(item,collectionTab)===filter.id).length;
+      return `<button type="button" data-collection-filter="${escapeHTML(filter.id)}" class="${collectionFilter===filter.id?"is-active":""}" aria-pressed="${collectionFilter===filter.id}">${escapeHTML(filter.label)} <span>${count}</span></button>`;
+    }).join("");
+    $("#collection-owned").textContent=items.filter(item=>owned.has(item.id)).length;
     $("#collection-total").textContent=items.length;
 
     const grid=$("#collection-grid");
     grid.className="collection-grid collection-grid--"+collectionTab;
+
+    if(!items.length){
+      grid.innerHTML=`<div class="collection-empty"><span>✧</span><b>아직 이 페이지는 비어 있어요</b><p>${collectionTab==="cards"?"상황극 세계를 여행하고 새로운 인물을 만나면 작품별 기록이 이곳에 모입니다.":"여행에서 새로운 물건을 찾으면 이 분류에 기록됩니다."}</p></div>`;
+      return;
+    }
 
     grid.innerHTML=items.map(item=>{
       const open=owned.has(item.id);
@@ -408,6 +469,60 @@
       </article>`;
     }).join("");
   }
+
+  function renderWardrobe(){
+    const save=activeSave();
+    const owned=new Set(save?.collection?.items||[]);
+    $("#wardrobe-slot-label").textContent=save?"SLOT "+(root.activeSlot+1):"NO SAVE";
+    $("#wardrobe-equipped").textContent=wardrobeSlots.map(slot=>wardrobeOptions[slot].find(option=>option.id===outfitDraft[slot])?.name).join(" · ");
+    $("#wardrobe-save-button").disabled=!save;
+    $("#wardrobe-status").textContent=save?"선택한 모습은 저장 버튼을 누르면 이 슬롯에 기록됩니다.":"먼저 새 이야기를 시작하고 슬롯을 선택해 주세요.";
+    $$("[data-wardrobe-slot]").forEach(button=>{
+      const active=button.dataset.wardrobeSlot===wardrobeSlot;
+      button.classList.toggle("is-active",active);
+      button.setAttribute("aria-pressed",active?"true":"false");
+    });
+    const choices=wardrobeOptions[wardrobeSlot];
+    $("#wardrobe-options").innerHTML=choices.map(option=>{
+      const unlocked=option.id==="none" || option.id==="default" || owned.has(option.id);
+      const selected=outfitDraft[wardrobeSlot]===option.id;
+      return `<button type="button" data-wardrobe-item="${option.id}" class="wardrobe-option ${selected?"is-selected":""} ${unlocked?"":"is-locked"}" aria-pressed="${selected}" ${unlocked&&save?"":"disabled"}>
+        <span class="wardrobe-option-art">${unlocked?escapeHTML(option.symbol):"?"}</span>
+        <b>${unlocked?escapeHTML(option.name):"???"}</b>
+        <small>${selected?"착용 중":unlocked?"선택 가능":"여행 중 발견"}</small>
+      </button>`;
+    }).join("")+(choices.length===1?'<p class="wardrobe-empty">아직 이 부위에 등록된 꾸미기 아이템이 없어요.</p>':"");
+  }
+
+  function saveOutfit(){
+    const save=activeSave();
+    if(!save){ toast("먼저 새 이야기를 시작하세요."); return; }
+    save.outfit=validOutfit(outfitDraft,save.collection.items);
+    save.savedAt=Date.now();
+    save.savedLabel=nowLabel();
+    if(!persist()){
+      outfitDraft={...validOutfit(activeSave()?.outfit,activeSave()?.collection?.items||[])};
+      renderWardrobe();
+      return;
+    }
+    renderWardrobe();
+    toast("꿈뜰이의 모습이 SLOT "+(root.activeSlot+1)+"에 저장됐어요.");
+  }
+
+  function grantItem(itemId){
+    const save=activeSave();
+    if(!save || !catalogue.items.some(item=>item.id===itemId)) return false;
+    if(save.collection.items.includes(itemId)) return true;
+    save.collection.items.push(itemId);
+    save.savedAt=Date.now();
+    save.savedLabel=nowLabel();
+    if(!persist()) return false;
+    if(!$('[data-view="wardrobe"]').hidden) renderWardrobe();
+    if(!$('[data-view="collection"]').hidden) renderCollection();
+    if(!$('[data-view="story"]').hidden) renderGameUI();
+    return true;
+  }
+  window.PixelyInventory={grantItem};
 
   function renderChapters(){
     const save=activeSave();
@@ -493,6 +608,7 @@
     $("#save-manager-button").addEventListener("click",()=>openSaveModal("manage"));
 
     $$("[data-open-collection]").forEach(b=>b.addEventListener("click",()=>showView("collection")));
+    $$("[data-open-wardrobe]").forEach(b=>b.addEventListener("click",()=>showView("wardrobe")));
     $$("[data-open-chapters]").forEach(b=>b.addEventListener("click",()=>showView("chapters")));
     $$("[data-go-home]").forEach(b=>b.addEventListener("click",()=>showView("home")));
     $$("[data-close-modal]").forEach(b=>b.addEventListener("click",closeSaveModal));
@@ -512,8 +628,31 @@
       const nextTab=button.dataset.collectionTab;
       if(!catalogue[nextTab]) return;
       collectionTab=nextTab;
+      collectionFilter="all";
       renderCollection();
     });
+
+    $("#collection-filters").addEventListener("click",event=>{
+      const button=event.target.closest("[data-collection-filter]");
+      if(!button) return;
+      collectionFilter=button.dataset.collectionFilter;
+      renderCollection();
+    });
+    $("#wardrobe-tabs").addEventListener("click",event=>{
+      const button=event.target.closest("[data-wardrobe-slot]");
+      if(!button || !wardrobeSlots.includes(button.dataset.wardrobeSlot)) return;
+      wardrobeSlot=button.dataset.wardrobeSlot;
+      renderWardrobe();
+    });
+    $("#wardrobe-options").addEventListener("click",event=>{
+      const button=event.target.closest("[data-wardrobe-item]");
+      if(!button || button.disabled || !activeSave()) return;
+      const item=wardrobeOptions[wardrobeSlot].find(option=>option.id===button.dataset.wardrobeItem);
+      if(!item || (item.id!=="default" && item.id!=="none" && !activeSave().collection.items.includes(item.id))) return;
+      outfitDraft[wardrobeSlot]=item.id;
+      renderWardrobe();
+    });
+    $("#wardrobe-save-button").addEventListener("click",saveOutfit);
 
     $("#save-slot-list").addEventListener("click",event=>{
       const newBtn=event.target.closest("[data-new-slot]");
@@ -529,7 +668,7 @@
     document.addEventListener("keydown",event=>{
       if(event.key!=="Escape") return;
       if(!$("#save-modal").hidden) closeSaveModal();
-      else if(!$("[data-view='collection']").hidden || !$("[data-view='chapters']").hidden || !$("[data-view='story']").hidden) showView("home");
+      else if(!$("[data-view='collection']").hidden || !$("[data-view='chapters']").hidden || !$("[data-view='story']").hidden || !$("[data-view='wardrobe']").hidden) showView("home");
     });
   }
 
