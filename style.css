@@ -763,3 +763,52 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
     grid-template-columns:1fr;
   }
 }
+
+
+/* =========================================================
+   VISUAL PATCH v7 — menu/tab color consistency
+   ========================================================= */
+
+/* HOME: CHAPTERS / COLLECTION도 다른 메뉴와 같은 기본색 사용 */
+.command-button--chapter,
+.command-button--collection{
+  background:transparent;
+  border-color:transparent;
+}
+.command-button--collection::after{
+  color:rgba(186,205,221,.34);
+}
+.command-button--chapter:hover,
+.command-button--chapter:focus-visible,
+.command-button--collection:hover,
+.command-button--collection:focus-visible{
+  border-color:rgba(207,232,251,.12);
+  background:linear-gradient(90deg,rgba(118,174,215,.15),rgba(255,255,255,.018));
+}
+
+/* COLLECTION: 카드/아이템/엽서 탭은 같은 종이톤.
+   선택 상태는 색면 대신 얇은 골드 라인과 텍스트로만 표시 */
+.diary-tabs button,
+.diary-tabs button.is-active{
+  background:rgba(255,251,244,.50);
+  border-color:rgba(112,88,65,.12);
+  color:#74695f;
+  box-shadow:none;
+}
+.diary-tabs button span,
+.diary-tabs button.is-active span{
+  color:#a08f7e;
+}
+.diary-tabs button::after,
+.diary-tabs button.is-active::after{
+  background:rgba(215,196,170,.55);
+}
+.diary-tabs button.is-active{
+  border-color:rgba(190,157,95,.30);
+  color:#5f554c;
+  transform:translateX(5px);
+  box-shadow:inset 3px 0 0 rgba(201,166,99,.58);
+}
+.diary-tabs button.is-active::after{
+  background:rgba(215,196,170,.72);
+}
