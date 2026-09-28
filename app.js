@@ -309,7 +309,7 @@
     $("#collection-eyebrow").textContent=labels[collectionTab][0];
     $("#collection-heading").textContent=labels[collectionTab][1];
     $("#collection-description").textContent=labels[collectionTab][2];
-    $(".diary-tabs button").forEach(b=>{
+    document.querySelectorAll(".diary-tabs button").forEach(b=>{
       const active=b.dataset.collectionTab===collectionTab;
       b.classList.toggle("is-active",active);
       b.setAttribute("aria-selected",active?"true":"false");
