@@ -891,7 +891,7 @@
       wardrobeEditorTarget=event.target.value||"base";
       renderWardrobe();
     });
-    $("[data-wardrobe-transform]").forEach(input=>{
+    Array.from(document.querySelectorAll("[data-wardrobe-transform]")).forEach(input=>{
       input.addEventListener("input",event=>updateWardrobeTransform(event.target.dataset.wardrobeTransform,event.target.value,false));
       input.addEventListener("change",event=>updateWardrobeTransform(event.target.dataset.wardrobeTransform,event.target.value,true));
     });
