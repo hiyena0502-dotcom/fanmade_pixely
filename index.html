@@ -7,8 +7,8 @@
   <meta name="theme-color" content="#111a3b" />
   <title>PIXELY : LOST SKY</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=20" />
-  <script src="app.js?v=20" defer></script>
+  <link rel="stylesheet" href="style.css?v=21" />
+  <script src="app.js?v=21" defer></script>
 </head>
 <body>
   <div class="game-root">
@@ -199,23 +199,36 @@
         <section class="wardrobe-panel game-window">
           <small class="wardrobe-kicker">YOUR OWN DREAMER</small>
           <h3>오늘은 어떤 모습으로 떠날까?</h3>
-          <p>여행에서 얻은 꾸미기 아이템은 아이템 컬렉션에도 기록됩니다. 옷·소품·얼굴을 고르고, 장식은 원하는 만큼 함께 선택한 뒤 현재 슬롯에 저장하세요. 이미지는 나중에 적용됩니다.</p>
+          <p>옷·소품·얼굴은 하나씩 고르고, 장식은 여러 개를 함께 선택할 수 있어요. 개발 중인 이미지는 아래 개발자 도구에서 직접 등록하면 미리보기에 바로 적용됩니다.</p>
           <nav class="wardrobe-tabs" id="wardrobe-tabs" aria-label="꾸미기 파츠">
             <button type="button" data-wardrobe-slot="outfit">옷</button>
             <button type="button" data-wardrobe-slot="accessory">소품</button>
             <button type="button" data-wardrobe-slot="face">얼굴</button>
             <button type="button" data-wardrobe-slot="decoration">장식 <span>MULTI</span></button>
           </nav>
-          <p class="wardrobe-multi-note">장식은 하나만 고르는 슬롯이 아니라 여러 개를 동시에 켜고 끌 수 있어요.</p>
+          <p class="wardrobe-multi-note" id="wardrobe-tab-note">옷·소품·얼굴은 한 번에 하나만 선택됩니다.</p>
           <div class="wardrobe-options" id="wardrobe-options"></div>
           <section class="wardrobe-image-tools" aria-labelledby="wardrobe-image-tools-title">
             <header>
-              <div><small>IMAGE EDITOR</small><h4 id="wardrobe-image-tools-title">이미지 추가 · 위치 조정</h4></div>
-              <p>투명 PNG 권장 · 이미지당 최대 1.8MB</p>
+              <div><small>DEVELOPER IMAGE EDITOR</small><h4 id="wardrobe-image-tools-title">이미지 등록 · 위치 조정</h4></div>
+              <p>개발 중에만 사용하는 설정 도구 · 투명 PNG 권장</p>
             </header>
-            <div class="wardrobe-upload-grid">
-              <label class="wardrobe-upload-button"><span>베이스 이미지</span><b>추가 / 교체</b><input type="file" id="wardrobe-base-file" accept="image/png,image/webp,image/jpeg"></label>
-              <div class="wardrobe-part-upload"><span>현재 탭에 새 이미지 추가</span><input type="text" id="wardrobe-image-name" maxlength="40" placeholder="파츠 이름"><label class="wardrobe-file-button"><b>이미지 선택</b><input type="file" id="wardrobe-image-file" accept="image/png,image/webp,image/jpeg"></label></div>
+            <p class="wardrobe-dev-guide"><b>파츠 추가:</b> 종류 선택 → 이름 입력 → 이미지 선택. 선택한 이미지는 바로 미리보기에 적용됩니다.</p>
+            <div class="wardrobe-upload-sections">
+              <section class="wardrobe-upload-card wardrobe-upload-card--base">
+                <small>BASE</small><h5>베이스 이미지</h5>
+                <p>꿈뜰이 몸체가 되는 가장 아래 레이어예요.</p>
+                <label class="wardrobe-file-action">베이스 추가 / 교체<input type="file" id="wardrobe-base-file" accept="image/png,image/webp,image/jpeg"></label>
+              </section>
+              <section class="wardrobe-upload-card wardrobe-upload-card--part">
+                <small>PART</small><h5>새 파츠 추가</h5>
+                <div class="wardrobe-part-steps">
+                  <label><span>① 파츠 종류</span><select id="wardrobe-upload-slot"><option value="outfit">옷</option><option value="accessory">소품</option><option value="face">얼굴</option><option value="decoration">장식 · 여러 개 가능</option></select></label>
+                  <label><span>② 파츠 이름</span><input type="text" id="wardrobe-image-name" maxlength="40" placeholder="예: 기본 표정"></label>
+                  <label class="wardrobe-file-action wardrobe-file-action--part"><span>③ 이미지</span><b>PNG 선택하기</b><input type="file" id="wardrobe-image-file" accept="image/png,image/webp,image/jpeg"></label>
+                </div>
+                <p class="wardrobe-upload-help">이미지를 고르면 해당 종류에 등록되고 즉시 착용됩니다.</p>
+              </section>
             </div>
             <div class="wardrobe-transform-editor">
               <label class="wardrobe-layer-picker"><span>조정할 레이어</span><select id="wardrobe-layer-select"><option value="base">베이스 이미지</option></select></label>

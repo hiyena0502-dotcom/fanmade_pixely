@@ -1366,7 +1366,7 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
 
 
 /* =========================================================
-   WARDROBE PREVIEW FIT v20 — fixed short preview panel
+   WARDROBE PREVIEW + DEV EDITOR v21
    ========================================================= */
 .wardrobe-shell{
   align-items:start;
@@ -1374,41 +1374,152 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
 }
 .wardrobe-stage{
   align-self:start;
-  height:430px !important;
-  min-height:430px !important;
-  max-height:430px !important;
+  height:520px !important;
+  min-height:520px !important;
+  max-height:520px !important;
   overflow:visible;
 }
 .wardrobe-stage::before{
   z-index:0;
-  inset:52px 10% 72px;
+  inset:54px 10% 78px;
 }
 .wardrobe-stage::after{
   z-index:0;
-  bottom:84px;
+  bottom:90px;
 }
 .wardrobe-portrait{
-  inset:48px 4% 58px;
+  inset:50px 4% 64px;
   z-index:1;
   overflow:visible;
   border-radius:18px;
 }
 .wardrobe-image-layer{
   top:50%;
-  width:104%;
+  width:100%;
   height:auto;
   max-width:none;
   max-height:none;
   object-fit:unset;
 }
+.wardrobe-dev-guide{
+  margin:14px 0 0!important;
+  padding:10px 12px;
+  border:1px solid rgba(216,141,168,.26);
+  border-radius:10px;
+  background:#fff5f8;
+  color:#8b6676!important;
+  font-size:9px!important;
+  line-height:1.65!important;
+}
+.wardrobe-upload-sections{
+  display:grid;
+  grid-template-columns:.72fr 1.28fr;
+  gap:10px;
+  margin-top:12px;
+}
+.wardrobe-upload-card{
+  padding:14px;
+  border:1px solid rgba(103,149,166,.2);
+  border-radius:13px;
+  background:rgba(255,255,255,.8);
+}
+.wardrobe-upload-card>small{
+  color:#d27fa2;
+  font-size:7px;
+  font-weight:1000;
+  letter-spacing:.15em;
+}
+.wardrobe-upload-card h5{
+  margin:5px 0 6px;
+  color:#476c81;
+  font-size:12px;
+}
+.wardrobe-upload-card>p{
+  margin:0 0 11px;
+  color:#8097a3;
+  font-size:8px;
+  line-height:1.55;
+}
+.wardrobe-file-action{
+  position:relative;
+  display:grid;
+  place-items:center;
+  min-height:36px;
+  padding:0 11px;
+  border:1px solid rgba(222,143,173,.28);
+  border-radius:9px;
+  background:linear-gradient(145deg,#ffe3ed,#fff0c4);
+  color:#8f6477;
+  font-size:9px;
+  font-weight:1000;
+  cursor:pointer;
+  overflow:hidden;
+}
+.wardrobe-file-action input[type="file"]{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  opacity:0;
+  cursor:pointer;
+}
+.wardrobe-part-steps{
+  display:grid;
+  grid-template-columns:.82fr 1fr .8fr;
+  gap:8px;
+  align-items:end;
+}
+.wardrobe-part-steps>label:not(.wardrobe-file-action){
+  display:grid;
+  gap:5px;
+}
+.wardrobe-part-steps span{
+  color:#6f8998;
+  font-size:8px;
+  font-weight:900;
+}
+.wardrobe-part-steps select,
+.wardrobe-part-steps input[type="text"]{
+  width:100%;
+  min-width:0;
+  height:36px;
+  padding:0 9px;
+  border:1px solid rgba(92,139,157,.2);
+  border-radius:9px;
+  outline:none;
+  background:#f9fdff;
+  color:#4e7083;
+  font-size:9px;
+}
+.wardrobe-file-action--part{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  height:36px;
+}
+.wardrobe-file-action--part span{
+  color:#a56b82;
+  font-size:7px;
+}
+.wardrobe-file-action--part b{font-size:8px}
+.wardrobe-upload-help{
+  margin:9px 0 0!important;
+  color:#d07999!important;
+  font-size:8px!important;
+}
+@media(max-width:900px){
+  .wardrobe-upload-sections{grid-template-columns:1fr}
+}
 @media(max-width:680px){
   .wardrobe-stage{
-    height:330px !important;
-    min-height:330px !important;
-    max-height:330px !important;
+    height:390px !important;
+    min-height:390px !important;
+    max-height:390px !important;
   }
-  .wardrobe-stage::before{inset:42px 15% 62px}
-  .wardrobe-stage::after{bottom:70px}
-  .wardrobe-portrait{inset:40px 8% 52px}
-  .wardrobe-image-layer{width:100%;height:auto}
+  .wardrobe-stage::before{inset:42px 15% 66px}
+  .wardrobe-stage::after{bottom:74px}
+  .wardrobe-portrait{inset:40px 8% 54px}
+  .wardrobe-image-layer{width:98%;height:auto}
+  .wardrobe-part-steps{grid-template-columns:1fr}
+  .wardrobe-file-action--part{height:38px}
 }

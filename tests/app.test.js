@@ -7,8 +7,9 @@ const vm=require("node:vm");
 const directory=path.join(__dirname,"..");
 const app=fs.readFileSync(path.join(directory,"app.js"),"utf8");
 const storageKey="pixely-lost-sky-saves-v2";
+const wardrobeKey="pixely-lost-sky-wardrobe-assets-v1";
 
-function boot(saved,initialVersion="15"){
+function boot(saved,initialVersion="15",wardrobeAssets){
   const nodes=new Map();
   const listeners={};
   const requests=[];
@@ -63,7 +64,9 @@ function boot(saved,initialVersion="15"){
     },
     addEventListener(name,callback){listeners[name]=callback}
   };
-  const storage=new Map(saved===undefined?[]:[[storageKey,JSON.stringify(saved)]]);
+  const storage=new Map();
+  if(saved!==undefined) storage.set(storageKey,JSON.stringify(saved));
+  if(wardrobeAssets!==undefined) storage.set(wardrobeKey,JSON.stringify(wardrobeAssets));
   const context={
     document,URL,console,
     window:{confirm(){return confirmResult},scrollTo(){},location:{reload(){}},addEventListener(name,callback){listeners[name]=callback}},
@@ -216,7 +219,7 @@ test("update prompt compares the loaded version on the first check and on later 
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
   assert.equal(state.requests[0].options.cache,"no-store");
-  state.setVersion("20");
+  state.setVersion("21");
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,false);
@@ -225,7 +228,7 @@ test("update prompt compares the loaded version on the first check and on later 
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
-  const stale=boot(undefined,"20");
+  const stale=boot(undefined,"21");
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(stale.node("#update-modal").hidden,false);
 });
@@ -243,6 +246,7 @@ test("wardrobe image editor controls and multi-layer upload UI are present",()=>
   const html=fs.readFileSync(path.join(directory,"index.html"),"utf8");
   assert.match(html,/id="wardrobe-base-file"/);
   assert.match(html,/id="wardrobe-image-file"/);
+  assert.match(html,/id="wardrobe-upload-slot"/);
   assert.match(html,/id="wardrobe-layer-select"/);
   assert.match(html,/data-wardrobe-transform="x"/);
   assert.match(html,/data-wardrobe-transform="y"/);
@@ -250,4 +254,23 @@ test("wardrobe image editor controls and multi-layer upload UI are present",()=>
   assert.match(html,/data-wardrobe-transform="rotation"/);
   assert.match(app,/WARDROBE_ASSET_KEY/);
   assert.match(app,/wardrobeAssets\.custom/);
+});
+
+
+test("developer wardrobe setup applies custom parts without a save slot",()=>{
+  const assets={
+    base:{image:"data:image/png;base64,BASE",name:"베이스",transform:{x:0,y:0,scale:100,rotation:0}},
+    custom:[{id:"custom-face",slot:"face",name:"기본 표정",image:"data:image/png;base64,FACE",custom:true,transform:{x:0,y:0,scale:100,rotation:0}}],
+    setupOutfit:{outfit:"default",accessory:"none",face:"default",decorations:[]}
+  };
+  const state=boot(undefined,"21",assets);
+  state.click("[data-open-wardrobe]");
+  assert.equal(state.node("#wardrobe-slot-label").textContent,"DEV SETUP");
+  const faceTab=state.node("wardrobe-tab:face");
+  state.node("#wardrobe-tabs").listeners.click({target:{closest(){return faceTab}}});
+  const customButton={dataset:{wardrobeItem:"custom-face"},disabled:false};
+  state.node("#wardrobe-options").listeners.click({target:{closest(){return customButton}}});
+  const stored=JSON.parse(state.storage.get(wardrobeKey));
+  assert.equal(stored.setupOutfit.face,"custom-face");
+  assert.match(state.node("#wardrobe-preview").innerHTML,/data:image\/png;base64,FACE/);
 });

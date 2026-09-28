@@ -3,7 +3,7 @@
 
   const STORAGE_KEY = "pixely-lost-sky-saves-v2";
   const WARDROBE_ASSET_KEY = "pixely-lost-sky-wardrobe-assets-v1";
-  const SITE_VERSION = "20";
+  const SITE_VERSION = "21";
   const $ = (q, root = document) => root.querySelector(q);
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 
@@ -70,7 +70,21 @@
     };
   }
   function freshWardrobeAssets(){
-    return {base:{image:"",name:"베이스",transform:{...defaultTransform}},custom:[]};
+    return {
+      base:{image:"",name:"베이스",transform:{...defaultTransform}},
+      custom:[],
+      setupOutfit:{...defaultOutfit,decorations:[]}
+    };
+  }
+  function normalizeSetupOutfit(value={}){
+    return {
+      outfit:typeof value.outfit==="string"?value.outfit:"default",
+      accessory:typeof value.accessory==="string"?value.accessory:"none",
+      face:typeof value.face==="string"?value.face:"default",
+      decorations:Array.isArray(value.decorations)
+        ? [...new Set(value.decorations.filter(item=>typeof item==="string"))]
+        : []
+    };
   }
   function readWardrobeAssets(){
     try{
@@ -89,7 +103,8 @@
       })):[];
       return {
         base:{image:typeof raw.base?.image==="string"?raw.base.image:"",name:"베이스",transform:normalizeWardrobeTransform(raw.base?.transform)},
-        custom
+        custom,
+        setupOutfit:normalizeSetupOutfit(raw.setupOutfit)
       };
     }catch{
       return freshWardrobeAssets();
@@ -104,6 +119,14 @@
   }
   function wardrobeOptionUnlocked(option,owned){
     return Boolean(option?.custom || option?.id==="none" || option?.id==="default" || owned.has(option?.id));
+  }
+  function developerOutfit(){
+    return validOutfit(wardrobeAssets.setupOutfit,[]);
+  }
+  function rememberDeveloperOutfit(){
+    const previous=JSON.parse(JSON.stringify(wardrobeAssets));
+    wardrobeAssets.setupOutfit=normalizeSetupOutfit(validOutfit(outfitDraft,[]));
+    return persistWardrobeAssets(previous);
   }
   function persistWardrobeAssets(previous){
     try{
@@ -323,7 +346,11 @@
     if(name==="collection") renderCollection();
     if(name==="chapters") renderChapters();
     if(name==="wardrobe"){
-      outfitDraft={...validOutfit(activeSave()?.outfit,activeSave()?.collection?.items||[])};
+      const save=activeSave();
+      outfitDraft=save
+        ? {...validOutfit(save.outfit,save.collection?.items||[])}
+        : {...developerOutfit()};
+      outfitDraft.decorations=[...(outfitDraft.decorations||[])];
       renderWardrobe();
     }
     window.scrollTo(0,0);
@@ -606,15 +633,22 @@
     const owned=new Set(save?.collection?.items||[]);
     const decorationNames=(outfitDraft.decorations||[]).map(id=>wardrobeOptionName("decoration",id)).filter(Boolean);
     const equipped=[wardrobeOptionName("outfit",outfitDraft.outfit),wardrobeOptionName("accessory",outfitDraft.accessory),wardrobeOptionName("face",outfitDraft.face),...decorationNames].filter(Boolean);
-    $("#wardrobe-slot-label").textContent=save?"SLOT "+(root.activeSlot+1):"NO SAVE";
+    $("#wardrobe-slot-label").textContent=save?"SLOT "+(root.activeSlot+1):"DEV SETUP";
     $("#wardrobe-equipped").textContent=equipped.join(" · ")||"기본 모습";
-    $("#wardrobe-save-button").disabled=!save;
+    $("#wardrobe-save-button").disabled=false;
+    $("#wardrobe-save-button").textContent=save?"이 모습 저장하기 ✦":"개발자 기본 모습 저장";
     $("#wardrobe-status").textContent=save
       ? wardrobeSlot==="decoration"
         ? "장식은 여러 개를 동시에 선택할 수 있어요. 이미지 위치는 아래 편집기에서 각각 조절할 수 있습니다."
         : "파츠 이미지를 추가한 뒤 위치와 크기를 맞추고 현재 슬롯에 저장하세요."
-      : "먼저 새 이야기를 시작하고 슬롯을 선택해 주세요.";
-    $$("[data-wardrobe-slot]").forEach(button=>{
+      : "개발자 설정 모드예요. 세이브 없이도 파츠를 추가·선택할 수 있고 현재 모습이 자동 저장됩니다.";
+    const uploadSlot=$("#wardrobe-upload-slot");
+    if(uploadSlot) uploadSlot.value=wardrobeSlot;
+    const tabNote=$("#wardrobe-tab-note");
+    if(tabNote) tabNote.textContent=wardrobeSlot==="decoration"
+      ? "장식은 여러 개를 동시에 선택할 수 있어요. 선택한 장식은 모두 미리보기에 겹쳐집니다."
+      : "옷·소품·얼굴은 한 번에 하나만 선택됩니다. 다른 파츠를 누르면 바로 교체돼요.";
+    $("[data-wardrobe-slot]").forEach(button=>{
       const active=button.dataset.wardrobeSlot===wardrobeSlot;
       button.classList.toggle("is-active",active);
       button.setAttribute("aria-pressed",active?"true":"false");
@@ -625,7 +659,7 @@
       const unlocked=wardrobeOptionUnlocked(option,owned);
       const selected=wardrobeSlot==="decoration"?(outfitDraft.decorations||[]).includes(option.id):outfitDraft[wardrobeSlot]===option.id;
       const art=option.image?'<img src="'+escapeHTML(option.image)+'" alt="">':escapeHTML(unlocked?option.symbol:"?");
-      return '<button type="button" data-wardrobe-item="'+escapeHTML(option.id)+'" class="wardrobe-option '+(selected?"is-selected ":"")+(unlocked?"":"is-locked")+'" aria-pressed="'+selected+'" '+(unlocked&&save?"":"disabled")+'><span class="wardrobe-option-art">'+art+'</span><b>'+escapeHTML(unlocked?option.name:"???")+'</b><small>'+(selected?(wardrobeSlot==="decoration"?"함께 착용 중":"착용 중"):unlocked?(option.custom?"내 이미지":"선택 가능"):"여행 중 발견")+'</small></button>';
+      return '<button type="button" data-wardrobe-item="'+escapeHTML(option.id)+'" class="wardrobe-option '+(selected?"is-selected ":"")+(unlocked?"":"is-locked")+'" aria-pressed="'+selected+'" '+(unlocked?"":"disabled")+'><span class="wardrobe-option-art">'+art+'</span><b>'+escapeHTML(unlocked?option.name:"???")+'</b><small>'+(selected?(wardrobeSlot==="decoration"?"함께 착용 중":"착용 중"):unlocked?(option.custom?"내 이미지":"선택 가능"):"여행 중 발견")+'</small></button>';
     }).join(""):"")+(choices.length<=(wardrobeSlot==="decoration"?0:1)?'<p class="wardrobe-empty">'+emptyMessage+'</p>':"");
     renderWardrobePreview();
     renderWardrobeEditor();
@@ -652,20 +686,29 @@
   function addWardrobeImage(file){
     readImageFile(file,image=>{
       const nameInput=$("#wardrobe-image-name");
+      const typeInput=$("#wardrobe-upload-slot");
+      const targetSlot=wardrobeSlots.includes(typeInput?.value)?typeInput.value:wardrobeSlot;
       const fileName=String(file?.name||"").replace(/\.[^.]+$/,"");
       const name=(nameInput?.value||fileName||"내 파츠").trim().slice(0,40)||"내 파츠";
       const id="custom-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,7);
       const previous=JSON.parse(JSON.stringify(wardrobeAssets));
-      const asset={id,slot:wardrobeSlot,name,symbol:"IMG",image,custom:true,transform:{...defaultTransform}};
+      const asset={id,slot:targetSlot,name,symbol:"IMG",image,custom:true,transform:{...defaultTransform}};
       wardrobeAssets.custom.push(asset);
-      if(wardrobeSlot==="decoration") outfitDraft.decorations=[...(outfitDraft.decorations||[]),id];
-      else outfitDraft[wardrobeSlot]=id;
+      wardrobeSlot=targetSlot;
+      if(targetSlot==="decoration") outfitDraft.decorations=[...(outfitDraft.decorations||[]),id];
+      else outfitDraft[targetSlot]=id;
       wardrobeEditorTarget=id;
-      if(!persistWardrobeAssets(previous)){outfitDraft=validOutfit(outfitDraft,activeSave()?.collection?.items||[]);return}
+      if(!activeSave()) wardrobeAssets.setupOutfit=normalizeSetupOutfit(validOutfit(outfitDraft,[]));
+      if(!persistWardrobeAssets(previous)){
+        outfitDraft=activeSave()
+          ? validOutfit(outfitDraft,activeSave()?.collection?.items||[])
+          : developerOutfit();
+        return;
+      }
       if(nameInput) nameInput.value="";
       const upload=$("#wardrobe-image-file");if(upload) upload.value="";
       renderWardrobe();
-      toast(name+" 이미지를 추가했어요.");
+      toast(name+" 파츠를 추가하고 바로 적용했어요.");
     });
   }
   function updateWardrobeTransform(key,value,persist=false){
@@ -705,6 +748,7 @@
     if(outfitDraft.face===id) outfitDraft.face="default";
     outfitDraft.decorations=(outfitDraft.decorations||[]).filter(itemId=>itemId!==id);
     wardrobeEditorTarget="base";
+    if(!activeSave()) wardrobeAssets.setupOutfit=normalizeSetupOutfit(validOutfit(outfitDraft,[]));
     persistWardrobeAssets();
     renderWardrobe();
     toast((removed?.name||"이미지")+"를 삭제했어요.");
@@ -712,7 +756,11 @@
 
   function saveOutfit(){
     const save=activeSave();
-    if(!save){ toast("먼저 새 이야기를 시작하세요."); return; }
+    if(!save){
+      if(rememberDeveloperOutfit()) toast("현재 모습을 개발자 기본 설정으로 저장했어요.");
+      renderWardrobe();
+      return;
+    }
     save.outfit=validOutfit(outfitDraft,save.collection.items);
     save.savedAt=Date.now();
     save.savedLabel=nowLabel();
@@ -862,9 +910,9 @@
     });
     $("#wardrobe-options").addEventListener("click",event=>{
       const button=event.target.closest("[data-wardrobe-item]");
-      if(!button || button.disabled || !activeSave()) return;
+      if(!button || button.disabled) return;
       const item=wardrobeOptionById(wardrobeSlot,button.dataset.wardrobeItem);
-      const owned=new Set(activeSave().collection.items||[]);
+      const owned=new Set(activeSave()?.collection?.items||[]);
       if(!item || !wardrobeOptionUnlocked(item,owned)) return;
       if(wardrobeSlot==="decoration"){
         const selected=new Set(outfitDraft.decorations||[]);
@@ -875,6 +923,7 @@
         outfitDraft[wardrobeSlot]=item.id;
       }
       if(item.custom) wardrobeEditorTarget=item.id;
+      if(!activeSave() && !rememberDeveloperOutfit()) outfitDraft={...developerOutfit(),decorations:[...developerOutfit().decorations]};
       renderWardrobe();
     });
     $("#wardrobe-save-button").addEventListener("click",saveOutfit);
@@ -882,6 +931,12 @@
       const file=event.target.files?.[0];
       if(file) setBaseImage(file);
       event.target.value="";
+    });
+    $("#wardrobe-upload-slot").addEventListener("change",event=>{
+      const slot=event.target.value;
+      if(!wardrobeSlots.includes(slot)) return;
+      wardrobeSlot=slot;
+      renderWardrobe();
     });
     $("#wardrobe-image-file").addEventListener("change",event=>{
       const file=event.target.files?.[0];
