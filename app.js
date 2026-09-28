@@ -3,7 +3,7 @@
 
   const STORAGE_KEY = "pixely-lost-sky-saves-v2";
   const WARDROBE_ASSET_KEY = "pixely-lost-sky-wardrobe-assets-v1";
-  const SITE_VERSION = "21";
+  const SITE_VERSION = "22";
   const $ = (q, root = document) => root.querySelector(q);
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 
@@ -711,11 +711,22 @@
   }
   function readImageFile(file,callback){
     if(!file) return;
-    if(!/^image\/(png|webp|jpeg)$/i.test(file.type||"")){toast("PNG, WEBP, JPG 이미지만 추가할 수 있어요.");return}
-    if(file.size>3000000){toast("이미지 한 장은 3MB 이하로 줄여 주세요.");return}
+    if(!/^image\/(png|webp|jpeg)$/i.test(file.type||"")){
+      setUploadStatus("PNG, WEBP, JPG 파일만 등록할 수 있어요.","error");
+      toast("PNG, WEBP, JPG 이미지만 추가할 수 있어요.");
+      return;
+    }
+    if(file.size>3000000){
+      setUploadStatus("파일이 너무 커요. 3MB 이하로 줄여 주세요.","error");
+      toast("이미지 한 장은 3MB 이하로 줄여 주세요.");
+      return;
+    }
     const reader=new FileReader();
     reader.onload=()=>callback(String(reader.result||""));
-    reader.onerror=()=>toast("이미지를 읽지 못했습니다.");
+    reader.onerror=()=>{
+      setUploadStatus("이미지를 읽지 못했습니다. 다른 파일로 다시 시도해 주세요.","error");
+      toast("이미지를 읽지 못했습니다.");
+    };
     reader.readAsDataURL(file);
   }
   function setUploadStatus(message,state="ok"){
@@ -1016,6 +1027,7 @@
     $("#wardrobe-image-file").addEventListener("change",event=>{
       const file=event.target.files?.[0];
       if(file) addWardrobeImage(file);
+      event.target.value="";
     });
     $("#wardrobe-layer-select").addEventListener("change",event=>{
       wardrobeEditorTarget=event.target.value||"base";
