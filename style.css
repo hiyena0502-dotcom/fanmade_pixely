@@ -162,3 +162,604 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
   .diary-wrap{width:calc(100% - 16px);margin-top:10px}.diary-book{display:block;min-height:0}.diary-spine{display:none}.diary-left-page,.diary-right-page{padding:22px}.diary-left-page{border-right:0;border-bottom:1px solid rgba(97,77,57,.08)}.diary-tabs{grid-template-columns:repeat(3,1fr);margin-top:18px}.diary-tabs button{height:50px;padding:0 6px;text-align:center}.diary-tabs button.is-active{transform:translateY(-2px)}.diary-decoration{display:none}.diary-page-heading p{display:none}.collection-grid{grid-template-columns:1fr 1fr;gap:8px}.collection-grid--postcards{grid-template-columns:1fr;gap:18px}.collection-card--postcard{grid-template-columns:1fr}.postcard-copy{margin:-8px 10px 0;padding:16px;border-radius:7px;transform:rotate(.3deg)}.postcard-art{min-height:185px}.card-art{height:96px}.collection-card{min-height:175px}
   .save-slot{grid-template-columns:42px 1fr}.slot-number{width:40px;height:40px}.slot-actions{grid-column:1/-1;justify-content:flex-end}
 }
+
+/* =========================================================
+   VISUAL SYSTEM v6 — NIGHT SKY × TRAVEL DIARY
+   홈과 컬렉션을 같은 게임 세계의 UI로 통일
+   ========================================================= */
+:root{
+  --night-950:#0d1730;
+  --night-900:#13233f;
+  --night-800:#1d3456;
+  --sky-soft:#cfe8fb;
+  --sky-accent:#95cde9;
+  --paper-cream:#f7f0e4;
+  --paper-deep:#ecdfcb;
+  --warm-brown:#876b57;
+  --accent-gold:#e5ca86;
+  --ui-border:rgba(222,239,255,.15);
+  --ui-border-strong:rgba(222,239,255,.25);
+}
+
+/* 공통: 게임 UI의 얇은 선, 라운드, 그림자 규칙 */
+.game-window{
+  border-color:var(--ui-border);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.045),
+    0 22px 70px rgba(4,10,28,.28);
+}
+.back-button{
+  border-color:var(--ui-border);
+  background:rgba(231,244,255,.055);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+  transition:.18s ease;
+}
+.back-button:hover{
+  border-color:rgba(229,202,134,.33);
+  background:rgba(229,202,134,.09);
+  transform:translateX(-2px);
+}
+
+/* ---------- HOME ---------- */
+.title-view{
+  background:var(--night-950);
+}
+.title-backdrop{
+  background:
+    radial-gradient(circle at 68% 18%,rgba(104,150,220,.12),transparent 25%),
+    radial-gradient(circle at 15% 72%,rgba(167,135,173,.11),transparent 27%),
+    linear-gradient(180deg,#0d1730 0%,#162849 48%,#344a6e 73%,#7c7080 100%);
+}
+.backdrop-sky{
+  background:
+    radial-gradient(circle at 76% 14%,rgba(158,198,255,.12),transparent 18%),
+    radial-gradient(circle at 32% 40%,rgba(114,162,226,.075),transparent 26%),
+    linear-gradient(180deg,rgba(255,255,255,.018),transparent 62%);
+}
+.backdrop-horizon{
+  height:34%;
+  background:
+    radial-gradient(ellipse at 49% 105%,rgba(246,199,165,.20),transparent 53%),
+    linear-gradient(180deg,transparent,rgba(130,100,130,.10));
+}
+
+/* 메인 일러스트 영역: 개발용 빈칸도 '기록 프레임'처럼 보이게 */
+.art-placeholder{
+  left:5.5vw;
+  right:39vw;
+  top:29vh;
+  bottom:17vh;
+  border:1px solid rgba(217,235,255,.12);
+  border-radius:24px;
+  overflow:visible;
+  color:rgba(222,237,255,.25);
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.008)),
+    radial-gradient(circle at 50% 45%,rgba(137,183,225,.055),transparent 38%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.018),
+    0 18px 60px rgba(2,8,25,.08);
+}
+.art-placeholder::before{
+  content:"";
+  position:absolute;
+  inset:16px;
+  border:1px dashed rgba(220,237,255,.075);
+  border-radius:18px;
+  pointer-events:none;
+}
+.art-placeholder::after{
+  content:"";
+  position:absolute;
+  left:8%;
+  right:8%;
+  top:50%;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(214,235,255,.08),transparent);
+  pointer-events:none;
+}
+.art-placeholder>span{
+  position:relative;
+  z-index:1;
+  font-size:clamp(34px,4.2vw,64px);
+  letter-spacing:.065em;
+  color:rgba(214,232,255,.20);
+  text-shadow:0 6px 30px rgba(2,8,24,.18);
+}
+.art-placeholder>small{
+  position:relative;
+  z-index:1;
+  margin-top:4px;
+  color:rgba(215,231,250,.34);
+  letter-spacing:.04em;
+}
+.visual-kicker{
+  position:absolute;
+  left:28px;
+  top:24px;
+  z-index:2;
+  color:rgba(205,228,246,.52);
+  font-size:7px;
+  font-weight:1000;
+  letter-spacing:.18em;
+}
+.visual-note{
+  position:absolute;
+  right:24px;
+  bottom:-13px;
+  z-index:2;
+  padding:8px 12px;
+  border:1px solid rgba(229,202,134,.20);
+  border-radius:7px;
+  background:rgba(17,31,58,.86);
+  color:#dccb9e;
+  box-shadow:0 8px 22px rgba(5,11,28,.24);
+  font-size:6px;
+  font-weight:1000;
+  letter-spacing:.14em;
+  transform:rotate(-1.2deg);
+}
+
+/* 브랜드를 다이어리의 잉크/골드 포인트와 연결 */
+.title-brand>small{
+  color:#b6cbe0;
+}
+.title-brand h1{
+  text-shadow:0 8px 34px rgba(3,9,27,.28);
+}
+.title-brand h1 em{
+  color:#cdeafe;
+}
+.title-brand p{
+  color:#c4d3e2;
+}
+
+/* 메뉴 패널: 유리창은 유지하되 다이어리의 골드/종이 포인트를 공유 */
+.command-window{
+  width:min(375px,calc(100vw - 48px));
+  padding:13px 14px 15px;
+  border-radius:19px;
+  background:
+    linear-gradient(180deg,rgba(15,31,58,.83),rgba(9,23,48,.88));
+}
+.window-caption{
+  margin-bottom:8px;
+  border-bottom-color:rgba(216,236,255,.09);
+}
+.window-caption i{color:var(--accent-gold)}
+.command-button{
+  min-height:61px;
+  border-radius:11px;
+}
+.command-button b{
+  color:#edf6fc;
+  letter-spacing:-.015em;
+}
+.command-button small{
+  color:#9db0c2;
+}
+.command-button:hover,.command-button:focus-visible{
+  border-color:rgba(207,232,251,.12);
+  background:
+    linear-gradient(90deg,rgba(118,174,215,.15),rgba(255,255,255,.018));
+}
+.command-button--chapter{
+  background:linear-gradient(90deg,rgba(107,115,177,.15),transparent);
+}
+.command-button--collection{
+  position:relative;
+  background:
+    linear-gradient(90deg,rgba(229,202,134,.11),rgba(137,191,220,.055));
+  border-color:rgba(229,202,134,.11);
+}
+.command-button--collection::after{
+  content:"DIARY";
+  position:absolute;
+  right:13px;
+  top:9px;
+  color:rgba(229,202,134,.45);
+  font-size:5px;
+  font-weight:1000;
+  letter-spacing:.18em;
+}
+
+/* 현재 세이브 = '여행 기록 카드' */
+.save-summary{
+  width:min(660px,calc(100vw - 48px));
+  padding:17px 20px 18px 23px;
+  border-radius:17px;
+  background:
+    linear-gradient(90deg,rgba(15,33,61,.83),rgba(17,38,68,.73));
+  border-color:rgba(210,232,249,.13);
+  box-shadow:
+    inset 3px 0 0 rgba(229,202,134,.42),
+    0 18px 50px rgba(4,10,28,.22);
+}
+.summary-label span,.summary-progress small{
+  color:#93abc0;
+}
+.summary-label b{
+  color:#f4f7f8;
+}
+.summary-track{
+  height:6px;
+  background:rgba(255,255,255,.075);
+}
+.summary-track i{
+  background:linear-gradient(90deg,#7ebbdc,#d9d59f);
+}
+.save-summary dt{
+  color:#8199af;
+}
+.save-summary dd{
+  color:#e5edf4;
+}
+.title-help{
+  color:rgba(207,221,236,.48);
+}
+
+/* 엔딩 후 홈도 동일한 골드/종이 포인트를 유지 */
+.title-view.is-cleared .command-window,
+.title-view.is-cleared .save-summary{
+  border-color:rgba(255,255,255,.30);
+  box-shadow:
+    inset 3px 0 0 rgba(231,202,126,.44),
+    0 20px 60px rgba(42,105,145,.17);
+}
+.title-view.is-cleared .command-window{
+  background:linear-gradient(180deg,rgba(33,98,142,.53),rgba(32,82,120,.58));
+}
+
+/* ---------- COLLECTION / TRAVEL DIARY ---------- */
+.collection-view{
+  background:var(--night-950);
+}
+
+/* '갈색 화면' 대신 밤하늘 속 책상: 위는 밤, 아래쪽만 은은한 우드 */
+.diary-desk{
+  background:
+    radial-gradient(circle at 8% 18%,rgba(255,255,255,.82) 0 1px,transparent 1.8px),
+    radial-gradient(circle at 19% 31%,rgba(218,239,255,.62) 0 1px,transparent 1.8px),
+    radial-gradient(circle at 34% 12%,rgba(255,244,207,.62) 0 1px,transparent 1.8px),
+    radial-gradient(circle at 57% 26%,rgba(255,255,255,.70) 0 1.2px,transparent 2px),
+    radial-gradient(circle at 77% 13%,rgba(217,239,255,.72) 0 1px,transparent 1.8px),
+    radial-gradient(circle at 91% 34%,rgba(255,245,212,.58) 0 1.1px,transparent 2px),
+    linear-gradient(180deg,rgba(13,23,48,.96) 0%,rgba(24,43,73,.95) 58%,rgba(45,55,74,.95) 72%,rgba(95,72,57,.95) 100%);
+}
+.diary-desk::before{
+  content:"";
+  position:absolute;
+  left:-5%;
+  right:-5%;
+  bottom:-8%;
+  height:33%;
+  background:
+    repeating-linear-gradient(92deg,rgba(48,29,20,.10) 0 2px,transparent 2px 92px),
+    linear-gradient(180deg,rgba(92,68,53,.10),rgba(91,66,50,.76));
+  border-top:1px solid rgba(231,214,190,.08);
+  transform:perspective(520px) rotateX(9deg);
+  transform-origin:bottom;
+}
+.diary-desk::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle at 50% 62%,rgba(229,202,134,.07),transparent 28%),
+    radial-gradient(circle at 50% 100%,rgba(13,21,38,0),rgba(6,12,27,.25));
+  pointer-events:none;
+}
+
+/* 컬렉션 상단 바도 홈 메뉴와 같은 네이비 글래스 */
+.collection-topbar{
+  border-bottom-color:rgba(217,237,255,.10);
+  background:rgba(10,24,47,.76);
+  box-shadow:0 12px 38px rgba(4,10,26,.12);
+}
+.collection-topbar h2{
+  color:#f0f6fa;
+}
+.collection-topbar small{
+  color:#9db4c7;
+}
+.collection-count{
+  min-width:105px;
+}
+.collection-count b{
+  color:#f5f8f8;
+}
+.collection-count em{
+  display:block;
+  margin-top:4px;
+  color:rgba(229,202,134,.62);
+  font-size:5px;
+  font-style:normal;
+  font-weight:1000;
+  letter-spacing:.16em;
+}
+
+/* 책은 조금 더 작고 정돈되게, 주변 밤하늘이 보이게 */
+.diary-wrap{
+  width:min(1120px,calc(100% - 42px));
+  margin:42px auto 72px;
+}
+.diary-book{
+  min-height:650px;
+  grid-template-columns:30% 70%;
+  border:1px solid rgba(255,247,230,.58);
+  border-radius:19px;
+  background:var(--paper-cream);
+  box-shadow:
+    0 34px 90px rgba(3,8,22,.40),
+    0 0 0 1px rgba(229,202,134,.07),
+    inset 0 0 0 1px rgba(114,86,62,.10);
+}
+.diary-book::after{
+  inset:9px;
+  border-color:rgba(115,88,62,.075);
+}
+.diary-spine{
+  left:30%;
+  width:21px;
+  background:
+    linear-gradient(90deg,rgba(82,62,47,.12),rgba(255,255,255,.38),rgba(84,64,49,.11));
+}
+.diary-left-page{
+  padding:40px 35px;
+  background:
+    linear-gradient(90deg,#ede0cd 0%,#f7ecdc 76%,#f3e7d6 100%);
+}
+.diary-right-page{
+  padding:40px 43px 44px;
+  background:
+    radial-gradient(circle at 86% 9%,rgba(148,195,219,.08),transparent 18%),
+    repeating-linear-gradient(0deg,rgba(113,87,61,.017) 0 1px,transparent 1px 7px),
+    linear-gradient(90deg,#fff9ef,#f8f0e3);
+}
+.diary-date{
+  color:#8e826f;
+}
+.diary-left-page h3{
+  color:#314f69;
+  font-size:28px;
+}
+.diary-note{
+  color:#756d65;
+  max-width:245px;
+}
+
+/* 탭을 큰 버튼이 아니라 '책갈피'처럼 */
+.diary-tabs{
+  gap:8px;
+  margin-top:30px;
+}
+.diary-tabs button{
+  width:calc(100% - 10px);
+  height:47px;
+  padding:0 14px 0 16px;
+  border-color:rgba(112,88,65,.12);
+  border-radius:8px 2px 2px 8px;
+  background:rgba(255,251,244,.50);
+  color:#74695f;
+  box-shadow:none;
+}
+.diary-tabs button span{
+  margin-bottom:1px;
+  color:#a08f7e;
+}
+.diary-tabs button::after{
+  right:-10px;
+  top:0;
+  bottom:0;
+  width:10px;
+  border-radius:0 6px 6px 0;
+  background:rgba(215,196,170,.55);
+  opacity:1;
+}
+.diary-tabs button:hover{
+  background:#fffaf2;
+  transform:translateX(2px);
+}
+.diary-tabs button.is-active{
+  width:100%;
+  border-color:rgba(122,178,205,.33);
+  background:linear-gradient(90deg,#dcebf0,#e8f1f0);
+  color:#315a70;
+  transform:translateX(7px);
+  box-shadow:0 6px 14px rgba(67,100,113,.08);
+}
+.diary-tabs button.is-active::after{
+  background:#8ebfd2;
+}
+.diary-tabs button.is-active span{
+  color:#62849a;
+}
+
+/* 다이어리 장식도 밤하늘과 공유하는 색으로 */
+.diary-decoration .tape{
+  background:rgba(184,210,207,.48);
+}
+.tape--two{
+  background:rgba(229,202,134,.34)!important;
+}
+.doodle{
+  color:#7ea6bc;
+}
+
+/* 오른쪽 페이지: 정보 밀도와 구획 강화 */
+.diary-page-heading{
+  padding:2px 0 18px;
+  border-bottom-color:rgba(103,82,63,.16);
+}
+.diary-page-heading small{
+  color:#8d826f;
+}
+.diary-page-heading h3{
+  color:#314f69;
+  font-size:22px;
+}
+.diary-page-heading p{
+  max-width:300px;
+  color:#776f67;
+  line-height:1.65;
+}
+.collection-grid{
+  gap:14px;
+  margin-top:21px;
+}
+
+/* 카드: 수집 카드답게 더 '카드' 형태 */
+.collection-card--card{
+  min-height:246px;
+  border-radius:9px;
+  border-color:rgba(104,83,64,.13);
+  background:linear-gradient(180deg,#fffdfa,#fbf6ed);
+}
+.collection-card--card .card-art{
+  height:132px;
+  border-radius:7px;
+  box-shadow:
+    inset 0 0 0 5px rgba(255,255,255,.13),
+    0 7px 14px rgba(72,60,50,.08);
+}
+.collection-card--card .card-art::after{
+  content:"";
+  position:absolute;
+  inset:7px;
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:4px;
+}
+.collection-card--card .card-symbol{
+  font-size:33px;
+}
+.card-memo{
+  border-left-color:#8fb3c4;
+  background:#edf3f1;
+}
+
+/* 아이템: 스크랩북에 붙인 물건 조각 */
+.collection-card--item{
+  min-height:218px;
+  background:
+    linear-gradient(180deg,#fffdf8,#f8f1e6);
+}
+.collection-card--item::before{
+  content:"";
+  position:absolute;
+  top:-5px;
+  left:50%;
+  width:46px;
+  height:15px;
+  transform:translateX(-50%) rotate(-2deg);
+  background:rgba(229,202,134,.27);
+  border:1px solid rgba(255,255,255,.25);
+}
+.collection-card--item .card-art{
+  height:106px;
+  margin:9px 20px 3px;
+}
+
+/* 엽서: 실제 페이지에 꽂아둔 큰 한 장처럼 */
+.collection-grid--postcards{
+  gap:24px 20px;
+}
+.collection-card--postcard{
+  grid-template-columns:1.18fr .82fr;
+}
+.postcard-art{
+  min-height:202px;
+  border-width:7px;
+  border-color:#fffaf0;
+  box-shadow:
+    0 11px 24px rgba(71,52,38,.15),
+    0 0 0 1px rgba(98,76,57,.07);
+}
+.postcard-copy{
+  background:#fffaf2;
+  border-color:rgba(110,84,61,.13);
+}
+
+/* 잠긴 수집품도 빈 종이가 아니라 '발견 예정 슬롯'처럼 보이게 */
+.collection-card.is-locked{
+  opacity:.55;
+  filter:saturate(.18);
+}
+.collection-card.is-locked::after{
+  content:"NOT YET";
+  position:absolute;
+  right:9px;
+  bottom:8px;
+  color:rgba(89,78,68,.30);
+  font-size:5px;
+  font-weight:1000;
+  letter-spacing:.16em;
+}
+.collection-card--postcard.is-locked::after{
+  right:12px;
+  bottom:10px;
+}
+
+/* 공통 서브 페이지 상단도 홈과 같은 밤하늘 UI 규칙 */
+.subpage-topbar{
+  border-bottom-color:rgba(217,237,255,.10);
+  background:rgba(10,24,47,.73);
+}
+.subpage-topbar small{
+  color:#9db4c7;
+}
+.subpage-topbar h2{
+  color:#eef5f9;
+}
+
+/* ---------- Responsive unification ---------- */
+@media(max-width:900px){
+  .art-placeholder{
+    top:22vh;
+    bottom:42vh;
+  }
+  .diary-wrap{
+    width:calc(100% - 24px);
+    margin-top:24px;
+  }
+  .diary-book{
+    grid-template-columns:225px 1fr;
+  }
+  .diary-spine{left:225px}
+  .diary-left-page{padding:32px 24px}
+  .diary-right-page{padding:32px 28px}
+}
+@media(max-width:680px){
+  .art-placeholder{display:none}
+  .save-summary{
+    box-shadow:
+      inset 3px 0 0 rgba(229,202,134,.42),
+      0 16px 42px rgba(4,10,28,.20);
+  }
+  .collection-topbar .collection-count em{display:none}
+  .diary-wrap{
+    width:calc(100% - 14px);
+    margin-top:10px;
+  }
+  .diary-left-page,.diary-right-page{
+    padding:22px 20px;
+  }
+  .diary-tabs{
+    grid-template-columns:repeat(3,1fr);
+    gap:6px;
+  }
+  .diary-tabs button{
+    width:100%;
+    height:48px;
+    padding:0 5px;
+    border-radius:8px;
+    text-align:center;
+  }
+  .diary-tabs button::after{display:none}
+  .diary-tabs button.is-active{
+    width:100%;
+    transform:translateY(-2px);
+  }
+  .collection-grid--postcards{
+    grid-template-columns:1fr;
+  }
+}
