@@ -8,6 +8,7 @@ const directory=path.join(__dirname,"..");
 const app=fs.readFileSync(path.join(directory,"app.js"),"utf8");
 const storageKey="pixely-lost-sky-saves-v2";
 const wardrobeKey="pixely-lost-sky-wardrobe-assets-v1";
+const devContentKey="pixely-lost-sky-dev-content-v1";
 
 function boot(saved,initialVersion="15",wardrobeAssets){
   const nodes=new Map();
@@ -27,6 +28,7 @@ function boot(saved,initialVersion="15",wardrobeAssets){
         classList:{toggle(name,on){if(on) classes.add(name);else classes.delete(name)},add(name){classes.add(name)},remove(name){classes.delete(name)},contains(name){return classes.has(name)}},
         setAttribute(name,value){this[name]=value},
         addEventListener(name,callback){this.listeners[name]=callback},
+        querySelectorAll(){return []},
         replaceChildren(...children){this.children=children},
         append(child){this.children.push(child)}
       });
@@ -43,7 +45,17 @@ function boot(saved,initialVersion="15",wardrobeAssets){
     result.dataset.wardrobeSlot=key;
     return result;
   });
-  const views=["home","chapters","collection","wardrobe","story"].map(key=>{
+  const devTabs=["chapters","collection","dialogues","items"].map(key=>{
+    const result=node(`dev-tab:${key}`);
+    result.dataset.devSection=key;
+    return result;
+  });
+  const devCollectionTabs=["cards","postcards"].map(key=>{
+    const result=node(`dev-collection:${key}`);
+    result.dataset.devCollectionType=key;
+    return result;
+  });
+  const views=["home","chapters","collection","wardrobe","dev","story"].map(key=>{
     const result=node(`view:${key}`);
     result.dataset.view=key;
     return result;
@@ -59,7 +71,9 @@ function boot(saved,initialVersion="15",wardrobeAssets){
       if(selector==="[data-view]") return views;
       if(selector===".diary-tabs button") return tabs;
       if(selector==="[data-wardrobe-slot]") return wardrobeTabs;
-      if(["[data-open-collection]","[data-open-chapters]","[data-open-wardrobe]","[data-go-home]","[data-close-modal]"].includes(selector)) return [node(selector)];
+      if(selector==="[data-dev-section]") return devTabs;
+      if(selector==="[data-dev-collection-type]") return devCollectionTabs;
+      if(["[data-open-collection]","[data-open-chapters]","[data-open-wardrobe]","[data-open-dev]","[data-go-home]","[data-close-modal]"].includes(selector)) return [node(selector)];
       return [];
     },
     addEventListener(name,callback){listeners[name]=callback}
@@ -215,7 +229,7 @@ test("update prompt compares the loaded version on the first check and on later 
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
   assert.equal(state.requests[0].options.cache,"no-store");
-  state.setVersion("22");
+  state.setVersion("24");
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,false);
@@ -224,7 +238,7 @@ test("update prompt compares the loaded version on the first check and on later 
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
-  const stale=boot(undefined,"22");
+  const stale=boot(undefined,"24");
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(stale.node("#update-modal").hidden,false);
 });
@@ -266,7 +280,7 @@ test("developer wardrobe setup toggles multiple custom parts without a save slot
     layerOrder:["custom-eyes","custom-mouth"],
     setupOutfit:{layers:[]}
   };
-  const state=boot(undefined,"22",assets);
+  const state=boot(undefined,"24",assets);
   state.click("[data-open-wardrobe]");
   assert.equal(state.node("#wardrobe-slot-label").textContent,"DEV SETUP");
   const faceTab=state.node("wardrobe-tab:face");
@@ -281,9 +295,38 @@ test("developer wardrobe setup toggles multiple custom parts without a save slot
 });
 
 
-test("all wardrobe tabs advertise multi selection",()=>{
+test("simplified wardrobe editor keeps all four multi-select categories",()=>{
   const html=fs.readFileSync(path.join(directory,"index.html"),"utf8");
   for(const slot of ["outfit","accessory","face","decoration"]){
-    assert.match(html,new RegExp('data-wardrobe-slot="'+slot+'"[^>]*>[^<]*<span>MULTI<\\/span>'));
+    assert.match(html,new RegExp('data-wardrobe-slot="'+slot+'"'));
   }
+  assert.match(app,/모든 분류에서 여러 파츠를 동시에 선택할 수 있어요/);
+  assert.match(html,/id="wardrobe-add-part-button"/);
+  assert.match(html,/등록하고 켜기/);
+});
+
+
+test("developer settings screen exposes chapters collection dialogues and items",()=>{
+  const html=fs.readFileSync(path.join(directory,"index.html"),"utf8");
+  assert.match(html,/data-open-dev/);
+  assert.match(html,/data-view="dev"/);
+  for(const section of ["chapters","collection","dialogues","items"]){
+    assert.match(html,new RegExp('data-dev-section="'+section+'"'));
+  }
+  assert.match(html,/id="dev-entry-list"/);
+  assert.match(html,/id="dev-editor-fields"/);
+  assert.match(app,/DEV_CONTENT_KEY/);
+  assert.match(app,/persistDevContent/);
+});
+
+test("developer settings can create an item entry without touching source code",()=>{
+  const state=boot(undefined,"24");
+  state.click("[data-open-dev]");
+  const itemTab=state.node("dev-tab:items");
+  state.node("#dev-settings-tabs").listeners.click({target:{closest(){return itemTab}}});
+  state.click("#dev-new-entry");
+  const stored=JSON.parse(state.storage.get(devContentKey));
+  assert.equal(Array.isArray(stored.items),true);
+  assert.equal(stored.items.some(item=>item.name==="새 아이템"),true);
+  assert.equal(state.node("view:dev").hidden,false);
 });
