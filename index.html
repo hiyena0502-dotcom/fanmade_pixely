@@ -7,8 +7,8 @@
   <meta name="theme-color" content="#111a3b" />
   <title>PIXELY : LOST SKY</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=23" />
-  <script src="app.js?v=23" defer></script>
+  <link rel="stylesheet" href="style.css?v=24" />
+  <script src="app.js?v=24" defer></script>
 </head>
 <body>
   <div class="game-root">
@@ -34,6 +34,12 @@
         <span aria-hidden="true">✿</span>
         <b>꿈뜰이 옷장</b>
         <small>DRESS UP</small>
+      </button>
+
+      <button class="dev-shortcut" type="button" data-open-dev aria-label="개발자 설정 열기">
+        <span aria-hidden="true">⚙</span>
+        <b>개발자 설정</b>
+        <small>DEV SETTINGS</small>
       </button>
 
       <aside class="command-window game-window">
@@ -272,66 +278,163 @@
           </div>
           <div class="wardrobe-stage-bottom"><strong>꿈뜰이</strong><span id="wardrobe-equipped">기본 복장</span></div>
         </section>
-        <section class="wardrobe-panel game-window">
-          <small class="wardrobe-kicker">YOUR OWN DREAMER</small>
-          <h3>오늘은 어떤 모습으로 떠날까?</h3>
-          <p>옷·소품·얼굴·장식 모두 여러 파츠를 동시에 겹칠 수 있어요. 눈·입·상의·하의처럼 세부 파츠를 따로 등록하고, 아래 개발자 도구에서 순서와 위치까지 조정할 수 있습니다.</p>
-          <nav class="wardrobe-tabs" id="wardrobe-tabs" aria-label="꾸미기 파츠">
-            <button type="button" data-wardrobe-slot="outfit">옷 <span>MULTI</span></button>
-            <button type="button" data-wardrobe-slot="accessory">소품 <span>MULTI</span></button>
-            <button type="button" data-wardrobe-slot="face">얼굴 <span>MULTI</span></button>
-            <button type="button" data-wardrobe-slot="decoration">장식 <span>MULTI</span></button>
-          </nav>
-          <p class="wardrobe-multi-note" id="wardrobe-tab-note">모든 분류에서 여러 파츠를 함께 선택할 수 있어요.</p>
-          <div class="wardrobe-options" id="wardrobe-options"></div>
-          <section class="wardrobe-image-tools" aria-labelledby="wardrobe-image-tools-title">
-            <header>
-              <div><small>DEVELOPER IMAGE EDITOR</small><h4 id="wardrobe-image-tools-title">이미지 등록 · 위치 조정</h4></div>
-              <p>개발 중에만 사용하는 설정 도구 · 투명 PNG 권장</p>
-            </header>
-            <p class="wardrobe-dev-guide"><b>파츠 추가:</b> 종류 선택 → 이름 입력 → 이미지 선택. 선택한 이미지는 바로 미리보기에 적용됩니다.</p>
-            <div class="wardrobe-upload-sections">
-              <section class="wardrobe-upload-card wardrobe-upload-card--base">
-                <small>BASE</small><h5>베이스 이미지</h5>
-                <p>꿈뜰이 몸체가 되는 가장 아래 레이어예요.</p>
-                <label class="wardrobe-file-action">베이스 추가 / 교체<input type="file" id="wardrobe-base-file" accept="image/png,image/webp,image/jpeg"></label>
-              </section>
-              <section class="wardrobe-upload-card wardrobe-upload-card--part">
-                <small>PART</small><h5>새 파츠 추가</h5>
-                <div class="wardrobe-part-steps">
-                  <label><span>① 큰 분류</span><select id="wardrobe-upload-slot"><option value="outfit">옷</option><option value="accessory">소품</option><option value="face">얼굴</option><option value="decoration">장식</option></select></label>
-                  <label><span>② 세부 파츠</span><select id="wardrobe-part-group"><option value="top">상의</option></select></label>
-                  <label><span>③ 파츠 이름</span><input type="text" id="wardrobe-image-name" maxlength="40" placeholder="예: 웃는 입"></label>
-                  <label class="wardrobe-file-action wardrobe-file-action--part"><span>④ 이미지</span><b>PNG 선택하기</b><input type="file" id="wardrobe-image-file" accept="image/png,image/webp,image/jpeg"></label>
-                </div>
-                <p class="wardrobe-upload-help">이미지를 고르면 새 레이어로 등록되고 즉시 켜집니다.</p>
-                <p class="wardrobe-upload-status" id="wardrobe-upload-status" data-state="idle">아직 등록한 새 파츠가 없어요.</p>
-              </section>
+        <section class="wardrobe-panel wardrobe-dev-panel game-window">
+          <div class="wardrobe-dev-heading">
+            <div>
+              <small class="wardrobe-kicker">DEVELOPER EDITOR</small>
+              <h3>꿈뜰이 파츠 편집</h3>
             </div>
-            <div class="wardrobe-transform-editor">
-              <label class="wardrobe-layer-picker"><span>조정할 레이어</span><select id="wardrobe-layer-select"><option value="base">베이스 이미지</option></select></label>
-              <div class="wardrobe-sliders">
-                <label><span>좌우 <output data-wardrobe-transform-value="x">0</output></span><input type="range" min="-100" max="100" step="1" value="0" data-wardrobe-transform="x"></label>
-                <label><span>위아래 <output data-wardrobe-transform-value="y">0</output></span><input type="range" min="-100" max="100" step="1" value="0" data-wardrobe-transform="y"></label>
-                <label><span>크기 <output data-wardrobe-transform-value="scale">100%</output></span><input type="range" min="20" max="300" step="1" value="100" data-wardrobe-transform="scale"></label>
-                <label><span>회전 <output data-wardrobe-transform-value="rotation">0°</output></span><input type="range" min="-180" max="180" step="1" value="0" data-wardrobe-transform="rotation"></label>
-              </div>
-              <div class="wardrobe-layer-order-box">
-                <span id="wardrobe-layer-order">베이스는 항상 맨 아래</span>
-                <div class="wardrobe-layer-order-actions">
-                  <button type="button" data-layer-move="bottom">맨 아래</button>
-                  <button type="button" data-layer-move="down">한 칸 아래</button>
-                  <button type="button" data-layer-move="up">한 칸 위</button>
-                  <button type="button" data-layer-move="top">맨 위</button>
-                </div>
-              </div>
-              <div class="wardrobe-editor-actions"><button type="button" id="wardrobe-reset-transform">위치 초기화</button><button type="button" id="wardrobe-delete-image">선택 이미지 삭제</button></div>
+            <span class="wardrobe-dev-badge">AUTO SAVE</span>
+          </div>
+          <p class="wardrobe-dev-summary">모든 분류는 여러 파츠를 동시에 켤 수 있어요. <b>소품</b>은 캐릭터가 들거나 착용하는 물건, <b>장식</b>은 주변 이펙트·스티커예요.</p>
+
+          <section class="wardrobe-dev-section">
+            <header class="wardrobe-dev-section-title">
+              <div><span>01</span><b>등록된 파츠</b></div>
+              <small id="wardrobe-selected-count">0개 적용 중</small>
+            </header>
+            <nav class="wardrobe-tabs wardrobe-dev-tabs" id="wardrobe-tabs" aria-label="꾸미기 파츠">
+              <button type="button" data-wardrobe-slot="outfit">옷</button>
+              <button type="button" data-wardrobe-slot="accessory">소품</button>
+              <button type="button" data-wardrobe-slot="face">얼굴</button>
+              <button type="button" data-wardrobe-slot="decoration">장식</button>
+            </nav>
+            <p class="wardrobe-multi-note" id="wardrobe-tab-note">모든 파츠는 여러 개를 함께 켤 수 있어요.</p>
+            <div class="wardrobe-options wardrobe-dev-options" id="wardrobe-options"></div>
+          </section>
+
+          <section class="wardrobe-dev-section">
+            <header class="wardrobe-dev-section-title">
+              <div><span>02</span><b>새 파츠 등록</b></div>
+              <small id="wardrobe-storage-meter">저장 공간 계산 중</small>
+            </header>
+            <div class="wardrobe-dev-form">
+              <label><span>분류</span><select id="wardrobe-upload-slot"><option value="outfit">옷</option><option value="accessory">소품</option><option value="face">얼굴</option><option value="decoration">장식</option></select></label>
+              <label><span>세부 파츠</span><select id="wardrobe-part-group"><option value="top">상의</option></select></label>
+              <label class="wardrobe-dev-name"><span>이름</span><input type="text" id="wardrobe-image-name" maxlength="40" placeholder="예: 웃는 입"></label>
+              <label class="wardrobe-dev-file">
+                <span>이미지</span>
+                <b>파일 선택</b>
+                <input type="file" id="wardrobe-image-file" accept="image/png,image/webp,image/jpeg">
+              </label>
+              <div class="wardrobe-file-name" id="wardrobe-file-name">선택된 파일 없음</div>
+              <button type="button" class="wardrobe-add-part-button" id="wardrobe-add-part-button" disabled>등록하고 켜기</button>
+            </div>
+            <p class="wardrobe-upload-status" id="wardrobe-upload-status" data-state="idle">파일을 고른 뒤 <b>등록하고 켜기</b>를 누르세요.</p>
+            <div class="wardrobe-base-row">
+              <div><b>베이스 이미지</b><small>항상 가장 아래에 있는 몸체 이미지</small></div>
+              <label>추가 / 교체<input type="file" id="wardrobe-base-file" accept="image/png,image/webp,image/jpeg"></label>
             </div>
           </section>
-          <div class="wardrobe-actions">
-            <span id="wardrobe-status" role="status">슬롯을 선택하면 꾸밀 수 있어요.</span>
-            <button type="button" id="wardrobe-save-button">이 모습 저장하기 ✦</button>
+
+          <section class="wardrobe-dev-section">
+            <header class="wardrobe-dev-section-title">
+              <div><span>03</span><b>선택 레이어 조정</b></div>
+              <small id="wardrobe-layer-order">베이스는 항상 맨 아래</small>
+            </header>
+            <label class="wardrobe-layer-picker wardrobe-dev-layer-picker">
+              <span>편집할 레이어</span>
+              <select id="wardrobe-layer-select"><option value="base">베이스 이미지</option></select>
+            </label>
+            <div class="wardrobe-sliders wardrobe-dev-sliders">
+              <label><span>좌우 <output data-wardrobe-transform-value="x">0</output></span><input type="range" min="-100" max="100" step="1" value="0" data-wardrobe-transform="x"></label>
+              <label><span>위아래 <output data-wardrobe-transform-value="y">0</output></span><input type="range" min="-100" max="100" step="1" value="0" data-wardrobe-transform="y"></label>
+              <label><span>크기 <output data-wardrobe-transform-value="scale">100%</output></span><input type="range" min="20" max="300" step="1" value="100" data-wardrobe-transform="scale"></label>
+              <label><span>회전 <output data-wardrobe-transform-value="rotation">0°</output></span><input type="range" min="-180" max="180" step="1" value="0" data-wardrobe-transform="rotation"></label>
+            </div>
+            <div class="wardrobe-layer-order-actions wardrobe-dev-order-actions">
+              <button type="button" data-layer-move="bottom">맨 아래</button>
+              <button type="button" data-layer-move="down">↓ 한 칸</button>
+              <button type="button" data-layer-move="up">↑ 한 칸</button>
+              <button type="button" data-layer-move="top">맨 위</button>
+            </div>
+            <div class="wardrobe-editor-actions wardrobe-dev-editor-actions">
+              <button type="button" id="wardrobe-reset-transform">위치 초기화</button>
+              <button type="button" id="wardrobe-delete-image">선택 레이어 삭제</button>
+            </div>
+          </section>
+
+          <div class="wardrobe-actions wardrobe-dev-footer">
+            <span id="wardrobe-status" role="status">개발자 설정은 자동 저장됩니다.</span>
+            <button type="button" id="wardrobe-save-button">기본값 저장</button>
           </div>
+        </section>
+      </main>
+    </section>
+
+    <section class="view dev-settings-view" data-view="dev" hidden>
+      <header class="subpage-topbar dev-topbar">
+        <button class="back-button" type="button" data-go-home aria-label="홈으로">←</button>
+        <div><small>DEVELOPER SETTINGS</small><h2>게임 데이터 설정</h2></div>
+        <div class="dev-autosave-label">LOCAL DEV DATA</div>
+      </header>
+
+      <main class="dev-settings-shell">
+        <aside class="dev-settings-sidebar game-window">
+          <div class="dev-settings-brand">
+            <small>CONTENT EDITOR</small>
+            <h3>설정할 데이터</h3>
+            <p>코드를 직접 열지 않고 개발용 데이터를 추가·수정합니다.</p>
+          </div>
+
+          <nav class="dev-settings-tabs" id="dev-settings-tabs" aria-label="개발자 설정 분류">
+            <button type="button" data-dev-section="chapters"><span>01</span><b>챕터</b><small>CHAPTERS</small></button>
+            <button type="button" data-dev-section="collection"><span>02</span><b>컬렉션</b><small>CARDS · POST</small></button>
+            <button type="button" data-dev-section="dialogues"><span>03</span><b>대화방</b><small>DIALOGUE ROOMS</small></button>
+            <button type="button" data-dev-section="items"><span>04</span><b>아이템</b><small>ITEM DATA</small></button>
+          </nav>
+
+          <div class="dev-sidebar-actions">
+            <button type="button" id="dev-reset-content">전체 기본값 복원</button>
+          </div>
+        </aside>
+
+        <section class="dev-settings-main game-window">
+          <header class="dev-settings-main-header">
+            <div>
+              <small id="dev-current-section">챕터</small>
+              <h3>개발 데이터 편집</h3>
+            </div>
+            <div class="dev-header-meta">
+              <span id="dev-entry-count">0개</span>
+              <span id="dev-save-status">브라우저 개발 설정</span>
+            </div>
+          </header>
+
+          <div class="dev-subtabs" id="dev-collection-types" hidden>
+            <button type="button" data-dev-collection-type="cards">카드</button>
+            <button type="button" data-dev-collection-type="postcards">엽서</button>
+          </div>
+
+          <div class="dev-settings-toolbar">
+            <button type="button" id="dev-new-entry">＋ 새 항목</button>
+            <p>왼쪽 목록에서 선택 → 오른쪽에서 수정 → 저장.</p>
+          </div>
+
+          <div class="dev-settings-workspace">
+            <aside class="dev-entry-pane">
+              <div class="dev-entry-pane-title"><b>목록</b><small>ID 기준</small></div>
+              <div class="dev-entry-list" id="dev-entry-list"></div>
+            </aside>
+
+            <section class="dev-editor-pane">
+              <div class="dev-editor-pane-title">
+                <div><small>EDITOR</small><h4 id="dev-editor-title">항목을 선택하세요</h4></div>
+              </div>
+              <div class="dev-editor-fields" id="dev-editor-fields">
+                <div class="dev-editor-empty">왼쪽에서 항목을 선택하거나 + 새 항목을 눌러 주세요.</div>
+              </div>
+              <div class="dev-editor-actions">
+                <button type="button" class="danger" id="dev-delete-entry" disabled>삭제</button>
+                <button type="button" class="primary" id="dev-save-entry" disabled>저장 · 적용</button>
+              </div>
+            </section>
+          </div>
+
+          <footer class="dev-settings-note">
+            <b>개발용 임시 설정</b>
+            <span>여기서 수정한 값은 이 브라우저에 저장되고 게임 화면에 바로 반영됩니다. 최종 확정 뒤 코드 기본값으로 고정할 수 있어요.</span>
+          </footer>
         </section>
       </main>
     </section>
