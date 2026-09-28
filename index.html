@@ -7,8 +7,8 @@
   <meta name="theme-color" content="#111a3b" />
   <title>PIXELY : LOST SKY</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=29" />
-  <script src="app.js?v=29" defer></script>
+  <link rel="stylesheet" href="style.css?v=30" />
+  <script src="app.js?v=30" defer></script>
 </head>
 <body>
   <div class="game-root">
@@ -129,7 +129,10 @@
               <b id="story-chapter-name">생일 전날</b>
               <span><i></i><em id="story-location-name">파티방</em></span>
             </div>
-            <button class="story-home-button" type="button" data-go-home aria-label="메인 화면으로">⌂</button>
+            <div class="story-hud-actions">
+              <button class="story-dev-enter-button" type="button" id="story-dev-enter">EDIT</button>
+              <button class="story-home-button" type="button" data-go-home aria-label="메인 화면으로">⌂</button>
+            </div>
           </header>
 
           <button class="story-exit story-exit--left" type="button" data-story-exit="left" aria-label="왼쪽으로 이동">‹</button>
@@ -139,6 +142,33 @@
           <button class="story-hotspot story-hotspot--table" type="button" data-story-hotspot="table"><span>테이블 조사</span></button>
           <button class="story-hotspot story-hotspot--bookshelf" type="button" data-story-hotspot="bookshelf"><span>책장 조사</span></button>
           <button class="story-hotspot story-hotspot--gramophone" type="button" data-story-hotspot="gramophone"><span>축음기 조사</span></button>
+
+          <section class="story-dev-toolbar" id="story-dev-toolbar" hidden>
+            <div>
+              <small>CHAPTER EDIT MODE</small>
+              <b id="story-dev-chapter-title">챕터 상호작용 배치</b>
+              <span id="story-dev-status">상호작용 박스를 화면에서 직접 배치할 수 있어요.</span>
+            </div>
+            <div class="story-dev-toolbar-actions">
+              <button type="button" class="primary" id="story-dev-add-interaction">＋ 상호작용 추가</button>
+              <button type="button" id="story-dev-exit">설정으로 돌아가기</button>
+            </div>
+          </section>
+
+          <div class="story-dev-layer" id="story-dev-layer" hidden aria-label="상호작용 배치 영역"></div>
+
+          <aside class="story-dev-inspector" id="story-dev-inspector" hidden>
+            <header>
+              <div><small>INTERACTION</small><b id="story-dev-interaction-title">상호작용을 선택하세요</b></div>
+              <span id="story-dev-position">X 0 · Y 0 · W 0 · H 0</span>
+            </header>
+            <p>상호작용 박스를 <b>드래그</b>해서 이동하고 오른쪽 아래 <b>●</b>를 끌어서 크기를 바꿔요.</p>
+            <div class="story-dev-fields" id="story-dev-fields"></div>
+            <div class="story-dev-inspector-actions">
+              <button type="button" class="danger" id="story-dev-delete-interaction" disabled>삭제</button>
+              <button type="button" class="primary" id="story-dev-save-interaction" disabled>세부 설정 저장</button>
+            </div>
+          </aside>
 
           <section class="story-dialogue" id="story-dialogue" hidden aria-live="polite">
             <div class="story-dialogue-mark">✦</div>
@@ -407,7 +437,7 @@
 
           <div class="dev-settings-toolbar">
             <button type="button" id="dev-new-entry">＋ 새 항목</button>
-            <p>챕터를 선택하면 아래에서 그 챕터의 상호작용까지 따로 설정할 수 있어요.</p>
+            <p>챕터 기본 정보를 수정한 뒤 “챕터 화면에서 상호작용 배치”로 실제 장면을 보며 편집하세요.</p>
           </div>
 
           <div class="dev-settings-workspace">
@@ -424,49 +454,17 @@
                 <div class="dev-editor-empty">왼쪽에서 항목을 선택하거나 + 새 항목을 눌러 주세요.</div>
               </div>
               <div class="dev-editor-actions">
+                <button type="button" class="scene" id="dev-open-chapter-scene" hidden>▣ 챕터 화면에서 상호작용 배치</button>
                 <button type="button" class="danger" id="dev-delete-entry" disabled>삭제</button>
                 <button type="button" class="primary" id="dev-save-entry" disabled>저장 · 적용</button>
               </div>
 
-              <section class="dev-chapter-interactions" id="dev-chapter-interactions" hidden>
-                <header class="dev-interaction-header">
-                  <div>
-                    <small>CHAPTER INTERACTIONS</small>
-                    <h5>이 챕터의 상호작용</h5>
-                    <p>장면 안에서 눌러보거나, 대화하거나, 이동하거나, 아이템을 얻는 행동을 추가합니다.</p>
-                  </div>
-                  <div class="dev-interaction-header-actions">
-                    <span id="dev-interaction-count">0개</span>
-                    <button type="button" id="dev-add-interaction">＋ 상호작용 추가</button>
-                  </div>
-                </header>
-
-                <div class="dev-interaction-workspace">
-                  <aside class="dev-interaction-list-wrap">
-                    <div class="dev-entry-pane-title"><b>상호작용 목록</b><small>챕터 안에서 사용</small></div>
-                    <div class="dev-interaction-list" id="dev-interaction-list"></div>
-                  </aside>
-
-                  <section class="dev-interaction-detail">
-                    <div class="dev-editor-pane-title">
-                      <div><small>INTERACTION EDITOR</small><h6 id="dev-interaction-title">상호작용을 선택하세요</h6></div>
-                    </div>
-                    <div class="dev-editor-fields dev-interaction-fields" id="dev-interaction-fields">
-                      <div class="dev-editor-empty">+ 상호작용 추가를 누른 뒤 세부 설정을 입력하세요.</div>
-                    </div>
-                    <div class="dev-editor-actions">
-                      <button type="button" class="danger" id="dev-delete-interaction" disabled>상호작용 삭제</button>
-                      <button type="button" class="primary" id="dev-save-interaction" disabled>상호작용 저장</button>
-                    </div>
-                  </section>
-                </div>
-              </section>
             </section>
           </div>
 
           <footer class="dev-settings-note">
             <b>개발용 임시 설정</b>
-            <span>챕터·컬렉션·아이템을 편집합니다. 챕터 안의 상호작용은 챕터별로 따로 저장되며, 최종 확정 뒤 코드 기본값으로 고정할 수 있어요.</span>
+            <span>챕터·컬렉션·아이템 기본 데이터를 편집합니다. 상호작용의 위치와 크기는 실제 챕터 화면 안에서 직접 배치합니다.</span>
           </footer>
         </section>
       </main>
