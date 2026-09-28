@@ -5,7 +5,7 @@
   const SESSION_SAVE_KEY = STORAGE_KEY+"-session-fallback";
   const WARDROBE_ASSET_KEY = "pixely-lost-sky-wardrobe-assets-v1";
   const DEV_CONTENT_KEY = "pixely-lost-sky-dev-content-v1";
-  const SITE_VERSION = "29";
+  const SITE_VERSION = "30";
   const $ = (q, root = document) => root.querySelector(q);
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 
@@ -376,6 +376,9 @@
   let devCollectionType="cards";
   let devSelectedId=null;
   let devSelectedInteractionId=null;
+  let devStoryChapterId=null;
+  let devStoryPointer=null;
+  let devStoryPlacing=false;
   let saveMode="manage";
   let toastTimer=null;
   let dismissedUpdate=null;
@@ -521,9 +524,16 @@
       view.hidden=!active;
       view.classList.toggle("is-active",active);
     });
+    if(name!=="story"&&name!=="dev"&&devStoryChapterId){
+      devStoryChapterId=null;
+      devSelectedInteractionId=null;
+      devStoryPointer=null;
+      devStoryPlacing=false;
+    }
     if(name==="collection") renderCollection();
     if(name==="chapters") renderChapters();
     if(name==="dev") renderDevSettings();
+    if(name==="story") renderGameUI();
     if(name==="wardrobe"){
       const save=activeSave();
       outfitDraft=save
@@ -709,13 +719,14 @@
 
   function renderGameUI(){
     const save=activeSave();
-    if(!save) return;
+    const devChapter=currentDevStoryChapter();
+    if(!save&&!devChapter) return;
 
-    $("#story-chapter-name").textContent="생일 전날";
-    $("#story-location-name").textContent="파티방";
-    $("#story-current-objective").textContent=currentStoryObjective(save);
+    $("#story-chapter-name").textContent=devChapter?.title||"생일 전날";
+    $("#story-location-name").textContent=devChapter?"장면 편집":"파티방";
+    $("#story-current-objective").textContent=devChapter?"상호작용을 실제 화면에서 배치하세요.":currentStoryObjective(save);
 
-    const inventoryIds=Array.isArray(save.collection?.items)?save.collection.items:[];
+    const inventoryIds=Array.isArray(save?.collection?.items)?save.collection.items:[];
     $("#story-inventory-count").textContent=inventoryIds.length;
 
     const quick=$("#story-quick-inventory");
@@ -737,9 +748,10 @@
     }
 
     const missionList=$("#story-mission-list");
-    missionList.innerHTML=(save.missions||[]).map(mission=>
+    missionList.innerHTML=(save?.missions||[]).map(mission=>
       '<li class="'+(mission.done?"is-done":"")+'"><span>'+(mission.done?"✓":"○")+'</span><b>'+escapeHTML(mission.title)+'</b></li>'
     ).join("") || '<li><span>○</span><b>아직 등록된 목표가 없습니다.</b></li>';
+    renderStoryDevEditor();
   }
 
   function collectionOwnedSet(){
@@ -1301,117 +1313,278 @@
     $("#dev-save-entry").disabled=!selected;
     $("#dev-delete-entry").disabled=!selected;
     $("#dev-save-status").textContent="브라우저 개발 설정 · "+entries.length+"개";
-    renderChapterInteractionEditor(selected,key);
+    const sceneButton=$("#dev-open-chapter-scene");
+    if(sceneButton){
+      sceneButton.hidden=key!=="chapters"||!selected;
+      sceneButton.disabled=key!=="chapters"||!selected;
+    }
   }
 
-  function currentChapterInteraction(){
-    if(currentDevKey()!=="chapters") return null;
-    const chapter=devContent.chapters.find(entry=>String(entry.id)===String(devSelectedId));
+  function currentDevStoryChapter(){
+    return devContent.chapters.find(chapter=>String(chapter.id)===String(devStoryChapterId))||null;
+  }
+
+  function currentDevStoryInteraction(){
+    const chapter=currentDevStoryChapter();
     return chapter?.interactions?.find(interaction=>String(interaction.id)===String(devSelectedInteractionId))||null;
   }
 
-  function newChapterInteraction(){
+  function normalizeVisualInteraction(interaction){
+    const width=clampNumber(interaction.width,3,80,12);
+    const height=clampNumber(interaction.height,3,80,12);
     return {
+      ...interaction,
+      x:clampNumber(interaction.x,0,100-width,44),
+      y:clampNumber(interaction.y,0,100-height,42),
+      width,
+      height
+    };
+  }
+
+  function newChapterInteractionAt(x=44,y=42){
+    return normalizeVisualInteraction({
       id:"interaction-"+Date.now().toString(36),
       type:"inspect",
       label:"새 상호작용",
       target:"",
-      scene:"",
-      x:50,y:50,width:12,height:12,
+      scene:"party-room",
+      x,y,width:12,height:12,
       text:"",
       condition:"",
       rewardItem:"",
       next:"",
       note:""
-    };
+    });
   }
 
-  function interactionFieldMarkup(field,value){
+  function storyInteractionFieldMarkup(field,value){
     const safe=value==null?"":String(value);
     if(field.type==="textarea"){
-      return '<label class="dev-field dev-field--wide"><span>'+escapeHTML(field.label)+'</span><textarea data-dev-interaction-field="'+escapeHTML(field.key)+'" placeholder="'+escapeHTML(field.placeholder||"")+'">'+escapeHTML(safe)+'</textarea></label>';
+      return '<label class="story-dev-field story-dev-field--wide"><span>'+escapeHTML(field.label)+'</span><textarea data-story-dev-field="'+escapeHTML(field.key)+'" placeholder="'+escapeHTML(field.placeholder||"")+'">'+escapeHTML(safe)+'</textarea></label>';
     }
     if(field.type==="select"){
       const options=(field.options||[]).map(([id,label])=>'<option value="'+escapeHTML(id)+'" '+(safe===id?"selected":"")+'>'+escapeHTML(label)+'</option>').join("");
-      return '<label class="dev-field"><span>'+escapeHTML(field.label)+'</span><select data-dev-interaction-field="'+escapeHTML(field.key)+'">'+options+'</select></label>';
+      return '<label class="story-dev-field"><span>'+escapeHTML(field.label)+'</span><select data-story-dev-field="'+escapeHTML(field.key)+'">'+options+'</select></label>';
     }
     const type=field.type==="number"?"number":"text";
     const numeric=type==="number"?' min="'+escapeHTML(field.min??"")+'" max="'+escapeHTML(field.max??"")+'" step="'+escapeHTML(field.step??1)+'"':"";
-    return '<label class="dev-field"><span>'+escapeHTML(field.label)+'</span><input type="'+type+'" data-dev-interaction-field="'+escapeHTML(field.key)+'" value="'+escapeHTML(safe)+'" placeholder="'+escapeHTML(field.placeholder||"")+'"'+numeric+'></label>';
+    return '<label class="story-dev-field"><span>'+escapeHTML(field.label)+'</span><input type="'+type+'" data-story-dev-field="'+escapeHTML(field.key)+'" value="'+escapeHTML(safe)+'" placeholder="'+escapeHTML(field.placeholder||"")+'"'+numeric+'></label>';
   }
 
-  function renderChapterInteractionEditor(chapter,key=currentDevKey()){
-    const panel=$("#dev-chapter-interactions");
-    if(!panel) return;
-    const visible=key==="chapters"&&Boolean(chapter);
-    panel.hidden=!visible;
-    if(!visible) return;
-    chapter.interactions=normalizeChapterInteractions(chapter.interactions);
-    if(!devSelectedInteractionId || !chapter.interactions.some(item=>String(item.id)===String(devSelectedInteractionId))){
-      devSelectedInteractionId=chapter.interactions[0]?.id||null;
+  function setStoryDevStatus(message){
+    const node=$("#story-dev-status");
+    if(node) node.textContent=message;
+  }
+
+  function syncStoryDevSelection(){
+    const layer=$("#story-dev-layer");
+    if(!layer) return;
+    $$("[data-story-dev-interaction]",layer).forEach(box=>{
+      box.classList.toggle("is-selected",box.dataset.storyDevInteraction===String(devSelectedInteractionId));
+    });
+  }
+
+  function renderStoryDevInspector(){
+    const inspector=$("#story-dev-inspector");
+    if(!inspector) return;
+    const interaction=currentDevStoryInteraction();
+    inspector.hidden=!devStoryChapterId;
+    $("#story-dev-save-interaction").disabled=!interaction;
+    $("#story-dev-delete-interaction").disabled=!interaction;
+    $("#story-dev-interaction-title").textContent=interaction?(interaction.label||interaction.id):"상호작용을 선택하세요";
+    const fields=$("#story-dev-fields");
+    if(!interaction){
+      fields.innerHTML='<div class="story-dev-empty">왼쪽 화면의 상호작용 박스를 선택하거나 + 상호작용 추가를 눌러 주세요.</div>';
+      $("#story-dev-position").textContent="선택 없음";
+      return;
     }
-    const selected=currentChapterInteraction();
-    $("#dev-interaction-count").textContent=chapter.interactions.length+"개";
-    $("#dev-interaction-list").innerHTML=chapter.interactions.length
-      ? chapter.interactions.map(item=>'<button type="button" data-dev-interaction="'+escapeHTML(item.id)+'" class="'+(String(item.id)===String(devSelectedInteractionId)?"is-active":"")+'"><b>'+escapeHTML(item.label||item.id)+'</b><small>'+escapeHTML(item.type||"inspect")+' · '+escapeHTML(item.id)+'</small></button>').join("")
-      : '<p class="dev-empty">아직 상호작용이 없습니다. + 상호작용 추가를 눌러 주세요.</p>';
-    $("#dev-interaction-title").textContent=selected?"수정 · "+(selected.label||selected.id):"상호작용을 선택하세요";
-    $("#dev-interaction-fields").innerHTML=selected
-      ? interactionSchema.map(field=>interactionFieldMarkup(field,selected[field.key])).join("")
-      : '<div class="dev-editor-empty">왼쪽 목록에서 상호작용을 선택해 주세요.</div>';
-    $("#dev-save-interaction").disabled=!selected;
-    $("#dev-delete-interaction").disabled=!selected;
+    const normalized=normalizeVisualInteraction(interaction);
+    Object.assign(interaction,normalized);
+    $("#story-dev-position").textContent="X "+Math.round(interaction.x)+" · Y "+Math.round(interaction.y)+" · W "+Math.round(interaction.width)+" · H "+Math.round(interaction.height);
+    fields.innerHTML=interactionSchema.map(field=>storyInteractionFieldMarkup(field,interaction[field.key])).join("");
   }
 
-  function addChapterInteraction(){
+  function renderStoryDevLayer(){
+    const layer=$("#story-dev-layer");
+    const chapter=currentDevStoryChapter();
+    if(!layer) return;
+    layer.hidden=!chapter;
+    if(!chapter) return;
+    chapter.interactions=normalizeChapterInteractions(chapter.interactions).map(normalizeVisualInteraction);
+    layer.classList.toggle("is-placing",devStoryPlacing);
+    layer.innerHTML=chapter.interactions.map((interaction,index)=>{
+      const selected=String(interaction.id)===String(devSelectedInteractionId);
+      const style="left:"+interaction.x+"%;top:"+interaction.y+"%;width:"+interaction.width+"%;height:"+interaction.height+"%;";
+      return '<button type="button" class="story-dev-hotspot '+(selected?"is-selected":"")+'" data-story-dev-interaction="'+escapeHTML(interaction.id)+'" style="'+style+'"><span><em>'+(index+1)+'</em>'+escapeHTML(interaction.label||interaction.id)+'</span><i data-story-dev-resize aria-hidden="true"></i></button>';
+    }).join("");
+  }
+
+  function renderStoryDevEditor(){
+    const chapter=currentDevStoryChapter();
+    const active=Boolean(chapter);
+    const room=$("#story-room");
+    const stage=$(".story-stage");
+    room?.classList.toggle("is-dev-editing",active);
+    stage?.classList.toggle("is-dev-editing",active);
+    const toolbar=$("#story-dev-toolbar");
+    if(toolbar) toolbar.hidden=!active;
+    const inspector=$("#story-dev-inspector");
+    if(inspector) inspector.hidden=!active;
+    if(!active){
+      const layer=$("#story-dev-layer");
+      if(layer) layer.hidden=true;
+      return;
+    }
+    chapter.interactions=normalizeChapterInteractions(chapter.interactions);
+    if(devSelectedInteractionId && !chapter.interactions.some(item=>String(item.id)===String(devSelectedInteractionId))){
+      devSelectedInteractionId=null;
+    }
+    $("#story-dev-chapter-title").textContent=(chapter.label||"CHAPTER")+" · "+(chapter.title||chapter.id);
+    setStoryDevStatus(devStoryPlacing?"화면에서 상호작용을 설치할 위치를 클릭하세요.":"박스를 드래그해서 위치를 옮기고 ● 핸들로 크기를 바꿔요.");
+    renderStoryDevLayer();
+    renderStoryDevInspector();
+  }
+
+  function openChapterSceneEditor(){
+    if(currentDevKey()!=="chapters") return;
     const chapter=devContent.chapters.find(entry=>String(entry.id)===String(devSelectedId));
     if(!chapter) return;
     chapter.interactions=normalizeChapterInteractions(chapter.interactions);
-    const interaction=newChapterInteraction();
+    devStoryChapterId=chapter.id;
+    devSelectedInteractionId=chapter.interactions[0]?.id||null;
+    devStoryPlacing=false;
+    closeStoryPanels();
+    showView("story");
+    renderGameUI();
+  }
+
+  function closeChapterSceneEditor(){
+    devStoryChapterId=null;
+    devSelectedInteractionId=null;
+    devStoryPointer=null;
+    devStoryPlacing=false;
+    showView("dev");
+  }
+
+  function startStoryInteractionPlacement(){
+    if(!currentDevStoryChapter()) return;
+    devStoryPlacing=true;
+    renderStoryDevEditor();
+  }
+
+  function placeStoryInteraction(event){
+    if(!devStoryPlacing) return false;
+    const layer=$("#story-dev-layer");
+    const chapter=currentDevStoryChapter();
+    if(!layer||!chapter) return false;
+    const rect=layer.getBoundingClientRect();
+    const width=12, height=12;
+    const px=((event.clientX-rect.left)/Math.max(1,rect.width))*100;
+    const py=((event.clientY-rect.top)/Math.max(1,rect.height))*100;
+    const interaction=newChapterInteractionAt(
+      clampNumber(px-width/2,0,100-width,44),
+      clampNumber(py-height/2,0,100-height,42)
+    );
     chapter.interactions.push(interaction);
     devSelectedInteractionId=interaction.id;
-    if(persistDevContent()){
-      renderDevSettings();
-      toast("새 상호작용을 추가했습니다.");
-    }
+    devStoryPlacing=false;
+    persistDevContent();
+    renderStoryDevEditor();
+    toast("상호작용을 화면에 추가했어요.");
+    return true;
   }
 
-  function saveChapterInteraction(){
-    const chapter=devContent.chapters.find(entry=>String(entry.id)===String(devSelectedId));
-    if(!chapter) return;
-    chapter.interactions=normalizeChapterInteractions(chapter.interactions);
-    const index=chapter.interactions.findIndex(item=>String(item.id)===String(devSelectedInteractionId));
-    if(index<0) return;
-    const next={...chapter.interactions[index]};
-    $("[data-dev-interaction-field]",$("#dev-interaction-fields")).forEach(field=>{
-      const key=field.dataset.devInteractionField;
+  function beginStoryInteractionPointer(event,id,mode){
+    const chapter=currentDevStoryChapter();
+    const interaction=chapter?.interactions?.find(item=>String(item.id)===String(id));
+    const layer=$("#story-dev-layer");
+    if(!interaction||!layer) return;
+    const normalized=normalizeVisualInteraction(interaction);
+    Object.assign(interaction,normalized);
+    devSelectedInteractionId=interaction.id;
+    const rect=layer.getBoundingClientRect();
+    devStoryPointer={
+      mode,
+      id:interaction.id,
+      startClientX:event.clientX,
+      startClientY:event.clientY,
+      startX:interaction.x,
+      startY:interaction.y,
+      startWidth:interaction.width,
+      startHeight:interaction.height,
+      rect
+    };
+    syncStoryDevSelection();
+    renderStoryDevInspector();
+    event.preventDefault();
+  }
+
+  function updateStoryInteractionPointer(event){
+    if(!devStoryPointer) return;
+    const interaction=currentDevStoryChapter()?.interactions?.find(item=>String(item.id)===String(devStoryPointer.id));
+    if(!interaction) return;
+    const rect=devStoryPointer.rect;
+    const dx=((event.clientX-devStoryPointer.startClientX)/Math.max(1,rect.width))*100;
+    const dy=((event.clientY-devStoryPointer.startClientY)/Math.max(1,rect.height))*100;
+    if(devStoryPointer.mode==="resize"){
+      interaction.width=clampNumber(devStoryPointer.startWidth+dx,3,100-interaction.x,devStoryPointer.startWidth);
+      interaction.height=clampNumber(devStoryPointer.startHeight+dy,3,100-interaction.y,devStoryPointer.startHeight);
+    }else{
+      interaction.x=clampNumber(devStoryPointer.startX+dx,0,100-interaction.width,devStoryPointer.startX);
+      interaction.y=clampNumber(devStoryPointer.startY+dy,0,100-interaction.height,devStoryPointer.startY);
+    }
+    const layer=$("#story-dev-layer");
+    const box=$$("[data-story-dev-interaction]",layer).find(node=>node.dataset.storyDevInteraction===String(interaction.id));
+    if(box){
+      box.style.left=interaction.x+"%";
+      box.style.top=interaction.y+"%";
+      box.style.width=interaction.width+"%";
+      box.style.height=interaction.height+"%";
+    }
+    $("#story-dev-position").textContent="X "+Math.round(interaction.x)+" · Y "+Math.round(interaction.y)+" · W "+Math.round(interaction.width)+" · H "+Math.round(interaction.height);
+  }
+
+  function finishStoryInteractionPointer(){
+    if(!devStoryPointer) return;
+    devStoryPointer=null;
+    persistDevContent();
+    renderStoryDevEditor();
+  }
+
+  function saveStoryInteractionDetails(){
+    const chapter=currentDevStoryChapter();
+    const interaction=currentDevStoryInteraction();
+    if(!chapter||!interaction) return;
+    const next={...interaction};
+    $$("[data-story-dev-field]",$("#story-dev-fields")).forEach(field=>{
+      const key=field.dataset.storyDevField;
       next[key]=["x","y","width","height"].includes(key)?Number(field.value):field.value;
     });
     next.id=String(next.id||"").trim();
     if(!next.id){toast("상호작용 ID는 비워둘 수 없습니다.");return}
-    if(chapter.interactions.some((item,i)=>i!==index&&String(item.id)===next.id)){toast("같은 상호작용 ID가 이미 있습니다.");return}
-    chapter.interactions[index]=next;
-    devSelectedInteractionId=next.id;
+    if(chapter.interactions.some(item=>item!==interaction&&String(item.id)===next.id)){
+      toast("같은 상호작용 ID가 이미 있습니다.");
+      return;
+    }
+    Object.assign(interaction,normalizeVisualInteraction(next));
+    devSelectedInteractionId=interaction.id;
     if(persistDevContent()){
-      renderDevSettings();
-      toast("상호작용 설정을 저장했습니다.");
+      renderStoryDevEditor();
+      toast("상호작용 세부 설정을 저장했어요.");
     }
   }
 
-  function deleteChapterInteraction(){
-    const chapter=devContent.chapters.find(entry=>String(entry.id)===String(devSelectedId));
-    if(!chapter) return;
-    chapter.interactions=normalizeChapterInteractions(chapter.interactions);
-    const index=chapter.interactions.findIndex(item=>String(item.id)===String(devSelectedInteractionId));
-    if(index<0) return;
-    const name=chapter.interactions[index].label||chapter.interactions[index].id;
-    if(!window.confirm(name+" 상호작용을 삭제할까요?")) return;
+  function deleteStoryInteraction(){
+    const chapter=currentDevStoryChapter();
+    const interaction=currentDevStoryInteraction();
+    if(!chapter||!interaction) return;
+    if(!window.confirm((interaction.label||interaction.id)+" 상호작용을 삭제할까요?")) return;
+    const index=chapter.interactions.indexOf(interaction);
     chapter.interactions.splice(index,1);
     devSelectedInteractionId=chapter.interactions[Math.min(index,chapter.interactions.length-1)]?.id||null;
-    if(persistDevContent()){
-      renderDevSettings();
-      toast("상호작용을 삭제했습니다.");
-    }
+    persistDevContent();
+    renderStoryDevEditor();
+    toast("상호작용을 삭제했어요.");
   }
 
   function createDevEntry(){
@@ -1688,18 +1861,29 @@
       devSelectedInteractionId=null;
       renderDevSettings();
     });
-    $("#dev-interaction-list")?.addEventListener("click",event=>{
-      const button=event.target.closest("[data-dev-interaction]");
-      if(!button) return;
-      devSelectedInteractionId=button.dataset.devInteraction;
-      renderDevSettings();
+    $("#dev-open-chapter-scene")?.addEventListener("click",openChapterSceneEditor);
+    $("#story-dev-add-interaction")?.addEventListener("click",startStoryInteractionPlacement);
+    $("#story-dev-exit")?.addEventListener("click",closeChapterSceneEditor);
+    $("#story-dev-save-interaction")?.addEventListener("click",saveStoryInteractionDetails);
+    $("#story-dev-delete-interaction")?.addEventListener("click",deleteStoryInteraction);
+    $("#story-dev-layer")?.addEventListener("pointerdown",event=>{
+      const box=event.target.closest?.("[data-story-dev-interaction]");
+      if(!box) return;
+      const resize=event.target.closest?.("[data-story-dev-resize]");
+      beginStoryInteractionPointer(event,box.dataset.storyDevInteraction,resize?"resize":"move");
     });
-    $("#dev-add-interaction")?.addEventListener("click",addChapterInteraction);
-    $("#dev-save-interaction")?.addEventListener("click",saveChapterInteraction);
-    $("#dev-delete-interaction")?.addEventListener("click",deleteChapterInteraction);
-    $("#dev-interaction-fields")?.addEventListener("input",()=>{
-      $("#dev-save-status").textContent="상호작용 수정됨 · 저장 필요";
+    $("#story-dev-layer")?.addEventListener("click",event=>{
+      const box=event.target.closest?.("[data-story-dev-interaction]");
+      if(box){
+        devSelectedInteractionId=box.dataset.storyDevInteraction;
+        syncStoryDevSelection();
+        renderStoryDevInspector();
+        return;
+      }
+      placeStoryInteraction(event);
     });
+    document.addEventListener("pointermove",updateStoryInteractionPointer);
+    document.addEventListener("pointerup",finishStoryInteractionPointer);
     $("#dev-new-entry")?.addEventListener("click",createDevEntry);
     $("#dev-save-entry")?.addEventListener("click",saveDevEntry);
     $("#dev-delete-entry")?.addEventListener("click",deleteDevEntry);
@@ -1724,6 +1908,7 @@
       if(!$("#save-modal").hidden) closeSaveModal();
       else if(!$("#story-inventory-panel")?.hidden || !$("#story-missions-panel")?.hidden || !$("#story-map-panel")?.hidden){closeStoryPanels();}
       else if(!$("#story-dialogue")?.hidden){$("#story-dialogue").hidden=true;}
+      else if(devStoryChapterId && !$("[data-view='story']").hidden){closeChapterSceneEditor();}
       else if(!$("[data-view='collection']").hidden || !$("[data-view='chapters']").hidden || !$("[data-view='story']").hidden || !$("[data-view='wardrobe']").hidden || !$("[data-view='dev']").hidden) showView("home");
     });
   }
