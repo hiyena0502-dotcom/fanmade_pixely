@@ -91,6 +91,10 @@
   let collectionTab="cards";
   let saveMode="manage";
   let toastTimer=null;
+  let siteVersion=null;
+  let siteFingerprint=null;
+  let dismissedUpdate=null;
+  let updateCheckTimer=null;
 
   function persist(){
     localStorage.setItem(STORAGE_KEY,JSON.stringify(root));
@@ -368,6 +372,96 @@
     }).join("");
   }
 
+
+  async function fetchTextNoCache(path){
+    const url=new URL(path,document.baseURI);
+    url.searchParams.set("_update_check",Date.now().toString());
+    const response=await fetch(url.toString(),{cache:"no-store"});
+    if(!response.ok) throw new Error("update-check failed");
+    return response.text();
+  }
+
+  async function hashText(text){
+    if(window.crypto?.subtle){
+      const data=new TextEncoder().encode(text);
+      const digest=await crypto.subtle.digest("SHA-256",data);
+      return [...new Uint8Array(digest)].map(v=>v.toString(16).padStart(2,"0")).join("");
+    }
+    let hash=2166136261;
+    for(let i=0;i<text.length;i++){
+      hash^=text.charCodeAt(i);
+      hash=Math.imul(hash,16777619);
+    }
+    return (hash>>>0).toString(16);
+  }
+
+  async function getSiteFingerprint(){
+    const files=await Promise.all([
+      fetchTextNoCache("./index.html"),
+      fetchTextNoCache("./style.css"),
+      fetchTextNoCache("./app.js")
+    ]);
+    return hashText(files.join("\n/* file-boundary */\n"));
+  }
+
+  async function getPublishedVersion(){
+    try{
+      const raw=await fetchTextNoCache("./site-version.json");
+      const parsed=JSON.parse(raw);
+      return String(parsed.version||"").trim()||null;
+    }catch{
+      return null;
+    }
+  }
+
+  function showUpdatePrompt(versionKey){
+    if(!versionKey || dismissedUpdate===versionKey) return;
+    const modal=$("#update-modal");
+    if(!modal || !modal.hidden) return;
+    modal.hidden=false;
+  }
+
+  function hideUpdatePrompt(){
+    const modal=$("#update-modal");
+    if(modal) modal.hidden=true;
+  }
+
+  async function checkForSiteUpdate({initial=false}={}){
+    try{
+      const [version,fingerprint]=await Promise.all([
+        getPublishedVersion(),
+        getSiteFingerprint()
+      ]);
+
+      if(initial || (siteVersion===null && siteFingerprint===null)){
+        siteVersion=version;
+        siteFingerprint=fingerprint;
+        return;
+      }
+
+      const versionChanged=Boolean(version && siteVersion && version!==siteVersion);
+      const fingerprintChanged=Boolean(fingerprint && siteFingerprint && fingerprint!==siteFingerprint);
+
+      if(versionChanged || fingerprintChanged){
+        const key=version||fingerprint;
+        showUpdatePrompt(key);
+      }
+    }catch{
+      // 네트워크가 잠시 끊긴 경우에는 조용히 다음 확인을 기다립니다.
+    }
+  }
+
+  function startUpdateWatcher(){
+    checkForSiteUpdate({initial:true});
+    updateCheckTimer=setInterval(()=>checkForSiteUpdate(),30000);
+
+    document.addEventListener("visibilitychange",()=>{
+      if(document.visibilityState==="visible") checkForSiteUpdate();
+    });
+
+    window.addEventListener("focus",()=>checkForSiteUpdate());
+  }
+
   function toast(message){
     const node=$("#toast");
     node.textContent=message;
@@ -392,7 +486,15 @@
     $$("[data-open-chapters]").forEach(b=>b.addEventListener("click",()=>showView("chapters")));
     $$("[data-go-home]").forEach(b=>b.addEventListener("click",()=>showView("home")));
     $$("[data-close-modal]").forEach(b=>b.addEventListener("click",closeSaveModal));
-    $$("[data-close-notice]").forEach(b=>b.addEventListener("click",()=>$("#notice-modal").hidden=true));
+    $("[data-close-notice]").forEach(b=>b.addEventListener("click",()=>$("#notice-modal").hidden=true));
+
+    $("#update-refresh-button")?.addEventListener("click",()=>{
+      window.location.reload();
+    });
+    $("#update-later-button")?.addEventListener("click",async()=>{
+      dismissedUpdate=(await getPublishedVersion())||siteFingerprint||"dismissed";
+      hideUpdatePrompt();
+    });
 
     $$(".diary-tabs button").forEach(b=>b.addEventListener("click",()=>{
       collectionTab=b.dataset.collectionTab;
@@ -421,6 +523,7 @@
   function boot(){
     renderHome();
     bind();
+    startUpdateWatcher();
   }
 
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot,{once:true});
