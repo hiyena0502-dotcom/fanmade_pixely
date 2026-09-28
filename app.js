@@ -3,7 +3,7 @@
 
   const STORAGE_KEY = "pixely-lost-sky-saves-v2";
   const WARDROBE_ASSET_KEY = "pixely-lost-sky-wardrobe-assets-v1";
-  const SITE_VERSION = "22";
+  const SITE_VERSION = "23";
   const $ = (q, root = document) => root.querySelector(q);
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 
@@ -158,13 +158,30 @@
     wardrobeAssets.setupOutfit=normalizeSetupOutfit(validOutfit(outfitDraft,[]));
     return persistWardrobeAssets(previous);
   }
+  function wardrobeStorageBytes(){
+    try{return JSON.stringify(wardrobeAssets).length*2}catch{return 0}
+  }
+  function formatStorageSize(bytes){
+    if(bytes<1024) return bytes+" B";
+    if(bytes<1024*1024) return (bytes/1024).toFixed(0)+" KB";
+    return (bytes/1024/1024).toFixed(2)+" MB";
+  }
+  function updateWardrobeStorageMeter(){
+    const meter=$("#wardrobe-storage-meter");
+    if(!meter) return;
+    const bytes=wardrobeStorageBytes();
+    meter.textContent="브라우저 저장 "+formatStorageSize(bytes);
+    meter.dataset.state=bytes>4.2*1024*1024?"warn":"ok";
+  }
   function persistWardrobeAssets(previous){
     try{
       localStorage.setItem(WARDROBE_ASSET_KEY,JSON.stringify(wardrobeAssets));
+      updateWardrobeStorageMeter();
       return true;
     }catch{
       if(previous) wardrobeAssets=previous;
-      toast("이미지 저장 공간이 부족합니다. 기존 파츠를 지우거나 PNG 용량을 줄여 주세요.");
+      updateWardrobeStorageMeter();
+      toast("브라우저 저장 공간이 부족합니다. 큰 이미지를 줄이거나 기존 파츠를 지워 주세요.");
       return false;
     }
   }
@@ -244,6 +261,7 @@
   let collectionFilter="all";
   let wardrobeSlot="outfit";
   let wardrobeEditorTarget="base";
+  let pendingWardrobeFile=null;
   let outfitDraft={layers:[]};
   let saveMode="manage";
   let toastTimer=null;
@@ -676,6 +694,9 @@
     const equipped=selected.map(item=>item.name).filter(Boolean);
     $("#wardrobe-slot-label").textContent=save?"SLOT "+(root.activeSlot+1):"DEV SETUP";
     $("#wardrobe-equipped").textContent=equipped.join(" · ")||"베이스만 표시";
+    const selectedCount=$("#wardrobe-selected-count");
+    if(selectedCount) selectedCount.textContent=selected.length+"개 적용 중";
+    updateWardrobeStorageMeter();
     $("#wardrobe-save-button").disabled=false;
     $("#wardrobe-save-button").textContent=save?"이 모습 저장하기 ✦":"개발자 기본 모습 저장";
     $("#wardrobe-status").textContent=save
@@ -709,6 +730,41 @@
     renderWardrobePreview();
     renderWardrobeEditor();
   }
+  function optimizeWardrobeDataURL(original,callback){
+    if(!original || original.length<850000 || typeof Image==="undefined"){
+      callback(original);
+      return;
+    }
+    try{
+      const image=new Image();
+      image.onload=()=>{
+        try{
+          const maxSide=1400;
+          const ratio=Math.min(1,maxSide/Math.max(image.naturalWidth||image.width||1,image.naturalHeight||image.height||1));
+          const canvas=document.createElement("canvas");
+          if(typeof canvas.getContext!=="function"){callback(original);return}
+          canvas.width=Math.max(1,Math.round((image.naturalWidth||image.width||1)*ratio));
+          canvas.height=Math.max(1,Math.round((image.naturalHeight||image.height||1)*ratio));
+          const context=canvas.getContext("2d");
+          if(!context){callback(original);return}
+          context.clearRect(0,0,canvas.width,canvas.height);
+          context.drawImage(image,0,0,canvas.width,canvas.height);
+          let optimized="";
+          try{optimized=canvas.toDataURL("image/webp",0.9)}catch{}
+          if(!optimized || !optimized.startsWith("data:image/") || optimized.length>=original.length){
+            try{optimized=canvas.toDataURL("image/png")}catch{}
+          }
+          callback(optimized && optimized.length<original.length ? optimized : original);
+        }catch{
+          callback(original);
+        }
+      };
+      image.onerror=()=>callback(original);
+      image.src=original;
+    }catch{
+      callback(original);
+    }
+  }
   function readImageFile(file,callback){
     if(!file) return;
     if(!/^image\/(png|webp|jpeg)$/i.test(file.type||"")){
@@ -716,13 +772,13 @@
       toast("PNG, WEBP, JPG 이미지만 추가할 수 있어요.");
       return;
     }
-    if(file.size>3000000){
-      setUploadStatus("파일이 너무 커요. 3MB 이하로 줄여 주세요.","error");
-      toast("이미지 한 장은 3MB 이하로 줄여 주세요.");
+    if(file.size>8000000){
+      setUploadStatus("파일이 너무 커요. 8MB 이하 파일을 사용해 주세요.","error");
+      toast("이미지 한 장은 8MB 이하만 등록할 수 있어요.");
       return;
     }
     const reader=new FileReader();
-    reader.onload=()=>callback(String(reader.result||""));
+    reader.onload=()=>optimizeWardrobeDataURL(String(reader.result||""),callback);
     reader.onerror=()=>{
       setUploadStatus("이미지를 읽지 못했습니다. 다른 파일로 다시 시도해 주세요.","error");
       toast("이미지를 읽지 못했습니다.");
@@ -773,6 +829,9 @@
       }
       if(nameInput) nameInput.value="";
       const upload=$("#wardrobe-image-file");if(upload) upload.value="";
+      pendingWardrobeFile=null;
+      const fileName=$("#wardrobe-file-name");if(fileName) fileName.textContent="선택된 파일 없음";
+      const addButton=$("#wardrobe-add-part-button");if(addButton) addButton.disabled=true;
       renderWardrobe();
       setUploadStatus(wardrobeLabels[targetSlot]+" / "+wardrobeGroupLabel(targetSlot,targetGroup)+" · "+name+" 등록 및 적용 완료","ok");
       toast(name+" 파츠를 등록하고 바로 적용했어요.");
@@ -1025,9 +1084,20 @@
       renderWardrobe();
     });
     $("#wardrobe-image-file").addEventListener("change",event=>{
-      const file=event.target.files?.[0];
-      if(file) addWardrobeImage(file);
-      event.target.value="";
+      const file=event.target.files?.[0]||null;
+      pendingWardrobeFile=file;
+      const name=$("#wardrobe-file-name");
+      if(name) name.textContent=file?file.name:"선택된 파일 없음";
+      const button=$("#wardrobe-add-part-button");
+      if(button) button.disabled=!file;
+      setUploadStatus(file?"파일 선택됨 · 등록하고 켜기를 누르세요.":"파일을 먼저 선택하세요.",file?"busy":"idle");
+    });
+    $("#wardrobe-add-part-button").addEventListener("click",()=>{
+      if(!pendingWardrobeFile){
+        setUploadStatus("먼저 이미지 파일을 선택해 주세요.","error");
+        return;
+      }
+      addWardrobeImage(pendingWardrobeFile);
     });
     $("#wardrobe-layer-select").addEventListener("change",event=>{
       wardrobeEditorTarget=event.target.value||"base";
