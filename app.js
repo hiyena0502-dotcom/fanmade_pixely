@@ -2,6 +2,7 @@
   "use strict";
 
   const STORAGE_KEY = "pixely-lost-sky-saves-v2";
+  const SITE_VERSION = "11";
   const $ = (q, root = document) => root.querySelector(q);
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 
@@ -56,20 +57,27 @@
   function freshRoot(){ return {activeSlot:null,slots:[null,null,null]}; }
 
   function normalizeSave(save){
-    if(!save) return null;
+    if(!save || typeof save!=="object" || Array.isArray(save)) return null;
+    const strings=value=>Array.isArray(value) ? value.filter(item=>typeof item==="string") : [];
     return {
       ...save,
       completedGame:Boolean(save.completedGame),
-      unlockedChapters:Array.isArray(save.unlockedChapters) ? save.unlockedChapters : ["prologue"],
-      completedChapters:Array.isArray(save.completedChapters) ? save.completedChapters : [],
+      progress:Number.isFinite(save.progress) ? Math.max(0,Math.min(100,save.progress)) : 0,
+      playSeconds:Number.isFinite(save.playSeconds) ? Math.max(0,save.playSeconds) : 0,
+      savedAt:Number.isFinite(save.savedAt) ? save.savedAt : 0,
+      chapter:typeof save.chapter==="string" ? save.chapter : "프롤로그",
+      location:typeof save.location==="string" ? save.location : "생일 파티 준비 장소",
+      savedLabel:typeof save.savedLabel==="string" ? save.savedLabel : "",
+      unlockedChapters:Array.isArray(save.unlockedChapters) ? strings(save.unlockedChapters) : ["prologue"],
+      completedChapters:strings(save.completedChapters),
       collection:{
         cards:Array.isArray(save.collection?.cards)
-          ? save.collection.cards
+          ? strings(save.collection.cards)
           : Array.isArray(save.collection?.characters)
-            ? save.collection.characters
+            ? strings(save.collection.characters)
             : ["dreamer"],
-        items:Array.isArray(save.collection?.items) ? save.collection.items : [],
-        postcards:Array.isArray(save.collection?.postcards) ? save.collection.postcards : []
+        items:strings(save.collection?.items),
+        postcards:strings(save.collection?.postcards)
       }
     };
   }
@@ -78,28 +86,38 @@
     try{
       const parsed=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");
       if(!parsed||!Array.isArray(parsed.slots)) return freshRoot();
-      return {
-        activeSlot:Number.isInteger(parsed.activeSlot)?parsed.activeSlot:null,
-        slots:[0,1,2].map(i=>normalizeSave(parsed.slots[i]))
-      };
+      const slots=[0,1,2].map(i=>normalizeSave(parsed.slots[i]));
+      const activeSlot=parsed.activeSlot;
+      return {activeSlot:Number.isInteger(activeSlot) && activeSlot>=0 && activeSlot<slots.length && slots[activeSlot] ? activeSlot : null,slots};
     }catch{
       return freshRoot();
     }
   }
 
   let root=readRoot();
+  let lastSavedRoot=JSON.stringify(root);
   let collectionTab="cards";
   let saveMode="manage";
   let toastTimer=null;
-  let siteVersion=null;
-  let siteFingerprint=null;
   let dismissedUpdate=null;
   let pendingUpdateKey=null;
-  let updateCheckTimer=null;
+
+  function escapeHTML(value){
+    return String(value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"})[char]);
+  }
 
   function persist(){
-    localStorage.setItem(STORAGE_KEY,JSON.stringify(root));
+    const serialized=JSON.stringify(root);
+    try{ localStorage.setItem(STORAGE_KEY,serialized); }
+    catch{
+      root=JSON.parse(lastSavedRoot);
+      toast("저장에 실패했습니다. 브라우저 저장 공간을 확인해 주세요.");
+      renderHome();
+      return false;
+    }
+    lastSavedRoot=serialized;
     renderHome();
+    return true;
   }
 
   function nowLabel(){
@@ -212,7 +230,7 @@
     $("#save-slot-list").innerHTML=root.slots.map((slot,index)=>{
       const active=root.activeSlot===index;
       const copy=slot
-        ? `<b>${slot.chapter} · ${slot.progress}%</b><small>${slot.location} · ${formatPlaytime(slot.playSeconds)} · ${slot.savedLabel||"저장됨"}</small>`
+        ? `<b>${escapeHTML(slot.chapter)} · ${slot.progress}%</b><small>${escapeHTML(slot.location)} · ${formatPlaytime(slot.playSeconds)} · ${escapeHTML(slot.savedLabel||"저장됨")}</small>`
         : `<b>빈 슬롯</b><small>저장 데이터가 없습니다.</small>`;
 
       let actions="";
@@ -236,7 +254,7 @@
     if(root.slots[index] && !window.confirm("SLOT "+(index+1)+"의 기존 데이터를 덮어쓸까요?")) return;
     root.slots[index]=newSave();
     root.activeSlot=index;
-    persist();
+    if(!persist()) return;
     closeSaveModal();
     showStoryNotice("새 이야기를 시작했습니다.","프롤로그 세이브를 만들었습니다.\n다음 작업에서 실제 포인트앤클릭 장면을 이곳에 연결합니다.");
   }
@@ -244,18 +262,19 @@
   function loadSlot(index){
     if(!root.slots[index]) return;
     root.activeSlot=index;
-    persist();
+    if(!persist()) return;
     closeSaveModal();
     toast("SLOT "+(index+1)+"을 불러왔습니다.");
   }
 
   function saveToSlot(index){
+    if(root.slots[index] && index!==root.activeSlot && !window.confirm("SLOT "+(index+1)+"의 기존 데이터를 덮어쓸까요?")) return;
     const copied=JSON.parse(JSON.stringify(activeSave()||newSave()));
     copied.savedAt=Date.now();
     copied.savedLabel=nowLabel();
     root.slots[index]=copied;
     root.activeSlot=index;
-    persist();
+    if(!persist()) return;
     closeSaveModal();
     toast("SLOT "+(index+1)+"에 저장했습니다.");
   }
@@ -265,7 +284,7 @@
     if(!window.confirm("SLOT "+(index+1)+"의 저장 데이터를 삭제할까요?")) return;
     root.slots[index]=null;
     if(root.activeSlot===index) root.activeSlot=null;
-    persist();
+    if(!persist()) return;
     renderSaveSlots();
     toast("저장 데이터를 삭제했습니다.");
   }
@@ -277,7 +296,7 @@
       return;
     }
     root.activeSlot=recent;
-    persist();
+    if(!persist()) return;
     const save=root.slots[recent];
     showStoryNotice(
       "이야기 이어하기",
@@ -378,47 +397,6 @@
   }
 
 
-  async function fetchTextNoCache(path){
-    const url=new URL(path,document.baseURI);
-    url.searchParams.set("_update_check",Date.now().toString());
-    const response=await fetch(url.toString(),{cache:"no-store"});
-    if(!response.ok) throw new Error("update-check failed");
-    return response.text();
-  }
-
-  async function hashText(text){
-    if(window.crypto?.subtle){
-      const data=new TextEncoder().encode(text);
-      const digest=await crypto.subtle.digest("SHA-256",data);
-      return [...new Uint8Array(digest)].map(v=>v.toString(16).padStart(2,"0")).join("");
-    }
-    let hash=2166136261;
-    for(let i=0;i<text.length;i++){
-      hash^=text.charCodeAt(i);
-      hash=Math.imul(hash,16777619);
-    }
-    return (hash>>>0).toString(16);
-  }
-
-  async function getSiteFingerprint(){
-    const files=await Promise.all([
-      fetchTextNoCache("./index.html"),
-      fetchTextNoCache("./style.css"),
-      fetchTextNoCache("./app.js")
-    ]);
-    return hashText(files.join("\n/* file-boundary */\n"));
-  }
-
-  async function getPublishedVersion(){
-    try{
-      const raw=await fetchTextNoCache("./site-version.json");
-      const parsed=JSON.parse(raw);
-      return String(parsed.version||"").trim()||null;
-    }catch{
-      return null;
-    }
-  }
-
   function showUpdatePrompt(versionKey){
     if(!versionKey || dismissedUpdate===versionKey) return;
     const modal=$("#update-modal");
@@ -432,34 +410,22 @@
     if(modal) modal.hidden=true;
   }
 
-  async function checkForSiteUpdate({initial=false}={}){
+  async function checkForSiteUpdate(){
     try{
-      const [version,fingerprint]=await Promise.all([
-        getPublishedVersion(),
-        getSiteFingerprint()
-      ]);
-
-      if(initial || (siteVersion===null && siteFingerprint===null)){
-        siteVersion=version;
-        siteFingerprint=fingerprint;
-        return;
-      }
-
-      const versionChanged=Boolean(version && siteVersion && version!==siteVersion);
-      const fingerprintChanged=Boolean(fingerprint && siteFingerprint && fingerprint!==siteFingerprint);
-
-      if(versionChanged || fingerprintChanged){
-        const key=version||fingerprint;
-        showUpdatePrompt(key);
-      }
+      const response=await fetch(new URL("./site-version.json",document.baseURI),{cache:"no-store"});
+      if(!response.ok) return;
+      const {version}=await response.json();
+      if(typeof version==="string" && version && version!==SITE_VERSION) showUpdatePrompt(version);
     }catch{
       // 네트워크가 잠시 끊긴 경우에는 조용히 다음 확인을 기다립니다.
     }
   }
 
   function startUpdateWatcher(){
-    checkForSiteUpdate({initial:true});
-    updateCheckTimer=setInterval(()=>checkForSiteUpdate(),30000);
+    checkForSiteUpdate();
+    setInterval(()=>{
+      if(document.visibilityState==="visible") checkForSiteUpdate();
+    },60000);
 
     document.addEventListener("visibilitychange",()=>{
       if(document.visibilityState==="visible") checkForSiteUpdate();
@@ -492,7 +458,7 @@
     $$("[data-open-chapters]").forEach(b=>b.addEventListener("click",()=>showView("chapters")));
     $$("[data-go-home]").forEach(b=>b.addEventListener("click",()=>showView("home")));
     $$("[data-close-modal]").forEach(b=>b.addEventListener("click",closeSaveModal));
-    $("[data-close-notice]").forEach(b=>b.addEventListener("click",()=>$("#notice-modal").hidden=true));
+    $$("[data-close-notice]").forEach(b=>b.addEventListener("click",()=>$("#notice-modal").hidden=true));
 
     $("#update-refresh-button")?.addEventListener("click",()=>{
       window.location.reload();
