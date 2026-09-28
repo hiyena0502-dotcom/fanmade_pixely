@@ -2682,3 +2682,138 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
   .room-window{left:31%;width:38%}.room-curtain--left{left:24.5%}.room-curtain--right{right:23.5%}
   .room-table{left:24%;width:52%}.room-bookshelf{right:4%;width:20%}.room-sideboard{left:3%;width:20%}
 }
+
+
+/* =========================================================
+   CHAPTER INTERACTION EDITOR v27
+   ========================================================= */
+.dev-chapter-interactions{
+  margin:0 13px 13px;
+  border:1px solid rgba(86,126,145,.16);
+  border-radius:10px;
+  background:#f8fbfc;
+  overflow:hidden;
+}
+.dev-interaction-header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  padding:13px;
+  border-bottom:1px solid rgba(82,120,138,.1);
+  background:#eef6f9;
+}
+.dev-interaction-header small{
+  color:#86a0ac;
+  font-size:6px;
+  font-weight:1000;
+  letter-spacing:.14em;
+}
+.dev-interaction-header h5{
+  margin:3px 0 4px;
+  color:#456878;
+  font-size:12px;
+}
+.dev-interaction-header p{
+  max-width:520px;
+  margin:0;
+  color:#7e949e;
+  font-size:8px;
+  line-height:1.5;
+}
+.dev-interaction-header-actions{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  flex-shrink:0;
+}
+.dev-interaction-header-actions span{
+  padding:6px 8px;
+  border-radius:6px;
+  background:#fff;
+  color:#78919c;
+  font-size:7px;
+  font-weight:900;
+}
+.dev-interaction-header-actions button{
+  padding:8px 10px;
+  border:0;
+  border-radius:7px;
+  background:#668fa1;
+  color:#fff;
+  font-size:8px;
+  font-weight:1000;
+  cursor:pointer;
+}
+.dev-interaction-workspace{
+  display:grid;
+  grid-template-columns:190px minmax(0,1fr);
+  min-height:360px;
+}
+.dev-interaction-list-wrap{
+  border-right:1px solid rgba(82,120,138,.1);
+  background:#fff;
+}
+.dev-interaction-list{
+  max-height:520px;
+  overflow:auto;
+  padding:6px;
+}
+.dev-interaction-list button{
+  width:100%;
+  display:grid;
+  gap:3px;
+  padding:9px;
+  border:0;
+  border-bottom:1px solid rgba(84,120,138,.08);
+  background:transparent;
+  color:#557686;
+  text-align:left;
+  cursor:pointer;
+}
+.dev-interaction-list button b{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:8px;
+}
+.dev-interaction-list button small{
+  color:#93a6ae;
+  font-size:6px;
+}
+.dev-interaction-list button.is-active{
+  border-radius:6px;
+  border-bottom-color:transparent;
+  background:#e8f3f7;
+  box-shadow:inset 3px 0 0 #76a5b7;
+}
+.dev-interaction-detail{
+  display:flex;
+  min-width:0;
+  flex-direction:column;
+  background:#fff;
+}
+.dev-interaction-detail .dev-editor-pane-title h6{
+  margin:2px 0 0;
+  color:#496a7b;
+  font-size:11px;
+}
+.dev-interaction-fields{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+.dev-interaction-fields input[type="number"]{
+  font-variant-numeric:tabular-nums;
+}
+@media(max-width:900px){
+  .dev-settings-tabs{grid-template-columns:repeat(3,1fr)}
+  .dev-interaction-workspace{grid-template-columns:170px minmax(0,1fr)}
+}
+@media(max-width:680px){
+  .dev-settings-tabs{grid-template-columns:repeat(3,1fr)}
+  .dev-interaction-header{flex-direction:column}
+  .dev-interaction-header-actions{width:100%;justify-content:space-between}
+  .dev-interaction-workspace{grid-template-columns:1fr}
+  .dev-interaction-list-wrap{border-right:0;border-bottom:1px solid rgba(82,120,138,.1)}
+  .dev-interaction-list{max-height:180px}
+  .dev-interaction-fields{grid-template-columns:1fr}
+}
