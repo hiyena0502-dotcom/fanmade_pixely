@@ -2817,3 +2817,148 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
   .dev-interaction-list{max-height:180px}
   .dev-interaction-fields{grid-template-columns:1fr}
 }
+
+
+/* =========================================================
+   DESKTOP CHAPTER + COLLECTION LAYOUT v28
+   16:9 desktop screens use horizontal space more effectively.
+   Tablet/mobile rules below 1099px stay unchanged.
+   ========================================================= */
+@media(min-width:1100px){
+  .chapters-view,
+  .collection-view{
+    min-height:100vh;
+  }
+
+  /* CHAPTERS — desktop: intro column + wide chapter log */
+  .chapters-shell{
+    width:min(1460px,calc(100vw - 96px));
+    margin:clamp(30px,4vh,54px) auto 72px;
+    display:grid;
+    grid-template-columns:minmax(260px,330px) minmax(0,1fr);
+    gap:clamp(34px,4vw,72px);
+    align-items:start;
+  }
+  .chapter-intro{
+    position:sticky;
+    top:118px;
+    max-width:none;
+    margin:0;
+    padding:8px 0 0;
+  }
+  .chapter-intro h3{
+    font-size:clamp(30px,2.25vw,40px);
+  }
+  .chapter-intro p{
+    max-width:300px;
+    font-size:11px;
+    line-height:1.8;
+  }
+  .chapter-list{
+    gap:13px;
+    min-width:0;
+  }
+  .chapter-card{
+    min-height:112px;
+    grid-template-columns:72px minmax(0,1fr) auto;
+    gap:18px;
+    padding:18px 22px;
+    border-radius:15px;
+  }
+  .chapter-number{
+    width:52px;
+    height:52px;
+  }
+  .chapter-copy b{
+    font-size:15px;
+  }
+  .chapter-copy p{
+    max-width:760px;
+    font-size:9px;
+    line-height:1.65;
+  }
+  .chapter-list::before{
+    left:35px;
+  }
+
+  /* COLLECTION — wider open diary on desktop */
+  .diary-wrap{
+    width:min(1500px,calc(100vw - 80px));
+    margin:clamp(24px,3vh,38px) auto 64px;
+  }
+  .diary-book{
+    min-height:min(760px,calc(100vh - 155px));
+    grid-template-columns:255px minmax(0,1fr);
+    border-radius:18px;
+  }
+  .diary-spine{
+    left:255px;
+  }
+  .diary-left-page{
+    padding:36px 26px 40px;
+  }
+  .diary-right-page{
+    padding:34px 38px 42px;
+    min-width:0;
+  }
+  .diary-left-page h3{
+    font-size:27px;
+  }
+  .diary-note{
+    max-width:205px;
+  }
+  .diary-tabs{
+    margin-top:28px;
+  }
+  .diary-page-heading{
+    align-items:center;
+    gap:28px;
+  }
+  .diary-page-heading p{
+    max-width:430px;
+  }
+  .collection-filters{
+    margin-top:15px;
+  }
+  .collection-grid{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:14px;
+    margin-top:18px;
+  }
+  .collection-card{
+    min-width:0;
+  }
+  .collection-card--card{
+    min-height:225px;
+  }
+  .collection-card--card .card-art{
+    height:112px;
+  }
+  .collection-card--item{
+    min-height:205px;
+  }
+  .collection-card--item .card-art{
+    height:92px;
+    margin-left:15px;
+    margin-right:15px;
+  }
+  .collection-grid--postcards{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:24px;
+  }
+  .collection-card--postcard{
+    grid-template-columns:1.12fr .88fr;
+  }
+  .postcard-art{
+    min-height:190px;
+  }
+}
+
+@media(min-width:1500px){
+  .chapters-shell{
+    grid-template-columns:340px minmax(0,1fr);
+  }
+  .collection-grid{
+    grid-template-columns:repeat(4,minmax(190px,1fr));
+  }
+}
