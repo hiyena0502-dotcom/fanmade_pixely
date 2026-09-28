@@ -503,10 +503,14 @@
       hideUpdatePrompt();
     });
 
-    $$(".diary-tabs button").forEach(b=>b.addEventListener("click",()=>{
-      collectionTab=b.dataset.collectionTab;
+    $(".diary-tabs")?.addEventListener("click",event=>{
+      const button=event.target.closest("[data-collection-tab]");
+      if(!button) return;
+      const nextTab=button.dataset.collectionTab;
+      if(!catalogue[nextTab]) return;
+      collectionTab=nextTab;
       renderCollection();
-    }));
+    });
 
     $("#save-slot-list").addEventListener("click",event=>{
       const newBtn=event.target.closest("[data-new-slot]");
