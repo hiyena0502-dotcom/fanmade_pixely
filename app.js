@@ -1474,6 +1474,7 @@
     if(!window.confirm("챕터·컬렉션·아이템 개발 설정을 모두 기본값으로 되돌릴까요?")) return;
     devContent=cloneData(BASE_DEV_CONTENT);
     devSelectedId=null;
+    devSelectedInteractionId=null;
     if(persistDevContent()){
       renderDevSettings();
       renderHome();
