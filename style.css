@@ -3125,3 +3125,409 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
     gap:11px;
   }
 }
+
+
+/* =========================================================
+   IN-SCENE CHAPTER INTERACTION EDITOR v30
+   Interaction placement happens on the actual chapter scene.
+   ========================================================= */
+.story-hud-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  pointer-events:auto;
+}
+.story-dev-enter-button{
+  min-width:58px;
+  height:44px;
+  padding:0 12px;
+  border:1px solid rgba(135,198,221,.45);
+  border-radius:12px;
+  background:rgba(10,31,43,.84);
+  color:#bfeafb;
+  font-size:9px;
+  font-weight:1000;
+  letter-spacing:.12em;
+  cursor:pointer;
+  box-shadow:0 8px 20px rgba(0,0,0,.24);
+}
+.story-dev-enter-button:hover{
+  background:rgba(21,61,77,.92);
+}
+.dev-editor-actions .scene{
+  margin-right:auto;
+  border:1px solid rgba(91,151,175,.25);
+  background:#eaf6fa;
+  color:#4f7d91;
+}
+
+.story-stage.is-dev-editing .story-toolbar{
+  opacity:.28;
+  pointer-events:none;
+}
+.story-room.is-dev-editing .story-hotspot,
+.story-room.is-dev-editing .story-exit{
+  opacity:.14;
+  pointer-events:none;
+}
+.story-room.is-dev-editing .story-hud{
+  opacity:.42;
+}
+.story-room.is-dev-editing .story-dev-toolbar,
+.story-room.is-dev-editing .story-dev-inspector{
+  opacity:1;
+}
+
+.story-dev-toolbar{
+  position:absolute;
+  z-index:55;
+  left:300px;
+  right:22px;
+  top:18px;
+  min-height:58px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:10px 12px;
+  border:1px solid rgba(132,194,216,.45);
+  border-radius:12px;
+  background:rgba(8,24,34,.91);
+  color:#d9f3fc;
+  box-shadow:0 14px 34px rgba(0,0,0,.30);
+  backdrop-filter:blur(12px);
+}
+.story-dev-toolbar>div:first-child{
+  min-width:0;
+  display:grid;
+  gap:2px;
+}
+.story-dev-toolbar small{
+  color:#82c7df;
+  font-size:7px;
+  font-weight:1000;
+  letter-spacing:.15em;
+}
+.story-dev-toolbar b{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:12px;
+}
+.story-dev-toolbar span{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#a9c5d0;
+  font-size:8px;
+}
+.story-dev-toolbar-actions{
+  display:flex;
+  gap:7px;
+  flex-shrink:0;
+}
+.story-dev-toolbar-actions button{
+  height:34px;
+  padding:0 11px;
+  border:1px solid rgba(126,183,204,.25);
+  border-radius:8px;
+  background:#173947;
+  color:#cdebf5;
+  font-size:8px;
+  font-weight:900;
+  cursor:pointer;
+}
+.story-dev-toolbar-actions button.primary{
+  border-color:#82c8df;
+  background:#4c91aa;
+  color:#fff;
+}
+
+.story-dev-layer{
+  position:absolute;
+  z-index:42;
+  inset:0;
+  overflow:hidden;
+  pointer-events:auto;
+}
+.story-dev-layer.is-placing{
+  cursor:crosshair;
+  background:rgba(60,174,211,.055);
+}
+.story-dev-layer.is-placing::after{
+  content:"이 화면에서 상호작용을 둘 위치를 클릭하세요";
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  padding:10px 13px;
+  border:1px solid rgba(143,214,237,.55);
+  border-radius:9px;
+  background:rgba(8,29,39,.86);
+  color:#d4f3fc;
+  font-size:9px;
+  font-weight:900;
+  pointer-events:none;
+  box-shadow:0 8px 24px rgba(0,0,0,.26);
+}
+
+.story-dev-hotspot{
+  position:absolute;
+  z-index:2;
+  min-width:34px;
+  min-height:28px;
+  border:2px dashed rgba(105,208,236,.82);
+  border-radius:8px;
+  background:rgba(65,181,216,.13);
+  color:#e8f9ff;
+  cursor:move;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),0 0 0 1px rgba(0,0,0,.2);
+  touch-action:none;
+}
+.story-dev-hotspot:hover{
+  background:rgba(81,199,231,.20);
+}
+.story-dev-hotspot.is-selected{
+  border-style:solid;
+  border-color:#ffb5ce;
+  background:rgba(239,132,169,.18);
+  box-shadow:0 0 0 2px rgba(255,181,206,.2),0 0 24px rgba(232,122,161,.2);
+}
+.story-dev-hotspot>span{
+  position:absolute;
+  left:5px;
+  top:5px;
+  max-width:calc(100% - 18px);
+  display:flex;
+  align-items:center;
+  gap:5px;
+  padding:4px 6px;
+  border-radius:6px;
+  background:rgba(4,22,30,.86);
+  color:#eafaff;
+  font-size:7px;
+  font-weight:900;
+  line-height:1;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  pointer-events:none;
+}
+.story-dev-hotspot>span em{
+  display:grid;
+  place-items:center;
+  width:15px;
+  height:15px;
+  border-radius:4px;
+  background:#67b6d0;
+  color:#fff;
+  font-size:6px;
+  font-style:normal;
+  flex-shrink:0;
+}
+.story-dev-hotspot.is-selected>span em{
+  background:#e68dab;
+}
+.story-dev-hotspot>[data-story-dev-resize]{
+  position:absolute;
+  right:-7px;
+  bottom:-7px;
+  width:15px;
+  height:15px;
+  border:3px solid #0c2935;
+  border-radius:50%;
+  background:#ffd0df;
+  cursor:nwse-resize;
+  box-shadow:0 0 0 1px #e68dab;
+  touch-action:none;
+}
+
+.story-dev-inspector{
+  position:absolute;
+  z-index:58;
+  right:18px;
+  top:92px;
+  bottom:18px;
+  width:min(360px,32vw);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  border:1px solid rgba(132,194,216,.4);
+  border-radius:12px;
+  background:rgba(244,251,253,.96);
+  color:#456979;
+  box-shadow:0 18px 40px rgba(0,0,0,.32);
+  backdrop-filter:blur(14px);
+}
+.story-dev-inspector>header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:8px;
+  padding:11px 12px;
+  border-bottom:1px solid rgba(83,132,151,.14);
+  background:#eaf5f8;
+}
+.story-dev-inspector>header>div{
+  min-width:0;
+  display:grid;
+  gap:2px;
+}
+.story-dev-inspector>header small{
+  color:#7da3b2;
+  font-size:6px;
+  font-weight:1000;
+  letter-spacing:.14em;
+}
+.story-dev-inspector>header b{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:10px;
+}
+.story-dev-inspector>header>span{
+  flex-shrink:0;
+  padding:5px 7px;
+  border-radius:6px;
+  background:#fff;
+  color:#72909d;
+  font-size:7px;
+  font-weight:900;
+}
+.story-dev-inspector>p{
+  margin:0;
+  padding:8px 11px;
+  border-bottom:1px solid rgba(83,132,151,.1);
+  color:#78919c;
+  font-size:7px;
+  line-height:1.55;
+}
+.story-dev-fields{
+  flex:1;
+  min-height:0;
+  overflow:auto;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  align-content:start;
+  gap:8px;
+  padding:11px;
+}
+.story-dev-field{
+  min-width:0;
+  display:grid;
+  gap:4px;
+}
+.story-dev-field--wide{
+  grid-column:1/-1;
+}
+.story-dev-field>span{
+  color:#678695;
+  font-size:7px;
+  font-weight:900;
+}
+.story-dev-field input,
+.story-dev-field select,
+.story-dev-field textarea{
+  width:100%;
+  min-width:0;
+  border:1px solid rgba(82,129,147,.2);
+  border-radius:7px;
+  outline:none;
+  background:#fff;
+  color:#476a7b;
+  font-size:8px;
+}
+.story-dev-field input,
+.story-dev-field select{
+  height:31px;
+  padding:0 7px;
+}
+.story-dev-field textarea{
+  min-height:58px;
+  padding:7px;
+  resize:vertical;
+  line-height:1.45;
+}
+.story-dev-field input:focus,
+.story-dev-field select:focus,
+.story-dev-field textarea:focus{
+  border-color:#74b2c8;
+  box-shadow:0 0 0 2px rgba(92,171,200,.12);
+}
+.story-dev-empty{
+  grid-column:1/-1;
+  display:grid;
+  place-items:center;
+  min-height:140px;
+  padding:18px;
+  color:#8da2ab;
+  text-align:center;
+  font-size:8px;
+}
+.story-dev-inspector-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:7px;
+  padding:9px 11px;
+  border-top:1px solid rgba(83,132,151,.12);
+  background:#f4f9fa;
+}
+.story-dev-inspector-actions button{
+  padding:8px 10px;
+  border-radius:7px;
+  font-size:8px;
+  font-weight:1000;
+  cursor:pointer;
+}
+.story-dev-inspector-actions button:disabled{
+  opacity:.38;
+  cursor:default;
+}
+.story-dev-inspector-actions .danger{
+  border:1px solid rgba(195,102,124,.22);
+  background:#fff2f5;
+  color:#a65e73;
+}
+.story-dev-inspector-actions .primary{
+  border:0;
+  background:#5a91a6;
+  color:#fff;
+}
+
+@media(max-width:1000px){
+  .story-dev-toolbar{
+    left:190px;
+  }
+  .story-dev-inspector{
+    width:340px;
+  }
+}
+@media(max-width:720px){
+  .story-dev-toolbar{
+    left:12px;
+    right:12px;
+    top:78px;
+    align-items:flex-start;
+    flex-direction:column;
+  }
+  .story-dev-toolbar-actions{
+    width:100%;
+  }
+  .story-dev-toolbar-actions button{
+    flex:1;
+  }
+  .story-dev-inspector{
+    left:10px;
+    right:10px;
+    top:auto;
+    bottom:10px;
+    width:auto;
+    max-height:44vh;
+  }
+  .story-dev-fields{
+    grid-template-columns:1fr;
+  }
+  .story-dev-field--wide{
+    grid-column:1;
+  }
+}
