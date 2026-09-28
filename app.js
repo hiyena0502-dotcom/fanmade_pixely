@@ -987,16 +987,18 @@
       const item=wardrobeOptionById(wardrobeSlot,button.dataset.wardrobeItem);
       const owned=new Set(activeSave()?.collection?.items||[]);
       if(!item || !wardrobeOptionUnlocked(item,owned)) return;
-      if(wardrobeSlot==="decoration"){
-        const selected=new Set(outfitDraft.decorations||[]);
-        if(selected.has(item.id)) selected.delete(item.id);
-        else selected.add(item.id);
-        outfitDraft.decorations=[...selected];
-      }else{
-        outfitDraft[wardrobeSlot]=item.id;
+      const selected=new Set(outfitDraft.layers||[]);
+      if(selected.has(item.id)) selected.delete(item.id);
+      else selected.add(item.id);
+      outfitDraft.layers=[...selected];
+      if(item.custom){
+        if(!wardrobeAssets.layerOrder.includes(item.id)) wardrobeAssets.layerOrder.push(item.id);
+        wardrobeEditorTarget=item.id;
       }
-      if(item.custom) wardrobeEditorTarget=item.id;
-      if(!activeSave() && !rememberDeveloperOutfit()) outfitDraft={...developerOutfit(),decorations:[...developerOutfit().decorations]};
+      if(!activeSave() && !rememberDeveloperOutfit()){
+        outfitDraft=developerOutfit();
+        outfitDraft.layers=[...(outfitDraft.layers||[])];
+      }
       renderWardrobe();
     });
     $("#wardrobe-save-button").addEventListener("click",saveOutfit);
@@ -1023,6 +1025,7 @@
       input.addEventListener("input",event=>updateWardrobeTransform(event.target.dataset.wardrobeTransform,event.target.value,false));
       input.addEventListener("change",event=>updateWardrobeTransform(event.target.dataset.wardrobeTransform,event.target.value,true));
     });
+    $("[data-layer-move]").forEach(button=>button.addEventListener("click",()=>moveWardrobeLayer(button.dataset.layerMove)));
     $("#wardrobe-reset-transform").addEventListener("click",resetWardrobeTransform);
     $("#wardrobe-delete-image").addEventListener("click",deleteWardrobeImage);
     $("#wardrobe-preview").addEventListener("click",event=>{
