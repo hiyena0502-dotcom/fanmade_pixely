@@ -239,4 +239,15 @@ test("deployed version and asset cache keys match the script",()=>{
 });
 
 
-test("wardrobe image editor controls and multi-layer upload UI are present",()=>{\n  const html=fs.readFileSync(path.join(directory,"index.html"),"utf8");\n  assert.match(html,/id="wardrobe-base-file"/);\n  assert.match(html,/id="wardrobe-image-file"/);\n  assert.match(html,/id="wardrobe-layer-select"/);\n  assert.match(html,/data-wardrobe-transform="x"/);\n  assert.match(html,/data-wardrobe-transform="y"/);\n  assert.match(html,/data-wardrobe-transform="scale"/);\n  assert.match(html,/data-wardrobe-transform="rotation"/);\n  assert.match(app,/WARDROBE_ASSET_KEY/);\n  assert.match(app,/wardrobeAssets\\.custom/);\n});\n
+test("wardrobe image editor controls and multi-layer upload UI are present",()=>{
+  const html=fs.readFileSync(path.join(directory,"index.html"),"utf8");
+  assert.match(html,/id="wardrobe-base-file"/);
+  assert.match(html,/id="wardrobe-image-file"/);
+  assert.match(html,/id="wardrobe-layer-select"/);
+  assert.match(html,/data-wardrobe-transform="x"/);
+  assert.match(html,/data-wardrobe-transform="y"/);
+  assert.match(html,/data-wardrobe-transform="scale"/);
+  assert.match(html,/data-wardrobe-transform="rotation"/);
+  assert.match(app,/WARDROBE_ASSET_KEY/);
+  assert.match(app,/wardrobeAssets\.custom/);
+});
