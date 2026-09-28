@@ -5,7 +5,7 @@
   const SESSION_SAVE_KEY = STORAGE_KEY+"-session-fallback";
   const WARDROBE_ASSET_KEY = "pixely-lost-sky-wardrobe-assets-v1";
   const DEV_CONTENT_KEY = "pixely-lost-sky-dev-content-v1";
-  const SITE_VERSION = "32";
+  const SITE_VERSION = "33";
   const $ = (q, root = document) => root.querySelector(q);
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 
@@ -648,13 +648,15 @@
     {phase:"exterior",kind:"dialogue",speaker:"꿈뜰",text:"여기 맞겠지?"},
     {phase:"exterior",kind:"dialogue",speaker:"꿈뜰",text:"생각보다 조용한데……."},
 
-    {phase:"exterior",kind:"dialogue",speaker:"수현",text:"잠깐만! 그 상자 거기 두면 안 돼!"},
-    {phase:"exterior",kind:"dialogue",speaker:"공룡",text:"아니, 내가 안 뒀다니까?!"},
-    {phase:"exterior",kind:"dialogue",speaker:"덕개",text:"그럼 바닥에 떨어진 리본은 누가 밟았는데?"},
-    {phase:"exterior",kind:"dialogue",speaker:"라더",text:"잠깐, 다들 한 번만 멈춰봐!"},
+    {phase:"exterior",kind:"house"},
 
-    {phase:"exterior",kind:"narration",text:"익숙한 소음과 친근한 목소리다……"},
-    {phase:"exterior",kind:"narration",text:"…잘 찾아온 것 같다."},
+    {phase:"door",kind:"dialogue",speaker:"수현",text:"잠깐만! 그 상자 거기 두면 안 돼!"},
+    {phase:"door",kind:"dialogue",speaker:"공룡",text:"아니, 내가 안 뒀다니까?!"},
+    {phase:"door",kind:"dialogue",speaker:"덕개",text:"그럼 바닥에 떨어진 리본은 누가 밟았는데?"},
+    {phase:"door",kind:"dialogue",speaker:"라더",text:"잠깐, 다들 한 번만 멈춰봐!"},
+
+    {phase:"door",kind:"narration",text:"익숙한 소음과 친근한 목소리다……"},
+    {phase:"door",kind:"narration",text:"…잘 찾아온 것 같다."},
 
     {phase:"chapter",kind:"chapter",kicker:"CHAPTER 1",title:"생일 전날",text:"잠뜰님의 생일 파티를 준비하자."}
   ];
@@ -668,22 +670,39 @@
     const step=storyIntroSteps[storyIntroIndex];
     if(!overlay||!step) return;
 
+    const houseStep=step.kind==="house";
     overlay.classList.toggle("is-exterior",step.phase==="exterior");
+    overlay.classList.toggle("is-door",step.phase==="door");
     overlay.classList.toggle("is-chapter",step.phase==="chapter");
     overlay.classList.toggle("is-dark",step.phase==="dark");
     overlay.classList.toggle("is-dialogue",step.kind==="dialogue");
     overlay.classList.toggle("is-narration",step.kind==="narration");
+    overlay.classList.toggle("is-house-prompt",houseStep);
+
+    const next=$("#story-intro-next");
+    const house=$("#story-intro-house");
+    const hint=$("#story-intro-hint-text");
+    const copy=$(".story-intro-copy",overlay);
+
+    if(next) next.disabled=houseStep;
+    if(house){
+      house.hidden=!houseStep;
+      house.disabled=!houseStep;
+    }
+    if(hint) hint.textContent=houseStep?"집을 클릭해 가까이 가기":"CLICK / SPACE";
 
     $("#story-intro-kicker").textContent=step.speaker||step.kicker||"";
     $("#story-intro-title").textContent=step.title||"";
     $("#story-intro-text").textContent=step.text||"";
     $("#story-intro-voices").innerHTML="";
 
-    const copy=$(".story-intro-copy",overlay);
     if(copy){
+      copy.hidden=houseStep;
       copy.classList.remove("is-reveal");
-      void copy.offsetWidth;
-      copy.classList.add("is-reveal");
+      if(!houseStep){
+        void copy.offsetWidth;
+        copy.classList.add("is-reveal");
+      }
     }
   }
 
@@ -697,6 +716,7 @@
     storyIntroIndex=0;
     storyIntroActive=true;
     overlay.hidden=false;
+    overlay.classList.remove("is-approaching");
 
     const copy=$(".story-intro-copy",overlay);
     if(copy) copy.classList.remove("is-reveal");
@@ -704,11 +724,34 @@
     renderStoryIntroStep();
   }
 
+  function approachStoryIntroHouse(){
+    if(!storyIntroActive) return;
+    const step=storyIntroSteps[storyIntroIndex];
+    if(step?.kind!=="house") return;
+
+    const overlay=$("#story-intro");
+    const house=$("#story-intro-house");
+    if(!overlay||overlay.classList.contains("is-approaching")) return;
+
+    overlay.classList.add("is-approaching");
+    if(house) house.disabled=true;
+
+    window.setTimeout(()=>{
+      if(!storyIntroActive) return;
+      storyIntroIndex+=1;
+      renderStoryIntroStep();
+      overlay.classList.remove("is-approaching");
+    },950);
+  }
+
   function finishStoryIntro(){
     const overlay=$("#story-intro");
     storyIntroActive=false;
     storyIntroIndex=0;
-    if(overlay) overlay.hidden=true;
+    if(overlay){
+      overlay.hidden=true;
+      overlay.classList.remove("is-approaching");
+    }
 
     const save=activeSave();
     if(save){
@@ -723,6 +766,9 @@
 
   function advanceStoryIntro(){
     if(!storyIntroActive) return;
+    const step=storyIntroSteps[storyIntroIndex];
+    if(step?.kind==="house") return;
+
     if(storyIntroIndex<storyIntroSteps.length-1){
       storyIntroIndex+=1;
       renderStoryIntroStep();
@@ -1857,6 +1903,7 @@
     Array.from(document.querySelectorAll("[data-story-close-panel]")).forEach(button=>button.addEventListener("click",closeStoryPanels));
     $("#story-dialogue-close")?.addEventListener("click",()=>$("#story-dialogue").hidden=true);
     $("#story-intro-next")?.addEventListener("click",advanceStoryIntro);
+    $("#story-intro-house")?.addEventListener("click",approachStoryIntroHouse);
     $("#story-save-button")?.addEventListener("click",quickStorySave);
     $("#story-quick-inventory")?.addEventListener("click",event=>{
       const button=event.target.closest("[data-story-item-id]");

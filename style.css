@@ -3534,8 +3534,8 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
 
 
 /* =========================================================
-   CHAPTER 01 INTRO v32
-   포근한 집 · 게임식 대화 · 블러→선명 · 웅장한 챕터 타이틀
+   CHAPTER 01 INTRO v33
+   모든 글 블러→선명 · 집 직접 클릭 · 현관 접근 씬
    ========================================================= */
 .story-intro-overlay{
   position:absolute;
@@ -3549,32 +3549,47 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
   position:absolute;
   inset:0;
   opacity:0;
-  transition:opacity .75s ease,filter .8s ease;
+  transform:scale(1);
+  transform-origin:50% 64%;
+  transition:
+    opacity .75s ease,
+    filter .85s ease,
+    transform .95s cubic-bezier(.18,.72,.2,1);
   background:
-    radial-gradient(circle at 76% 15%,rgba(255,244,214,.48),transparent 16%),
-    linear-gradient(180deg,#a9d2e3 0%,#cde8e8 48%,#e8d8b9 100%);
+    radial-gradient(circle at 78% 14%,rgba(255,246,219,.46),transparent 17%),
+    linear-gradient(180deg,#add5e5 0%,#d3eaea 49%,#eadabb 100%);
 }
-.story-intro-overlay.is-exterior .story-intro-backdrop{opacity:1}
-.story-intro-overlay.is-chapter .story-intro-backdrop{
-  opacity:.18;
-  filter:blur(7px) saturate(.55) brightness(.72);
-}
+.story-intro-overlay.is-exterior .story-intro-backdrop,
+.story-intro-overlay.is-door .story-intro-backdrop{opacity:1}
 .story-intro-overlay.is-dark .story-intro-backdrop{opacity:0}
+.story-intro-overlay.is-chapter .story-intro-backdrop{
+  opacity:.16;
+  filter:blur(8px) saturate(.52) brightness(.68);
+  transform:scale(1.04);
+}
+/* 집 클릭 직후 카메라가 현관 쪽으로 실제로 다가가는 장면 */
+.story-intro-overlay.is-approaching .story-intro-backdrop,
+.story-intro-overlay.is-door .story-intro-backdrop{
+  transform:scale(1.56);
+  transform-origin:50% 67%;
+}
 
 .intro-ground{
   position:absolute;
+  z-index:0;
   left:-5%;
   right:-5%;
-  bottom:-9%;
-  height:37%;
+  bottom:-12%;
+  height:33%;
   background:
-    radial-gradient(circle at 15% 20%,rgba(103,139,86,.82) 0 5%,transparent 5.4%),
-    radial-gradient(circle at 84% 14%,rgba(111,148,91,.78) 0 5%,transparent 5.4%),
-    linear-gradient(180deg,#9fbd86,#739864);
-  border-radius:50% 50% 0 0/19% 19% 0 0;
+    radial-gradient(circle at 14% 20%,rgba(103,139,86,.76) 0 5%,transparent 5.4%),
+    radial-gradient(circle at 86% 18%,rgba(111,148,91,.72) 0 5%,transparent 5.4%),
+    linear-gradient(180deg,#a1c18a,#789b68);
+  border-radius:50% 50% 0 0/18% 18% 0 0;
 }
 .intro-cloud{
   position:absolute;
+  z-index:1;
   width:180px;
   height:50px;
   border-radius:999px;
@@ -3592,81 +3607,71 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
 .intro-cloud--one{left:7%;top:13%;transform:scale(.78)}
 .intro-cloud--two{right:8%;top:18%;transform:scale(.58);opacity:.74}
 
-/* 집은 회전 사각형이 아니라 정면형 실루엣으로 구성 */
+/* 집은 땅보다 앞에 있고, 바닥에서 충분히 띄워 파묻혀 보이지 않게 함 */
 .intro-house{
   position:absolute;
+  z-index:3;
   left:50%;
-  bottom:13%;
-  width:min(520px,58vw);
-  height:min(430px,54vh);
+  bottom:20%;
+  width:min(560px,58vw);
+  height:min(430px,52vh);
   transform:translateX(-50%);
-  filter:drop-shadow(0 26px 28px rgba(45,56,54,.19));
+  filter:drop-shadow(0 25px 30px rgba(45,56,54,.18));
 }
 .intro-house-roof{
   position:absolute;
-  z-index:2;
+  z-index:3;
   left:50%;
-  top:3%;
-  width:88%;
-  height:43%;
+  top:0;
+  width:94%;
+  height:52%;
   transform:translateX(-50%);
-  background:#d87963;
-  clip-path:polygon(50% 0,100% 72%,94% 78%,50% 19%,6% 78%,0 72%);
-  filter:drop-shadow(0 5px 0 #75493d);
+  background:#d97b64;
+  clip-path:polygon(50% 0,100% 72%,94% 79%,50% 20%,6% 79%,0 72%);
+  filter:drop-shadow(0 5px 0 #7a4b3d);
+}
+.intro-house-roof::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:47%;
+  width:74px;
+  height:74px;
+  transform:translate(-50%,-50%);
+  border:4px solid #775342;
+  border-radius:50%;
+  background:
+    linear-gradient(90deg,transparent 47%,#775342 47% 53%,transparent 53%),
+    linear-gradient(180deg,transparent 47%,#775342 47% 53%,transparent 53%),
+    #fff9e7;
+  box-shadow:0 0 0 7px rgba(255,243,214,.85);
 }
 .intro-house-body{
   position:absolute;
-  z-index:1;
-  left:14%;
-  right:14%;
+  z-index:2;
+  left:13%;
+  right:13%;
   bottom:0;
-  height:64%;
+  height:65%;
   border:4px solid #795646;
   border-top:0;
+  border-radius:0 0 5px 5px;
   background:
     repeating-linear-gradient(90deg,rgba(177,142,104,.075) 0 2px,transparent 2px 24px),
     linear-gradient(180deg,#fff5dc,#f7e9ca);
 }
-.intro-house-body::before{
-  content:"";
-  position:absolute;
-  left:50%;
-  top:-42%;
-  width:48%;
-  height:53%;
-  transform:translateX(-50%);
-  background:#fff5dc;
-  clip-path:polygon(50% 0,100% 72%,100% 100%,0 100%,0 72%);
-  box-shadow:0 0 0 4px #795646;
-}
-.intro-house-body::after{
-  content:"";
-  position:absolute;
-  left:50%;
-  top:-25%;
-  width:82px;
-  height:82px;
-  transform:translateX(-50%);
-  border:4px solid #755342;
-  border-radius:50%;
-  background:
-    linear-gradient(90deg,transparent 47%,#755342 47% 53%,transparent 53%),
-    linear-gradient(180deg,transparent 47%,#755342 47% 53%,transparent 53%),
-    #fff9e8;
-  box-shadow:0 0 0 7px rgba(247,233,202,.92);
-}
 .intro-house-door{
   position:absolute;
-  z-index:3;
+  z-index:4;
   left:50%;
   bottom:0;
-  width:19%;
-  height:54%;
+  width:20%;
+  height:55%;
   transform:translateX(-50%);
   border:4px solid #6c4a3c;
   border-bottom:0;
-  border-radius:50px 50px 0 0;
-  background:linear-gradient(180deg,#b77f64,#9d6854);
+  border-radius:54px 54px 0 0;
+  background:linear-gradient(180deg,#b98166,#9e6954);
   box-shadow:inset 0 0 0 4px rgba(255,255,255,.04);
 }
 .intro-house-door::after{
@@ -3684,8 +3689,8 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
   position:absolute;
   z-index:3;
   bottom:25%;
-  width:19%;
-  height:28%;
+  width:20%;
+  height:29%;
   border:4px solid #735140;
   border-radius:18px;
   background:
@@ -3694,11 +3699,11 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
     linear-gradient(180deg,#fff0bc,#ffdd8b);
   box-shadow:0 0 20px rgba(255,218,130,.30);
 }
-.intro-house-window--left{left:15%}
-.intro-house-window--right{right:15%}
+.intro-house-window--left{left:14%}
+.intro-house-window--right{right:14%}
 .intro-house-bush{
   position:absolute;
-  z-index:4;
+  z-index:5;
   bottom:-4%;
   width:28%;
   height:18%;
@@ -3713,22 +3718,78 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
 .intro-house-bush--two{right:4%;transform:scaleX(-1)}
 .intro-house-path{
   position:absolute;
-  z-index:0;
+  z-index:1;
   left:50%;
-  bottom:-21%;
-  width:32%;
-  height:26%;
+  bottom:-25%;
+  width:31%;
+  height:30%;
   transform:translateX(-50%);
-  clip-path:polygon(37% 0,63% 0,100% 100%,0 100%);
+  clip-path:polygon(38% 0,62% 0,100% 100%,0 100%);
   background:
-    radial-gradient(ellipse at 50% 11%,#eadfc3 0 12%,transparent 13%),
-    radial-gradient(ellipse at 50% 39%,#dfd0af 0 14%,transparent 15%),
-    radial-gradient(ellipse at 50% 72%,#d6c39f 0 16%,transparent 17%);
+    radial-gradient(ellipse at 50% 10%,#eadfc3 0 11%,transparent 12%),
+    radial-gradient(ellipse at 50% 37%,#dfd0af 0 13%,transparent 14%),
+    radial-gradient(ellipse at 50% 68%,#d6c39f 0 15%,transparent 16%);
+}
+
+/* 집 클릭용 실제 상호작용 영역 */
+.intro-house-hit{
+  position:absolute;
+  z-index:8;
+  left:50%;
+  bottom:20%;
+  width:min(560px,58vw);
+  height:min(430px,52vh);
+  transform:translateX(-50%);
+  border:0;
+  border-radius:30px;
+  background:transparent;
+  cursor:pointer;
+}
+.intro-house-hit[hidden]{display:none}
+.intro-house-hit span{
+  position:absolute;
+  left:50%;
+  bottom:12%;
+  transform:translateX(-50%);
+  padding:8px 13px;
+  border:1px solid rgba(255,234,185,.45);
+  border-radius:999px;
+  background:rgba(46,61,54,.70);
+  color:#fff0c9;
+  box-shadow:0 7px 20px rgba(41,57,50,.18);
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.08em;
+  opacity:.84;
+  transition:.18s ease;
+}
+.intro-house-hit::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:23%;
+  width:36px;
+  height:50px;
+  transform:translateX(-50%);
+  border:2px solid rgba(244,211,139,.58);
+  border-radius:22px 22px 8px 8px;
+  box-shadow:
+    0 0 0 9px rgba(244,211,139,.07),
+    0 0 22px rgba(244,211,139,.28);
+  animation:intro-door-pulse 1.5s ease-in-out infinite;
+}
+.intro-house-hit:hover span{
+  opacity:1;
+  transform:translateX(-50%) translateY(-2px);
+  background:rgba(50,69,60,.88);
+}
+@keyframes intro-door-pulse{
+  50%{opacity:.52;transform:translateX(-50%) scale(1.08)}
 }
 
 .story-intro-next{
   position:absolute;
-  z-index:2;
+  z-index:6;
   inset:0;
   width:100%;
   height:100%;
@@ -3739,26 +3800,35 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
   cursor:pointer;
   text-align:center;
 }
+.story-intro-next:disabled{
+  pointer-events:none;
+  cursor:default;
+}
 
-/* 모든 문장은 매 장면 흐릿한 상태에서 선명해진다 */
+/* 모든 텍스트 장면은 매번 blur/opacity 0에서 다시 시작 */
 .story-intro-copy{
   position:absolute;
   left:50%;
   top:52%;
   width:min(780px,calc(100% - 70px));
-  transform:translate(-50%,-50%) translateY(16px);
-  opacity:0;
-  filter:blur(13px);
   text-shadow:0 3px 18px rgba(0,0,0,.55);
-  transition:
-    opacity .72s ease,
-    filter .72s ease,
-    transform .72s cubic-bezier(.2,.7,.2,1);
+  opacity:0;
+  filter:blur(17px);
 }
 .story-intro-copy.is-reveal{
-  opacity:1;
-  filter:blur(0);
-  transform:translate(-50%,-50%) translateY(0);
+  animation:intro-copy-reveal .82s cubic-bezier(.18,.72,.2,1) both;
+}
+@keyframes intro-copy-reveal{
+  0%{
+    opacity:0;
+    filter:blur(17px);
+    transform:translate(-50%,-50%) translateY(18px) scale(.985);
+  }
+  100%{
+    opacity:1;
+    filter:blur(0);
+    transform:translate(-50%,-50%) translateY(0) scale(1);
+  }
 }
 .story-intro-copy small{
   display:block;
@@ -3787,32 +3857,44 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
   word-break:keep-all;
 }
 
-/* 집 앞 독백/나레이션 */
-.story-intro-overlay.is-exterior .story-intro-copy{
+/* 집 앞/현관 앞 텍스트는 하단 게임 대사 영역 */
+.story-intro-overlay.is-exterior .story-intro-copy,
+.story-intro-overlay.is-door .story-intro-copy{
   top:auto;
   bottom:8%;
-  transform:translateX(-50%) translateY(18px);
   padding:18px 28px;
   border-radius:16px;
   background:linear-gradient(
     90deg,
     transparent,
-    rgba(37,43,39,.48) 16%,
-    rgba(37,43,39,.48) 84%,
+    rgba(37,43,39,.50) 16%,
+    rgba(37,43,39,.50) 84%,
     transparent
   );
 }
-.story-intro-overlay.is-exterior .story-intro-copy.is-reveal{
-  transform:translateX(-50%) translateY(0);
+.story-intro-overlay.is-exterior .story-intro-copy.is-reveal,
+.story-intro-overlay.is-door .story-intro-copy.is-reveal{
+  animation:intro-bottom-copy-reveal .82s cubic-bezier(.18,.72,.2,1) both;
+}
+@keyframes intro-bottom-copy-reveal{
+  0%{
+    opacity:0;
+    filter:blur(17px);
+    transform:translateX(-50%) translateY(20px) scale(.985);
+  }
+  100%{
+    opacity:1;
+    filter:blur(0);
+    transform:translateX(-50%) translateY(0) scale(1);
+  }
 }
 
-/* 실제 게임 대화처럼 speaker nameplate + 한 줄 대사 */
+/* 한 사람씩 실제 대화하는 이름표 + 대사창 */
 .story-intro-overlay.is-dialogue .story-intro-copy{
   width:min(720px,calc(100% - 80px));
   padding:20px 25px 21px;
-  border:1px solid rgba(255,235,195,.25);
-  border-radius:15px;
-  background:rgba(20,27,29,.76);
+  border:1px solid rgba(255,235,195,.28);
+  background:rgba(20,27,29,.78);
   box-shadow:
     0 16px 42px rgba(22,30,28,.23),
     inset 0 1px 0 rgba(255,255,255,.05);
@@ -3823,7 +3905,7 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
   min-height:0;
   margin:-34px 0 10px 4px;
   padding:6px 13px;
-  border:1px solid rgba(236,205,141,.32);
+  border:1px solid rgba(236,205,141,.34);
   border-radius:8px;
   background:#314944;
   color:#f0d390;
@@ -3837,59 +3919,65 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
   line-height:1.7;
 }
 
-/* 챕터 타이틀은 더 느리고 크게 등장 */
+/* 챕터 타이틀도 반드시 blur에서 선명해지며 더 웅장하게 등장 */
 .story-intro-overlay.is-chapter::before,
 .story-intro-overlay.is-chapter::after{
   content:"";
   position:absolute;
   z-index:3;
   left:50%;
-  width:min(650px,72vw);
+  width:min(690px,74vw);
   height:1px;
   transform:translateX(-50%);
-  background:linear-gradient(90deg,transparent,rgba(238,205,135,.92),transparent);
-  box-shadow:0 0 18px rgba(238,205,135,.18);
+  background:linear-gradient(90deg,transparent,rgba(238,205,135,.94),transparent);
+  box-shadow:0 0 20px rgba(238,205,135,.20);
 }
-.story-intro-overlay.is-chapter::before{top:32%}
-.story-intro-overlay.is-chapter::after{bottom:32%}
-
+.story-intro-overlay.is-chapter::before{top:31%}
+.story-intro-overlay.is-chapter::after{bottom:31%}
 .story-intro-overlay.is-chapter .story-intro-copy{
   top:50%;
   bottom:auto;
-  transform:translate(-50%,-50%) scale(.90);
-  background:none;
   padding:0;
-  filter:blur(18px);
-  transition:
-    opacity 1.05s ease,
-    filter 1.05s ease,
-    transform 1.15s cubic-bezier(.16,.72,.18,1);
+  background:none;
 }
 .story-intro-overlay.is-chapter .story-intro-copy.is-reveal{
-  transform:translate(-50%,-50%) scale(1);
-  filter:blur(0);
+  animation:intro-chapter-reveal 1.25s cubic-bezier(.14,.74,.16,1) both;
+}
+@keyframes intro-chapter-reveal{
+  0%{
+    opacity:0;
+    filter:blur(22px);
+    transform:translate(-50%,-50%) scale(.86);
+    letter-spacing:.14em;
+  }
+  100%{
+    opacity:1;
+    filter:blur(0);
+    transform:translate(-50%,-50%) scale(1);
+    letter-spacing:0;
+  }
 }
 .story-intro-overlay.is-chapter .story-intro-copy small{
   color:#e7c97e;
   font-size:12px;
-  letter-spacing:.32em;
-  text-shadow:0 0 22px rgba(229,202,126,.28);
+  letter-spacing:.34em;
+  text-shadow:0 0 22px rgba(229,202,126,.30);
 }
 .story-intro-overlay.is-chapter .story-intro-copy h2{
   margin-top:8px;
   color:#fff2cd;
-  font-size:clamp(62px,8vw,118px);
+  font-size:clamp(64px,8.2vw,122px);
   font-weight:500;
   letter-spacing:.08em;
   text-shadow:
-    0 0 28px rgba(239,208,139,.22),
-    0 8px 32px rgba(0,0,0,.46);
+    0 0 32px rgba(239,208,139,.24),
+    0 8px 34px rgba(0,0,0,.48);
 }
 .story-intro-overlay.is-chapter .story-intro-copy p{
   margin-top:18px;
   color:#ddd8cb;
   font-size:clamp(13px,1.25vw,18px);
-  letter-spacing:.10em;
+  letter-spacing:.11em;
 }
 .story-intro-overlay.is-chapter .story-intro-copy::before,
 .story-intro-overlay.is-chapter .story-intro-copy::after{
@@ -3897,11 +3985,11 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
   position:absolute;
   top:50%;
   color:#e7c97e;
-  font-size:15px;
-  text-shadow:0 0 14px rgba(231,201,126,.45);
+  font-size:16px;
+  text-shadow:0 0 16px rgba(231,201,126,.50);
 }
-.story-intro-overlay.is-chapter .story-intro-copy::before{left:-28px}
-.story-intro-overlay.is-chapter .story-intro-copy::after{right:-28px}
+.story-intro-overlay.is-chapter .story-intro-copy::before{left:-32px}
+.story-intro-overlay.is-chapter .story-intro-copy::after{right:-32px}
 
 .story-intro-voices{display:none}
 
@@ -3912,7 +4000,7 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
   display:flex;
   align-items:center;
   gap:8px;
-  color:rgba(255,255,255,.55);
+  color:rgba(255,255,255,.58);
   font-size:8px;
   font-weight:900;
   letter-spacing:.14em;
@@ -3930,15 +4018,17 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
 }
 
 @media(max-width:680px){
-  .intro-house{
+  .intro-house,
+  .intro-house-hit{
     width:82vw;
-    height:41vh;
-    bottom:18%;
+    height:40vh;
+    bottom:22%;
   }
   .story-intro-copy{
     width:calc(100% - 34px);
   }
-  .story-intro-overlay.is-exterior .story-intro-copy{
+  .story-intro-overlay.is-exterior .story-intro-copy,
+  .story-intro-overlay.is-door .story-intro-copy{
     bottom:11%;
     padding:14px 12px;
   }
@@ -3953,10 +4043,11 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
   .story-intro-copy p{font-size:16px}
   .story-intro-overlay.is-dialogue .story-intro-copy p{font-size:15px}
   .story-intro-overlay.is-chapter .story-intro-copy h2{
-    font-size:clamp(52px,15vw,80px);
+    font-size:clamp(52px,15vw,82px);
   }
-  .story-intro-overlay.is-chapter::before{top:30%}
-  .story-intro-overlay.is-chapter::after{bottom:30%}
+  .story-intro-overlay.is-chapter::before{top:29%}
+  .story-intro-overlay.is-chapter::after{bottom:29%}
+  .intro-house-hit span{font-size:8px}
   .story-intro-hint{
     right:16px;
     bottom:14px;

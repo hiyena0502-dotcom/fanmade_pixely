@@ -7,8 +7,8 @@
   <meta name="theme-color" content="#111a3b" />
   <title>PIXELY : LOST SKY</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=32" />
-  <script src="app.js?v=32" defer></script>
+  <link rel="stylesheet" href="style.css?v=33" />
+  <script src="app.js?v=33" defer></script>
 </head>
 <body>
   <div class="game-root">
@@ -221,6 +221,10 @@
             <div class="intro-ground"></div>
           </div>
 
+          <button class="intro-house-hit" id="story-intro-house" type="button" hidden aria-label="집으로 다가가기">
+            <span>현관으로 다가가기</span>
+          </button>
+
           <button class="story-intro-next" id="story-intro-next" type="button" aria-label="인트로 다음 장면">
             <div class="story-intro-copy">
               <small id="story-intro-kicker"></small>
@@ -228,7 +232,7 @@
               <p id="story-intro-text"></p>
               <div class="story-intro-voices" id="story-intro-voices"></div>
             </div>
-            <span class="story-intro-hint"><i></i> CLICK / SPACE</span>
+            <span class="story-intro-hint"><i></i><span id="story-intro-hint-text">CLICK / SPACE</span></span>
           </button>
         </section>
 
