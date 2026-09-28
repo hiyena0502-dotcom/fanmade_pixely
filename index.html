@@ -7,8 +7,8 @@
   <meta name="theme-color" content="#111a3b" />
   <title>PIXELY : LOST SKY</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=21" />
-  <script src="app.js?v=21" defer></script>
+  <link rel="stylesheet" href="style.css?v=22" />
+  <script src="app.js?v=22" defer></script>
 </head>
 <body>
   <div class="game-root">
@@ -199,14 +199,14 @@
         <section class="wardrobe-panel game-window">
           <small class="wardrobe-kicker">YOUR OWN DREAMER</small>
           <h3>오늘은 어떤 모습으로 떠날까?</h3>
-          <p>옷·소품·얼굴은 하나씩 고르고, 장식은 여러 개를 함께 선택할 수 있어요. 개발 중인 이미지는 아래 개발자 도구에서 직접 등록하면 미리보기에 바로 적용됩니다.</p>
+          <p>옷·소품·얼굴·장식 모두 여러 파츠를 동시에 겹칠 수 있어요. 눈·입·상의·하의처럼 세부 파츠를 따로 등록하고, 아래 개발자 도구에서 순서와 위치까지 조정할 수 있습니다.</p>
           <nav class="wardrobe-tabs" id="wardrobe-tabs" aria-label="꾸미기 파츠">
-            <button type="button" data-wardrobe-slot="outfit">옷</button>
-            <button type="button" data-wardrobe-slot="accessory">소품</button>
-            <button type="button" data-wardrobe-slot="face">얼굴</button>
+            <button type="button" data-wardrobe-slot="outfit">옷 <span>MULTI</span></button>
+            <button type="button" data-wardrobe-slot="accessory">소품 <span>MULTI</span></button>
+            <button type="button" data-wardrobe-slot="face">얼굴 <span>MULTI</span></button>
             <button type="button" data-wardrobe-slot="decoration">장식 <span>MULTI</span></button>
           </nav>
-          <p class="wardrobe-multi-note" id="wardrobe-tab-note">옷·소품·얼굴은 한 번에 하나만 선택됩니다.</p>
+          <p class="wardrobe-multi-note" id="wardrobe-tab-note">모든 분류에서 여러 파츠를 함께 선택할 수 있어요.</p>
           <div class="wardrobe-options" id="wardrobe-options"></div>
           <section class="wardrobe-image-tools" aria-labelledby="wardrobe-image-tools-title">
             <header>
@@ -223,11 +223,13 @@
               <section class="wardrobe-upload-card wardrobe-upload-card--part">
                 <small>PART</small><h5>새 파츠 추가</h5>
                 <div class="wardrobe-part-steps">
-                  <label><span>① 파츠 종류</span><select id="wardrobe-upload-slot"><option value="outfit">옷</option><option value="accessory">소품</option><option value="face">얼굴</option><option value="decoration">장식 · 여러 개 가능</option></select></label>
-                  <label><span>② 파츠 이름</span><input type="text" id="wardrobe-image-name" maxlength="40" placeholder="예: 기본 표정"></label>
-                  <label class="wardrobe-file-action wardrobe-file-action--part"><span>③ 이미지</span><b>PNG 선택하기</b><input type="file" id="wardrobe-image-file" accept="image/png,image/webp,image/jpeg"></label>
+                  <label><span>① 큰 분류</span><select id="wardrobe-upload-slot"><option value="outfit">옷</option><option value="accessory">소품</option><option value="face">얼굴</option><option value="decoration">장식</option></select></label>
+                  <label><span>② 세부 파츠</span><select id="wardrobe-part-group"><option value="top">상의</option></select></label>
+                  <label><span>③ 파츠 이름</span><input type="text" id="wardrobe-image-name" maxlength="40" placeholder="예: 웃는 입"></label>
+                  <label class="wardrobe-file-action wardrobe-file-action--part"><span>④ 이미지</span><b>PNG 선택하기</b><input type="file" id="wardrobe-image-file" accept="image/png,image/webp,image/jpeg"></label>
                 </div>
-                <p class="wardrobe-upload-help">이미지를 고르면 해당 종류에 등록되고 즉시 착용됩니다.</p>
+                <p class="wardrobe-upload-help">이미지를 고르면 새 레이어로 등록되고 즉시 켜집니다.</p>
+                <p class="wardrobe-upload-status" id="wardrobe-upload-status" data-state="idle">아직 등록한 새 파츠가 없어요.</p>
               </section>
             </div>
             <div class="wardrobe-transform-editor">
@@ -237,6 +239,15 @@
                 <label><span>위아래 <output data-wardrobe-transform-value="y">0</output></span><input type="range" min="-100" max="100" step="1" value="0" data-wardrobe-transform="y"></label>
                 <label><span>크기 <output data-wardrobe-transform-value="scale">100%</output></span><input type="range" min="20" max="300" step="1" value="100" data-wardrobe-transform="scale"></label>
                 <label><span>회전 <output data-wardrobe-transform-value="rotation">0°</output></span><input type="range" min="-180" max="180" step="1" value="0" data-wardrobe-transform="rotation"></label>
+              </div>
+              <div class="wardrobe-layer-order-box">
+                <span id="wardrobe-layer-order">베이스는 항상 맨 아래</span>
+                <div class="wardrobe-layer-order-actions">
+                  <button type="button" data-layer-move="bottom">맨 아래</button>
+                  <button type="button" data-layer-move="down">한 칸 아래</button>
+                  <button type="button" data-layer-move="up">한 칸 위</button>
+                  <button type="button" data-layer-move="top">맨 위</button>
+                </div>
               </div>
               <div class="wardrobe-editor-actions"><button type="button" id="wardrobe-reset-transform">위치 초기화</button><button type="button" id="wardrobe-delete-image">선택 이미지 삭제</button></div>
             </div>
