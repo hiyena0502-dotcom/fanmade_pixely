@@ -7,8 +7,8 @@
   <meta name="theme-color" content="#111a3b" />
   <title>PIXELY : LOST SKY</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=23" />
-  <script src="app.js?v=23" defer></script>
+  <link rel="stylesheet" href="style.css?v=24" />
+  <script src="app.js?v=24" defer></script>
 </head>
 <body>
   <div class="game-root">
@@ -34,6 +34,12 @@
         <span aria-hidden="true">✿</span>
         <b>꿈뜰이 옷장</b>
         <small>DRESS UP</small>
+      </button>
+
+      <button class="dev-shortcut" type="button" data-open-dev aria-label="개발자 설정 열기">
+        <span aria-hidden="true">⚙</span>
+        <b>개발자 설정</b>
+        <small>DEV SETTINGS</small>
       </button>
 
       <aside class="command-window game-window">
@@ -276,6 +282,83 @@
             <span id="wardrobe-status" role="status">개발자 설정은 자동 저장됩니다.</span>
             <button type="button" id="wardrobe-save-button">기본값 저장</button>
           </div>
+        </section>
+      </main>
+    </section>
+
+    <section class="view dev-settings-view" data-view="dev" hidden>
+      <header class="subpage-topbar dev-topbar">
+        <button class="back-button" type="button" data-go-home aria-label="홈으로">←</button>
+        <div><small>DEVELOPER SETTINGS</small><h2>게임 데이터 설정</h2></div>
+        <div class="dev-autosave-label">LOCAL DEV DATA</div>
+      </header>
+
+      <main class="dev-settings-shell">
+        <aside class="dev-settings-sidebar game-window">
+          <div class="dev-settings-brand">
+            <small>CONTENT EDITOR</small>
+            <h3>설정할 데이터</h3>
+            <p>코드를 직접 열지 않고 개발용 데이터를 추가·수정합니다.</p>
+          </div>
+
+          <nav class="dev-settings-tabs" id="dev-settings-tabs" aria-label="개발자 설정 분류">
+            <button type="button" data-dev-section="chapters"><span>01</span><b>챕터</b><small>CHAPTERS</small></button>
+            <button type="button" data-dev-section="collection"><span>02</span><b>컬렉션</b><small>CARDS · POST</small></button>
+            <button type="button" data-dev-section="dialogues"><span>03</span><b>대화방</b><small>DIALOGUE ROOMS</small></button>
+            <button type="button" data-dev-section="items"><span>04</span><b>아이템</b><small>ITEM DATA</small></button>
+          </nav>
+
+          <div class="dev-sidebar-actions">
+            <button type="button" id="dev-reset-content">전체 기본값 복원</button>
+          </div>
+        </aside>
+
+        <section class="dev-settings-main game-window">
+          <header class="dev-settings-main-header">
+            <div>
+              <small id="dev-current-section">챕터</small>
+              <h3>개발 데이터 편집</h3>
+            </div>
+            <div class="dev-header-meta">
+              <span id="dev-entry-count">0개</span>
+              <span id="dev-save-status">브라우저 개발 설정</span>
+            </div>
+          </header>
+
+          <div class="dev-subtabs" id="dev-collection-types" hidden>
+            <button type="button" data-dev-collection-type="cards">카드</button>
+            <button type="button" data-dev-collection-type="postcards">엽서</button>
+          </div>
+
+          <div class="dev-settings-toolbar">
+            <button type="button" id="dev-new-entry">＋ 새 항목</button>
+            <p>왼쪽 목록에서 선택 → 오른쪽에서 수정 → 저장.</p>
+          </div>
+
+          <div class="dev-settings-workspace">
+            <aside class="dev-entry-pane">
+              <div class="dev-entry-pane-title"><b>목록</b><small>ID 기준</small></div>
+              <div class="dev-entry-list" id="dev-entry-list"></div>
+            </aside>
+
+            <section class="dev-editor-pane">
+              <div class="dev-editor-pane-title">
+                <div><small>EDITOR</small><h4 id="dev-editor-title">항목을 선택하세요</h4></div>
+              </div>
+              <div class="dev-editor-fields" id="dev-editor-fields">
+                <div class="dev-editor-empty">왼쪽에서 항목을 선택하거나 + 새 항목을 눌러 주세요.</div>
+              </div>
+              <div class="dev-editor-actions">
+                <button type="button" class="danger" id="dev-delete-entry" disabled>삭제</button>
+                <button type="button" class="primary" id="dev-save-entry" disabled>저장 · 적용</button>
+              </div>
+            </section>
+          </div>
+
+          <footer class="dev-settings-note">
+            <b>개발용 임시 설정</b>
+            <span>여기서 수정한 값은 이 브라우저에 저장되고 게임 화면에 바로 반영됩니다. 최종 확정 뒤 코드 기본값으로 고정할 수 있어요.</span>
+          </footer>
         </section>
       </main>
     </section>
