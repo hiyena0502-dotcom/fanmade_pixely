@@ -894,7 +894,7 @@
       if(nameInput) nameInput.value="";
       const upload=$("#wardrobe-image-file");if(upload) upload.value="";
       pendingWardrobeFile=null;
-      const fileName=$("#wardrobe-file-name");if(fileName) fileName.textContent="선택된 파일 없음";
+      const fileNameNode=$("#wardrobe-file-name");if(fileNameNode) fileNameNode.textContent="선택된 파일 없음";
       const addButton=$("#wardrobe-add-part-button");if(addButton) addButton.disabled=true;
       renderWardrobe();
       setUploadStatus(wardrobeLabels[targetSlot]+" / "+wardrobeGroupLabel(targetSlot,targetGroup)+" · "+name+" 등록 및 적용 완료","ok");
