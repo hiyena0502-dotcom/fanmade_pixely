@@ -7,8 +7,8 @@
   <meta name="theme-color" content="#111a3b" />
   <title>PIXELY : LOST SKY</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=7" />
-  <script src="app.js?v=5" defer></script>
+  <link rel="stylesheet" href="style.css?v=8" />
+  <script src="app.js?v=6" defer></script>
 </head>
 <body>
   <div class="game-root">
@@ -170,6 +170,20 @@
         <h2 id="notice-title">이야기 준비 중</h2>
         <p id="notice-copy"></p>
         <button type="button" class="notice-ok" data-close-notice>확인</button>
+      </section>
+    </div>
+
+    <div class="modal update-modal" id="update-modal" hidden>
+      <div class="modal-backdrop update-backdrop" aria-hidden="true"></div>
+      <section class="update-window game-window" role="dialog" aria-modal="true" aria-labelledby="update-title">
+        <span class="update-spark" aria-hidden="true">✦</span>
+        <small>NEW VERSION</small>
+        <h2 id="update-title">새 버전이 준비됐어요!</h2>
+        <p>사이트가 수정되었습니다. 최신 내용으로 보려면 페이지를 새로고침해 주세요.</p>
+        <div class="update-actions">
+          <button type="button" class="update-later" id="update-later-button">나중에</button>
+          <button type="button" class="update-refresh" id="update-refresh-button">새로고침</button>
+        </div>
       </section>
     </div>
 
