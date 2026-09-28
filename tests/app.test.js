@@ -216,7 +216,7 @@ test("update prompt compares the loaded version on the first check and on later 
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
   assert.equal(state.requests[0].options.cache,"no-store");
-  state.setVersion("16");
+  state.setVersion("17");
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,false);
@@ -225,7 +225,7 @@ test("update prompt compares the loaded version on the first check and on later 
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
-  const stale=boot(undefined,"16");
+  const stale=boot(undefined,"17");
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(stale.node("#update-modal").hidden,false);
 });
@@ -236,4 +236,18 @@ test("deployed version and asset cache keys match the script",()=>{
   assert.match(app,new RegExp(`SITE_VERSION = "${version}"`));
   assert.match(html,new RegExp(`style\\.css\\?v=${version}`));
   assert.match(html,new RegExp(`app\\.js\\?v=${version}`));
+});
+
+
+test("wardrobe image editor controls and multi-layer upload UI are present",()=>{
+  const html=fs.readFileSync(path.join(directory,"index.html"),"utf8");
+  assert.match(html,/id="wardrobe-base-file"/);
+  assert.match(html,/id="wardrobe-image-file"/);
+  assert.match(html,/id="wardrobe-layer-select"/);
+  assert.match(html,/data-wardrobe-transform="x"/);
+  assert.match(html,/data-wardrobe-transform="y"/);
+  assert.match(html,/data-wardrobe-transform="scale"/);
+  assert.match(html,/data-wardrobe-transform="rotation"/);
+  assert.match(app,/WARDROBE_ASSET_KEY/);
+  assert.match(app,/wardrobeAssets\.custom/);
 });
