@@ -4,8 +4,6 @@
   --line:rgba(220,239,255,.2);
   --line-soft:rgba(220,239,255,.1);
   --text:#f7fbff;
-  --muted:#aebed1;
-  --blue:#83d8ff;
   --gold:#f4d98a;
   --shadow:0 24px 70px rgba(6,13,35,.34);
 }
@@ -64,8 +62,6 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
 .command-button{width:100%;min-height:59px;margin:3px 0;padding:0 13px;border:1px solid transparent;border-radius:12px;background:transparent;cursor:pointer;display:grid;grid-template-columns:22px 1fr;align-items:center;gap:7px;text-align:left;transition:.16s}
 .command-cursor{opacity:0;color:var(--gold);font-size:10px;transform:translateX(-5px);transition:.16s}.command-button b{display:block;font-size:16px}.command-button small{display:block;margin-top:4px;color:#aebfd0;font-size:8px}
 .command-button:hover,.command-button:focus-visible{background:linear-gradient(90deg,rgba(132,181,223,.16),rgba(255,255,255,.02));border-color:rgba(221,240,255,.1);transform:translateX(3px)}.command-button:hover .command-cursor,.command-button:focus-visible .command-cursor{opacity:1;transform:none}.command-button.is-disabled{opacity:.4;cursor:default}.command-button.is-disabled:hover{transform:none;background:transparent;border-color:transparent}
-.command-button--chapter{background:linear-gradient(90deg,rgba(112,103,164,.16),transparent)}
-.command-button--collection{background:linear-gradient(90deg,rgba(214,193,154,.13),rgba(255,255,255,.02));border-color:rgba(244,224,188,.09)}
 
 .save-summary{position:absolute;z-index:5;left:clamp(24px,6vw,90px);bottom:clamp(48px,7vh,82px);width:min(640px,calc(100vw - 48px));padding:17px 20px;border-radius:16px;display:grid;grid-template-columns:130px 170px 1fr;align-items:center;gap:18px}
 .summary-label span,.summary-progress small{display:block;color:#91a6bd;font-size:7px;font-weight:1000;letter-spacing:.16em}.summary-label b{display:block;margin-top:6px;font-size:13px}.summary-progress{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center}.summary-progress small{grid-column:1/-1}.summary-track{height:5px;border-radius:5px;background:rgba(255,255,255,.08);overflow:hidden}.summary-track i{display:block;width:0;height:100%;background:linear-gradient(90deg,#6baedc,#bfeaff);transition:width .25s}.summary-progress b{font-size:9px}
@@ -169,16 +165,9 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
    ========================================================= */
 :root{
   --night-950:#0d1730;
-  --night-900:#13233f;
-  --night-800:#1d3456;
-  --sky-soft:#cfe8fb;
-  --sky-accent:#95cde9;
   --paper-cream:#f7f0e4;
-  --paper-deep:#ecdfcb;
-  --warm-brown:#876b57;
   --accent-gold:#e5ca86;
   --ui-border:rgba(222,239,255,.15);
-  --ui-border-strong:rgba(222,239,255,.25);
 }
 
 /* 공통: 게임 UI의 얇은 선, 라운드, 그림자 규칙 */
@@ -343,14 +332,8 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
   background:
     linear-gradient(90deg,rgba(118,174,215,.15),rgba(255,255,255,.018));
 }
-.command-button--chapter{
-  background:linear-gradient(90deg,rgba(107,115,177,.15),transparent);
-}
 .command-button--collection{
   position:relative;
-  background:
-    linear-gradient(90deg,rgba(229,202,134,.11),rgba(137,191,220,.055));
-  border-color:rgba(229,202,134,.11);
 }
 .command-button--collection::after{
   content:"DIARY";
@@ -786,34 +769,6 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
   background:linear-gradient(90deg,rgba(118,174,215,.15),rgba(255,255,255,.018));
 }
 
-/* COLLECTION: 카드/아이템/엽서 탭은 같은 종이톤.
-   선택 상태는 색면 대신 얇은 골드 라인과 텍스트로만 표시 */
-.diary-tabs button,
-.diary-tabs button.is-active{
-  background:rgba(255,251,244,.50);
-  border-color:rgba(112,88,65,.12);
-  color:#74695f;
-  box-shadow:none;
-}
-.diary-tabs button span,
-.diary-tabs button.is-active span{
-  color:#a08f7e;
-}
-.diary-tabs button::after,
-.diary-tabs button.is-active::after{
-  background:rgba(215,196,170,.55);
-}
-.diary-tabs button.is-active{
-  border-color:rgba(190,157,95,.30);
-  color:#5f554c;
-  transform:translateX(5px);
-  box-shadow:inset 3px 0 0 rgba(201,166,99,.58);
-}
-.diary-tabs button.is-active::after{
-  background:rgba(215,196,170,.72);
-}
-
-
 /* =========================================================
    SITE UPDATE PROMPT v8
    ========================================================= */
@@ -918,164 +873,46 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
 }
 
 
-/* =========================================================
-   DIARY TAB STATE v9 — selected tab follows current screen
-   ========================================================= */
-
-/* 모든 탭의 기본 상태는 완전히 동일 */
+/* 컬렉션 책갈피: 분류에 관계없이 같은 모양을 사용합니다. */
 .diary-tabs button,
-.diary-tabs button[aria-selected="false"]{
-  position:relative;
-  background:rgba(255,251,244,.60);
+.diary-tabs button.is-active{
+  width:calc(100% - 10px);
+  height:47px;
+  padding:0 14px 0 16px;
   border:1px solid rgba(112,88,65,.14);
+  border-radius:8px 2px 2px 8px;
+  background:rgba(255,251,244,.60);
   color:#71675e;
   box-shadow:none;
-}
-.diary-tabs button span,
-.diary-tabs button[aria-selected="false"] span{
-  color:#9d8d7d;
+  transform:none;
 }
 .diary-tabs button::after,
-.diary-tabs button[aria-selected="false"]::after{
-  background:rgba(215,196,170,.58);
-}
-
-/* 현재 보고 있는 분류만 같은 방식으로 강조 */
-.diary-tabs button.is-active,
-.diary-tabs button[aria-selected="true"]{
-  background:
-    linear-gradient(180deg,rgba(38,63,87,.97),rgba(29,51,74,.98));
-  border-color:rgba(229,202,134,.38);
-  color:#fff8e8;
-  box-shadow:
-    inset 3px 0 0 #e5ca86,
-    0 7px 16px rgba(41,55,66,.16);
-  transform:translateX(6px);
-}
-.diary-tabs button.is-active span,
-.diary-tabs button[aria-selected="true"] span{
-  color:#d7e8f2;
-}
-.diary-tabs button.is-active::before,
-.diary-tabs button[aria-selected="true"]::before{
-  content:"✦";
-  position:absolute;
-  right:13px;
-  top:50%;
-  transform:translateY(-50%);
-  color:#e5ca86;
-  font-size:8px;
-}
-.diary-tabs button.is-active::after,
-.diary-tabs button[aria-selected="true"]::after{
-  background:#e5ca86;
-}
-
-/* hover는 선택 상태와 헷갈리지 않게 약하게만 */
-.diary-tabs button:not(.is-active):hover{
-  background:#fffaf1;
-  border-color:rgba(112,88,65,.20);
-  color:#61574f;
-  transform:translateX(2px);
-}
-
-@media(max-width:680px){
-  .diary-tabs button.is-active,
-  .diary-tabs button[aria-selected="true"]{
-    transform:translateY(-2px);
-  }
-  .diary-tabs button.is-active::before,
-  .diary-tabs button[aria-selected="true"]::before{
-    right:7px;
-    font-size:7px;
-  }
-}
-
-
-/* =========================================================
-   DIARY TAB FINAL UNIFICATION v10
-   세 탭은 같은 디자인, 선택 상태는 최소 표시만
-   ========================================================= */
-
-/* CARD / ITEM / POST 모두 동일한 박스 */
-.diary-tabs button,
-.diary-tabs button[aria-selected="false"],
-.diary-tabs button[aria-selected="true"],
-.diary-tabs button.is-active{
-  position:relative !important;
-  width:calc(100% - 10px) !important;
-  height:47px !important;
-  margin:0 !important;
-  padding:0 14px 0 16px !important;
-  border:1px solid rgba(112,88,65,.14) !important;
-  border-radius:8px 2px 2px 8px !important;
-  background:rgba(255,251,244,.60) !important;
-  color:#71675e !important;
-  box-shadow:none !important;
-  transform:none !important;
-}
-
-/* 탭 오른쪽 책갈피 부분도 동일 */
-.diary-tabs button::after,
-.diary-tabs button[aria-selected="false"]::after,
-.diary-tabs button[aria-selected="true"]::after,
 .diary-tabs button.is-active::after{
-  content:"" !important;
-  display:block !important;
-  position:absolute !important;
-  right:-10px !important;
-  top:0 !important;
-  bottom:0 !important;
-  width:10px !important;
-  border-radius:0 6px 6px 0 !important;
-  background:rgba(215,196,170,.58) !important;
-  opacity:1 !important;
+  right:-10px;
+  top:0;
+  bottom:0;
+  width:10px;
+  background:rgba(215,196,170,.58);
+  opacity:1;
 }
-
-/* 카드 옆 별/선택 장식 완전 제거 */
-.diary-tabs button::before,
-.diary-tabs button.is-active::before,
-.diary-tabs button[aria-selected="true"]::before{
-  content:none !important;
-  display:none !important;
-}
-
-/* 영문 라벨 색도 세 탭 동일 */
 .diary-tabs button span,
-.diary-tabs button.is-active span,
-.diary-tabs button[aria-selected="true"] span{
-  color:#9d8d7d !important;
+.diary-tabs button.is-active span{color:#9d8d7d}
+.diary-tabs button.is-active{
+  color:#4f4740;
+  box-shadow:inset 3px 0 0 rgba(201,166,99,.76);
 }
-
-/* 현재 탭은 배경/모양을 바꾸지 않고 글씨 + 얇은 왼쪽 라인만 */
-.diary-tabs button.is-active,
-.diary-tabs button[aria-selected="true"]{
-  color:#4f4740 !important;
-  font-weight:1000 !important;
-  box-shadow:inset 3px 0 0 rgba(201,166,99,.76) !important;
-}
-
-/* hover도 이동/색면 변화 없이 미세하게만 */
 .diary-tabs button:hover,
-.diary-tabs button:not(.is-active):hover{
-  background:rgba(255,252,247,.82) !important;
-  border-color:rgba(112,88,65,.20) !important;
-  transform:none !important;
+.diary-tabs button.is-active:hover{
+  background:rgba(255,252,247,.82);
+  border-color:rgba(112,88,65,.20);
+  transform:none;
 }
-
 @media(max-width:680px){
-  .diary-tabs button,
-  .diary-tabs button[aria-selected="false"],
-  .diary-tabs button[aria-selected="true"],
-  .diary-tabs button.is-active{
-    width:100% !important;
-    height:48px !important;
-    padding:0 6px !important;
-    border-radius:8px !important;
+  .diary-tabs button,.diary-tabs button.is-active{
+    width:100%;
+    height:48px;
+    padding:0 6px;
+    border-radius:8px;
   }
-  .diary-tabs button::after,
-  .diary-tabs button.is-active::after,
-  .diary-tabs button[aria-selected="true"]::after{
-    display:none !important;
-  }
+  .diary-tabs button::after,.diary-tabs button.is-active::after{display:none}
 }
