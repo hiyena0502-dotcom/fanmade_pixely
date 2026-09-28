@@ -5,7 +5,7 @@
   const SESSION_SAVE_KEY = STORAGE_KEY+"-session-fallback";
   const WARDROBE_ASSET_KEY = "pixely-lost-sky-wardrobe-assets-v1";
   const DEV_CONTENT_KEY = "pixely-lost-sky-dev-content-v1";
-  const SITE_VERSION = "25";
+  const SITE_VERSION = "26";
   const $ = (q, root = document) => root.querySelector(q);
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 
@@ -1578,7 +1578,7 @@
       ok:missing.length===0,
       missing,
       activeSave:Boolean(activeSave()),
-      views:$("[data-view]").map(view=>view.dataset.view),
+      views:$$("[data-view]").map(view=>view.dataset.view),
       localSaveAvailable:(()=>{
         try{
           const key="__pixely_storage_test__";
