@@ -169,35 +169,31 @@ test("collection filters separate existing characters and show an empty story gr
   assert.match(state.node("#collection-grid").innerHTML,/아직 이 페이지는 비어 있어요/);
 });
 
-test("wardrobe saves an earned item per slot and exposes equipment for future scenes",()=>{
+test("wardrobe saves earned items as multi-select layers and exposes them for future scenes",()=>{
   const state=boot();
   state.click("#new-game-button");
   state.slotAction("new-slot",0);
   state.click("[data-open-wardrobe]");
   const avatar=state.context.window.PixelyAvatar;
-  assert.equal(state.node("#wardrobe-options").innerHTML.includes("치명적으로 귀여운 봉제인형"),false);
-  const option=id=>state.node("#wardrobe-options").listeners.click({target:{closest(){return {dataset:{wardrobeItem:id},disabled:false}}}});
-  option("plush");
-  assert.equal(avatar.outfitForActiveSave().accessory,"none");
-  assert.deepEqual(Array.from(avatar.outfitForActiveSave().decorations),[]);
+  assert.deepEqual(Array.from(avatar.outfitForActiveSave().layers),[]);
   assert.equal(state.context.window.PixelyInventory.grantItem("plush"),true);
   state.node("#wardrobe-tabs").listeners.click({target:{closest(){return state.node("wardrobe-tab:accessory")}}});
+  const option=id=>state.node("#wardrobe-options").listeners.click({target:{closest(){return {dataset:{wardrobeItem:id},disabled:false}}}});
   option("plush");
   state.click("#wardrobe-save-button");
   const saved=JSON.parse(state.storage.get(storageKey));
-  assert.equal(saved.slots[0].outfit.accessory,"plush");
+  assert.deepEqual(saved.slots[0].outfit.layers,["plush"]);
   assert.deepEqual(saved.slots[0].collection.items,["plush"]);
-  assert.equal(avatar.outfitForActiveSave().accessory,"plush");
+  assert.deepEqual(Array.from(avatar.outfitForActiveSave().layers),["plush"]);
   const restored=boot(saved);
-  assert.equal(restored.context.window.PixelyAvatar.outfitForActiveSave().accessory,"plush");
-  assert.deepEqual(Array.from(restored.context.window.PixelyAvatar.outfitForActiveSave().decorations),[]);
+  assert.deepEqual(Array.from(restored.context.window.PixelyAvatar.outfitForActiveSave().layers),["plush"]);
   assert.equal(restored.context.window.PixelyInventory.grantItem("not-a-real-item"),false);
 });
 
-test("old save data keeps inventory empty and rejects unowned equipment",()=>{
+test("old single-slot save data migrates into layers and still rejects unowned equipment",()=>{
   const state=boot({activeSlot:0,slots:[{collection:{cards:["dreamer"],items:[]},outfit:{accessory:"plush"}},null,null]});
+  assert.deepEqual(Array.from(state.context.window.PixelyAvatar.outfitForActiveSave().layers),[]);
   state.click("[data-open-wardrobe]");
-  assert.equal(state.context.window.PixelyAvatar.outfitForActiveSave().accessory,"none");
   state.node("#wardrobe-tabs").listeners.click({target:{closest(){return state.node("wardrobe-tab:accessory")}}});
   assert.match(state.node("#wardrobe-options").innerHTML,/여행 중 발견/);
   assert.equal(state.context.window.PixelyInventory.grantItem("plush"),true);
@@ -219,7 +215,7 @@ test("update prompt compares the loaded version on the first check and on later 
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
   assert.equal(state.requests[0].options.cache,"no-store");
-  state.setVersion("21");
+  state.setVersion("22");
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,false);
@@ -228,7 +224,7 @@ test("update prompt compares the loaded version on the first check and on later 
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
-  const stale=boot(undefined,"21");
+  const stale=boot(undefined,"22");
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(stale.node("#update-modal").hidden,false);
 });
@@ -247,7 +243,10 @@ test("wardrobe image editor controls and multi-layer upload UI are present",()=>
   assert.match(html,/id="wardrobe-base-file"/);
   assert.match(html,/id="wardrobe-image-file"/);
   assert.match(html,/id="wardrobe-upload-slot"/);
+  assert.match(html,/id="wardrobe-part-group"/);
   assert.match(html,/id="wardrobe-layer-select"/);
+  assert.match(html,/data-layer-move="down"/);
+  assert.match(html,/data-layer-move="up"/);
   assert.match(html,/data-wardrobe-transform="x"/);
   assert.match(html,/data-wardrobe-transform="y"/);
   assert.match(html,/data-wardrobe-transform="scale"/);
@@ -257,20 +256,34 @@ test("wardrobe image editor controls and multi-layer upload UI are present",()=>
 });
 
 
-test("developer wardrobe setup applies custom parts without a save slot",()=>{
+test("developer wardrobe setup toggles multiple custom parts without a save slot",()=>{
   const assets={
     base:{image:"data:image/png;base64,BASE",name:"베이스",transform:{x:0,y:0,scale:100,rotation:0}},
-    custom:[{id:"custom-face",slot:"face",name:"기본 표정",image:"data:image/png;base64,FACE",custom:true,transform:{x:0,y:0,scale:100,rotation:0}}],
-    setupOutfit:{outfit:"default",accessory:"none",face:"default",decorations:[]}
+    custom:[
+      {id:"custom-eyes",slot:"face",group:"eyes",name:"기본 눈",image:"data:image/png;base64,EYES",custom:true,transform:{x:0,y:0,scale:100,rotation:0}},
+      {id:"custom-mouth",slot:"face",group:"mouth",name:"기본 입",image:"data:image/png;base64,MOUTH",custom:true,transform:{x:0,y:0,scale:100,rotation:0}}
+    ],
+    layerOrder:["custom-eyes","custom-mouth"],
+    setupOutfit:{layers:[]}
   };
-  const state=boot(undefined,"21",assets);
+  const state=boot(undefined,"22",assets);
   state.click("[data-open-wardrobe]");
   assert.equal(state.node("#wardrobe-slot-label").textContent,"DEV SETUP");
   const faceTab=state.node("wardrobe-tab:face");
   state.node("#wardrobe-tabs").listeners.click({target:{closest(){return faceTab}}});
-  const customButton={dataset:{wardrobeItem:"custom-face"},disabled:false};
-  state.node("#wardrobe-options").listeners.click({target:{closest(){return customButton}}});
+  const click=id=>state.node("#wardrobe-options").listeners.click({target:{closest(){return {dataset:{wardrobeItem:id},disabled:false}}}});
+  click("custom-eyes");
+  click("custom-mouth");
   const stored=JSON.parse(state.storage.get(wardrobeKey));
-  assert.equal(stored.setupOutfit.face,"custom-face");
-  assert.match(state.node("#wardrobe-preview").innerHTML,/data:image\/png;base64,FACE/);
+  assert.deepEqual(stored.setupOutfit.layers,["custom-eyes","custom-mouth"]);
+  assert.match(state.node("#wardrobe-preview").innerHTML,/data:image\/png;base64,EYES/);
+  assert.match(state.node("#wardrobe-preview").innerHTML,/data:image\/png;base64,MOUTH/);
+});
+
+
+test("all wardrobe tabs advertise multi selection",()=>{
+  const html=fs.readFileSync(path.join(directory,"index.html"),"utf8");
+  for(const slot of ["outfit","accessory","face","decoration"]){
+    assert.match(html,new RegExp('data-wardrobe-slot="'+slot+'"[^>]*>[^<]*<span>MULTI<\\/span>'));
+  }
 });
