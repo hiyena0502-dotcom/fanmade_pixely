@@ -5,7 +5,7 @@
   const SESSION_SAVE_KEY = STORAGE_KEY+"-session-fallback";
   const WARDROBE_ASSET_KEY = "pixely-lost-sky-wardrobe-assets-v1";
   const DEV_CONTENT_KEY = "pixely-lost-sky-dev-content-v1";
-  const SITE_VERSION = "26";
+  const SITE_VERSION = "27";
   const $ = (q, root = document) => root.querySelector(q);
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 
@@ -217,11 +217,10 @@
   }
 
   const BASE_DEV_CONTENT={
-    chapters:cloneData(chapters),
+    chapters:cloneData(chapters).map(chapter=>({...chapter,interactions:Array.isArray(chapter.interactions)?chapter.interactions:[]})),
     cards:cloneData(catalogue.cards),
     postcards:cloneData(catalogue.postcards),
-    items:cloneData(catalogue.items),
-    dialogues:[]
+    items:cloneData(catalogue.items)
   };
 
   function normalizeDevArray(value,fallback){
@@ -230,16 +229,43 @@
       : cloneData(fallback);
   }
 
+  function normalizeChapterInteractions(value){
+    return Array.isArray(value)
+      ? value.filter(entry=>entry&&typeof entry==="object"&&!Array.isArray(entry)).map(entry=>({
+          id:typeof entry.id==="string"&&entry.id.trim()?entry.id.trim():"interaction-"+Date.now().toString(36),
+          type:typeof entry.type==="string"?entry.type:"inspect",
+          label:typeof entry.label==="string"?entry.label:"",
+          target:typeof entry.target==="string"?entry.target:"",
+          scene:typeof entry.scene==="string"?entry.scene:"",
+          x:Number.isFinite(Number(entry.x))?Number(entry.x):50,
+          y:Number.isFinite(Number(entry.y))?Number(entry.y):50,
+          width:Number.isFinite(Number(entry.width))?Number(entry.width):12,
+          height:Number.isFinite(Number(entry.height))?Number(entry.height):12,
+          text:typeof entry.text==="string"?entry.text:"",
+          condition:typeof entry.condition==="string"?entry.condition:"",
+          rewardItem:typeof entry.rewardItem==="string"?entry.rewardItem:"",
+          next:typeof entry.next==="string"?entry.next:"",
+          note:typeof entry.note==="string"?entry.note:""
+        }))
+      : [];
+  }
+
+  function normalizeDevChapters(value,fallback){
+    return normalizeDevArray(value,fallback).map(chapter=>({
+      ...chapter,
+      interactions:normalizeChapterInteractions(chapter.interactions)
+    }));
+  }
+
   function readDevContent(){
     try{
       const raw=JSON.parse(localStorage.getItem(DEV_CONTENT_KEY)||"null");
       if(!raw||typeof raw!=="object") return cloneData(BASE_DEV_CONTENT);
       return {
-        chapters:normalizeDevArray(raw.chapters,BASE_DEV_CONTENT.chapters),
+        chapters:normalizeDevChapters(raw.chapters,BASE_DEV_CONTENT.chapters),
         cards:normalizeDevArray(raw.cards,BASE_DEV_CONTENT.cards),
         postcards:normalizeDevArray(raw.postcards,BASE_DEV_CONTENT.postcards),
-        items:normalizeDevArray(raw.items,BASE_DEV_CONTENT.items),
-        dialogues:normalizeDevArray(raw.dialogues,[])
+        items:normalizeDevArray(raw.items,BASE_DEV_CONTENT.items)
       };
     }catch{
       return cloneData(BASE_DEV_CONTENT);
@@ -270,7 +296,7 @@
 
   window.PixelyDevContent={
     all:()=>cloneData(devContent),
-    dialogues:()=>cloneData(devContent.dialogues)
+    interactionsForChapter:chapterId=>cloneData(devContent.chapters.find(chapter=>chapter.id===chapterId)?.interactions||[])
   };
 
   function freshRoot(){ return {activeSlot:null,slots:[null,null,null]}; }
@@ -349,6 +375,7 @@
   let devSection="chapters";
   let devCollectionType="cards";
   let devSelectedId=null;
+  let devSelectedInteractionId=null;
   let saveMode="manage";
   let toastTimer=null;
   let dismissedUpdate=null;
@@ -1170,14 +1197,6 @@
       {key:"desc",label:"설명",type:"textarea",placeholder:"엽서 설명"},
       {key:"caption",label:"캡션",type:"textarea",placeholder:"엽서 한마디"}
     ],
-    dialogues:[
-      {key:"id",label:"ID",type:"text",placeholder:"room-id"},
-      {key:"title",label:"대화방 이름",type:"text",placeholder:"꿈뜰이와 잠뜰"},
-      {key:"character",label:"주요 인물",type:"text",placeholder:"잠뜰"},
-      {key:"location",label:"장소",type:"text",placeholder:"생일 준비 장소"},
-      {key:"opening",label:"첫 대사·상황",type:"textarea",placeholder:"대화방을 열었을 때 시작 문장"},
-      {key:"note",label:"개발 메모",type:"textarea",placeholder:"대화 조건이나 연출 메모"}
-    ],
     items:[
       {key:"id",label:"ID",type:"text",placeholder:"item-id"},
       {key:"name",label:"아이템 이름",type:"text",placeholder:"아이템 이름"},
@@ -1190,6 +1209,23 @@
     ]
   };
 
+  const interactionSchema=[
+    {key:"id",label:"상호작용 ID",type:"text",placeholder:"inspect-window"},
+    {key:"type",label:"종류",type:"select",options:[["inspect","조사"],["talk","대화"],["pickup","획득"],["move","이동"],["use","아이템 사용"],["choice","선택지"]]},
+    {key:"label",label:"화면 표시 이름",type:"text",placeholder:"창문 조사"},
+    {key:"target",label:"대상 ID",type:"text",placeholder:"window / npc-name"},
+    {key:"scene",label:"장소·장면 ID",type:"text",placeholder:"party-room"},
+    {key:"x",label:"X 위치 %",type:"number",min:0,max:100,step:1},
+    {key:"y",label:"Y 위치 %",type:"number",min:0,max:100,step:1},
+    {key:"width",label:"가로 크기 %",type:"number",min:1,max:100,step:1},
+    {key:"height",label:"세로 크기 %",type:"number",min:1,max:100,step:1},
+    {key:"text",label:"실행 시 대사·설명",type:"textarea",placeholder:"상호작용했을 때 보여줄 문장"},
+    {key:"condition",label:"실행 조건",type:"textarea",placeholder:"예: item:key 보유 / interaction:abc 완료"},
+    {key:"rewardItem",label:"획득 아이템 ID",type:"text",placeholder:"비우면 보상 없음"},
+    {key:"next",label:"다음 장면·상호작용 ID",type:"text",placeholder:"선택 사항"},
+    {key:"note",label:"개발 메모",type:"textarea",placeholder:"연출, 효과음, 애니메이션 등 메모"}
+  ];
+
   function currentDevKey(){
     return devSection==="collection"?devCollectionType:devSection;
   }
@@ -1201,17 +1237,15 @@
 
   function devEntryTitle(entry,key=currentDevKey()){
     if(key==="chapters") return entry.title||entry.id||"이름 없는 챕터";
-    if(key==="dialogues") return entry.title||entry.character||entry.id||"이름 없는 대화방";
     return entry.name||entry.id||"이름 없는 항목";
   }
 
   function devNewTemplate(key){
     const id=key.replace(/s$/,"")+"-"+Date.now().toString(36);
     const templates={
-      chapters:{id,no:String((devContent.chapters.length+1)).padStart(2,"0"),label:"CHAPTER",title:"새 챕터",desc:""},
+      chapters:{id,no:String((devContent.chapters.length+1)).padStart(2,"0"),label:"CHAPTER",title:"새 챕터",desc:"",interactions:[]},
       cards:{id,name:"새 카드",type:"PERSON",symbol:"?",color:"#7894a5",world:"",desc:"",memo:""},
       postcards:{id,name:"새 엽서",type:"STORY POSTCARD",symbol:"✦",color:"#7894a5",desc:"",caption:""},
-      dialogues:{id,title:"새 대화방",character:"",location:"",opening:"",note:""},
       items:{id,name:"새 아이템",type:"MEMENTO",symbol:"✦",color:"#7894a5",desc:"",wardrobeSlot:"",wardrobeGroup:""}
     };
     return templates[key]||{id};
@@ -1226,9 +1260,10 @@
       const options=(field.options||[]).map(([id,label])=>'<option value="'+escapeHTML(id)+'" '+(safe===id?"selected":"")+'>'+escapeHTML(label)+'</option>').join("");
       return '<label class="dev-field"><span>'+escapeHTML(field.label)+'</span><select data-dev-field="'+escapeHTML(field.key)+'">'+options+'</select></label>';
     }
-    const type=field.type==="color"?"color":"text";
+    const type=field.type==="color"?"color":field.type==="number"?"number":"text";
     const fallback=type==="color" && !/^#[0-9a-f]{6}$/i.test(safe)?"#7894a5":safe;
-    return '<label class="dev-field"><span>'+escapeHTML(field.label)+'</span><input type="'+type+'" data-dev-field="'+escapeHTML(field.key)+'" value="'+escapeHTML(fallback)+'" placeholder="'+escapeHTML(field.placeholder||"")+'"></label>';
+    const numeric=type==="number"?' min="'+escapeHTML(field.min??"")+'" max="'+escapeHTML(field.max??"")+'" step="'+escapeHTML(field.step??1)+'"':"";
+    return '<label class="dev-field"><span>'+escapeHTML(field.label)+'</span><input type="'+type+'" data-dev-field="'+escapeHTML(field.key)+'" value="'+escapeHTML(fallback)+'" placeholder="'+escapeHTML(field.placeholder||"")+'"'+numeric+'></label>';
   }
 
   function renderDevSettings(){
@@ -1251,7 +1286,7 @@
       devSelectedId=entries[0]?.id||null;
     }
     const selected=entries.find(entry=>String(entry.id)===String(devSelectedId))||null;
-    const sectionNames={chapters:"챕터",cards:"컬렉션 카드",postcards:"컬렉션 엽서",dialogues:"대화방",items:"아이템"};
+    const sectionNames={chapters:"챕터",cards:"컬렉션 카드",postcards:"컬렉션 엽서",items:"아이템"};
     $("#dev-current-section").textContent=sectionNames[key]||key;
     $("#dev-entry-count").textContent=entries.length+"개";
     $("#dev-entry-list").innerHTML=entries.length
@@ -1266,6 +1301,117 @@
     $("#dev-save-entry").disabled=!selected;
     $("#dev-delete-entry").disabled=!selected;
     $("#dev-save-status").textContent="브라우저 개발 설정 · "+entries.length+"개";
+    renderChapterInteractionEditor(selected,key);
+  }
+
+  function currentChapterInteraction(){
+    if(currentDevKey()!=="chapters") return null;
+    const chapter=devContent.chapters.find(entry=>String(entry.id)===String(devSelectedId));
+    return chapter?.interactions?.find(interaction=>String(interaction.id)===String(devSelectedInteractionId))||null;
+  }
+
+  function newChapterInteraction(){
+    return {
+      id:"interaction-"+Date.now().toString(36),
+      type:"inspect",
+      label:"새 상호작용",
+      target:"",
+      scene:"",
+      x:50,y:50,width:12,height:12,
+      text:"",
+      condition:"",
+      rewardItem:"",
+      next:"",
+      note:""
+    };
+  }
+
+  function interactionFieldMarkup(field,value){
+    const safe=value==null?"":String(value);
+    if(field.type==="textarea"){
+      return '<label class="dev-field dev-field--wide"><span>'+escapeHTML(field.label)+'</span><textarea data-dev-interaction-field="'+escapeHTML(field.key)+'" placeholder="'+escapeHTML(field.placeholder||"")+'">'+escapeHTML(safe)+'</textarea></label>';
+    }
+    if(field.type==="select"){
+      const options=(field.options||[]).map(([id,label])=>'<option value="'+escapeHTML(id)+'" '+(safe===id?"selected":"")+'>'+escapeHTML(label)+'</option>').join("");
+      return '<label class="dev-field"><span>'+escapeHTML(field.label)+'</span><select data-dev-interaction-field="'+escapeHTML(field.key)+'">'+options+'</select></label>';
+    }
+    const type=field.type==="number"?"number":"text";
+    const numeric=type==="number"?' min="'+escapeHTML(field.min??"")+'" max="'+escapeHTML(field.max??"")+'" step="'+escapeHTML(field.step??1)+'"':"";
+    return '<label class="dev-field"><span>'+escapeHTML(field.label)+'</span><input type="'+type+'" data-dev-interaction-field="'+escapeHTML(field.key)+'" value="'+escapeHTML(safe)+'" placeholder="'+escapeHTML(field.placeholder||"")+'"'+numeric+'></label>';
+  }
+
+  function renderChapterInteractionEditor(chapter,key=currentDevKey()){
+    const panel=$("#dev-chapter-interactions");
+    if(!panel) return;
+    const visible=key==="chapters"&&Boolean(chapter);
+    panel.hidden=!visible;
+    if(!visible) return;
+    chapter.interactions=normalizeChapterInteractions(chapter.interactions);
+    if(!devSelectedInteractionId || !chapter.interactions.some(item=>String(item.id)===String(devSelectedInteractionId))){
+      devSelectedInteractionId=chapter.interactions[0]?.id||null;
+    }
+    const selected=currentChapterInteraction();
+    $("#dev-interaction-count").textContent=chapter.interactions.length+"개";
+    $("#dev-interaction-list").innerHTML=chapter.interactions.length
+      ? chapter.interactions.map(item=>'<button type="button" data-dev-interaction="'+escapeHTML(item.id)+'" class="'+(String(item.id)===String(devSelectedInteractionId)?"is-active":"")+'"><b>'+escapeHTML(item.label||item.id)+'</b><small>'+escapeHTML(item.type||"inspect")+' · '+escapeHTML(item.id)+'</small></button>').join("")
+      : '<p class="dev-empty">아직 상호작용이 없습니다. + 상호작용 추가를 눌러 주세요.</p>';
+    $("#dev-interaction-title").textContent=selected?"수정 · "+(selected.label||selected.id):"상호작용을 선택하세요";
+    $("#dev-interaction-fields").innerHTML=selected
+      ? interactionSchema.map(field=>interactionFieldMarkup(field,selected[field.key])).join("")
+      : '<div class="dev-editor-empty">왼쪽 목록에서 상호작용을 선택해 주세요.</div>';
+    $("#dev-save-interaction").disabled=!selected;
+    $("#dev-delete-interaction").disabled=!selected;
+  }
+
+  function addChapterInteraction(){
+    const chapter=devContent.chapters.find(entry=>String(entry.id)===String(devSelectedId));
+    if(!chapter) return;
+    chapter.interactions=normalizeChapterInteractions(chapter.interactions);
+    const interaction=newChapterInteraction();
+    chapter.interactions.push(interaction);
+    devSelectedInteractionId=interaction.id;
+    if(persistDevContent()){
+      renderDevSettings();
+      toast("새 상호작용을 추가했습니다.");
+    }
+  }
+
+  function saveChapterInteraction(){
+    const chapter=devContent.chapters.find(entry=>String(entry.id)===String(devSelectedId));
+    if(!chapter) return;
+    chapter.interactions=normalizeChapterInteractions(chapter.interactions);
+    const index=chapter.interactions.findIndex(item=>String(item.id)===String(devSelectedInteractionId));
+    if(index<0) return;
+    const next={...chapter.interactions[index]};
+    $("[data-dev-interaction-field]",$("#dev-interaction-fields")).forEach(field=>{
+      const key=field.dataset.devInteractionField;
+      next[key]=["x","y","width","height"].includes(key)?Number(field.value):field.value;
+    });
+    next.id=String(next.id||"").trim();
+    if(!next.id){toast("상호작용 ID는 비워둘 수 없습니다.");return}
+    if(chapter.interactions.some((item,i)=>i!==index&&String(item.id)===next.id)){toast("같은 상호작용 ID가 이미 있습니다.");return}
+    chapter.interactions[index]=next;
+    devSelectedInteractionId=next.id;
+    if(persistDevContent()){
+      renderDevSettings();
+      toast("상호작용 설정을 저장했습니다.");
+    }
+  }
+
+  function deleteChapterInteraction(){
+    const chapter=devContent.chapters.find(entry=>String(entry.id)===String(devSelectedId));
+    if(!chapter) return;
+    chapter.interactions=normalizeChapterInteractions(chapter.interactions);
+    const index=chapter.interactions.findIndex(item=>String(item.id)===String(devSelectedInteractionId));
+    if(index<0) return;
+    const name=chapter.interactions[index].label||chapter.interactions[index].id;
+    if(!window.confirm(name+" 상호작용을 삭제할까요?")) return;
+    chapter.interactions.splice(index,1);
+    devSelectedInteractionId=chapter.interactions[Math.min(index,chapter.interactions.length-1)]?.id||null;
+    if(persistDevContent()){
+      renderDevSettings();
+      toast("상호작용을 삭제했습니다.");
+    }
   }
 
   function createDevEntry(){
@@ -1273,6 +1419,7 @@
     const entry=devNewTemplate(key);
     devContent[key].push(entry);
     devSelectedId=entry.id;
+    devSelectedInteractionId=null;
     if(persistDevContent()){
       renderDevSettings();
       toast("새 "+(key==="items"?"아이템":"항목")+"을 만들었습니다.");
@@ -1324,9 +1471,10 @@
   }
 
   function resetDevContent(){
-    if(!window.confirm("챕터·컬렉션·대화방·아이템 개발 설정을 모두 기본값으로 되돌릴까요?")) return;
+    if(!window.confirm("챕터·컬렉션·아이템 개발 설정을 모두 기본값으로 되돌릴까요?")) return;
     devContent=cloneData(BASE_DEV_CONTENT);
     devSelectedId=null;
+    devSelectedInteractionId=null;
     if(persistDevContent()){
       renderDevSettings();
       renderHome();
@@ -1523,6 +1671,7 @@
       if(!button) return;
       devSection=button.dataset.devSection;
       devSelectedId=null;
+      devSelectedInteractionId=null;
       renderDevSettings();
     });
     $("#dev-collection-types")?.addEventListener("click",event=>{
@@ -1536,7 +1685,20 @@
       const button=event.target.closest("[data-dev-entry]");
       if(!button) return;
       devSelectedId=button.dataset.devEntry;
+      devSelectedInteractionId=null;
       renderDevSettings();
+    });
+    $("#dev-interaction-list")?.addEventListener("click",event=>{
+      const button=event.target.closest("[data-dev-interaction]");
+      if(!button) return;
+      devSelectedInteractionId=button.dataset.devInteraction;
+      renderDevSettings();
+    });
+    $("#dev-add-interaction")?.addEventListener("click",addChapterInteraction);
+    $("#dev-save-interaction")?.addEventListener("click",saveChapterInteraction);
+    $("#dev-delete-interaction")?.addEventListener("click",deleteChapterInteraction);
+    $("#dev-interaction-fields")?.addEventListener("input",()=>{
+      $("#dev-save-status").textContent="상호작용 수정됨 · 저장 필요";
     });
     $("#dev-new-entry")?.addEventListener("click",createDevEntry);
     $("#dev-save-entry")?.addEventListener("click",saveDevEntry);
