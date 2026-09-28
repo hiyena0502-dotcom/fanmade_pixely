@@ -8,7 +8,7 @@ const directory=path.join(__dirname,"..");
 const app=fs.readFileSync(path.join(directory,"app.js"),"utf8");
 const storageKey="pixely-lost-sky-saves-v2";
 
-function boot(saved,initialVersion="14"){
+function boot(saved,initialVersion="15"){
   const nodes=new Map();
   const listeners={};
   const requests=[];
@@ -214,7 +214,7 @@ test("update prompt compares the loaded version on the first check and on later 
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
   assert.equal(state.requests[0].options.cache,"no-store");
-  state.setVersion("15");
+  state.setVersion("16");
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,false);
@@ -223,7 +223,7 @@ test("update prompt compares the loaded version on the first check and on later 
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
-  const stale=boot(undefined,"15");
+  const stale=boot(undefined,"16");
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(stale.node("#update-modal").hidden,false);
 });

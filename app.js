@@ -2,7 +2,7 @@
   "use strict";
 
   const STORAGE_KEY = "pixely-lost-sky-saves-v2";
-  const SITE_VERSION = "14";
+  const SITE_VERSION = "15";
   const $ = (q, root = document) => root.querySelector(q);
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 

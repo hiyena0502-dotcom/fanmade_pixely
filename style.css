@@ -945,6 +945,7 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
 @keyframes float-emblem{to{transform:translateY(-10px) rotate(8deg)}}
 .visual-note{right:13%;bottom:7%;font-size:9px;letter-spacing:.14em;background:rgba(22,34,67,.87);border:1px solid rgba(255,226,166,.55);color:#fff0bc;transform:none}
 .visual-note span{color:#fff}
+.art-placeholder .visual-note span{display:inline;font-size:9px;line-height:1}
 .title-brand{z-index:4}.title-brand h1{font-size:clamp(56px,6vw,94px);line-height:.86;text-shadow:0 5px 2px rgba(15,25,56,.68),0 15px 35px rgba(9,16,41,.7)}
 .title-brand h1 em{color:#fae4ae}.title-brand p{padding:9px 14px;border-left:3px solid #efcc8d;background:rgba(18,32,65,.53);border-radius:0 12px 12px 0;color:#fff1d8;font-size:13px}
 .command-window{top:51%;right:5vw;width:min(380px,34vw);padding:13px;border:1px solid rgba(234,219,180,.48);box-shadow:0 25px 65px rgba(5,12,36,.4),inset 0 0 0 3px rgba(199,222,255,.06)}
@@ -956,6 +957,7 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
 
 /* Collection section filters */
 .collection-filters{display:flex;flex-wrap:wrap;gap:8px;margin-top:19px}
+.diary-decoration .doodle:not(.doodle--small){display:none}
 .collection-filters button{padding:9px 11px;border:1px solid rgba(96,83,94,.2);border-radius:999px;background:rgba(255,255,255,.6);color:#596778;font-size:10px;font-weight:800;cursor:pointer;transition:transform .15s,background .15s}
 .collection-filters button span{margin-left:4px;color:#9a8875;font-size:9px}
 .collection-filters button:hover{transform:translateY(-2px);background:#fff}
