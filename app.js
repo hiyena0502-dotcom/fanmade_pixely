@@ -1270,10 +1270,10 @@
     });
     $("#save-manager-button").addEventListener("click",()=>openSaveModal("manage"));
 
-    $("[data-open-collection]").forEach(b=>b.addEventListener("click",()=>showView("collection")));
-    $("[data-open-wardrobe]").forEach(b=>b.addEventListener("click",()=>showView("wardrobe")));
-    $("[data-open-chapters]").forEach(b=>b.addEventListener("click",()=>showView("chapters")));
-    $("[data-open-dev]").forEach(b=>b.addEventListener("click",()=>showView("dev")));
+    Array.from(document.querySelectorAll("[data-open-collection]")).forEach(b=>b.addEventListener("click",()=>showView("collection")));
+    Array.from(document.querySelectorAll("[data-open-wardrobe]")).forEach(b=>b.addEventListener("click",()=>showView("wardrobe")));
+    Array.from(document.querySelectorAll("[data-open-chapters]")).forEach(b=>b.addEventListener("click",()=>showView("chapters")));
+    Array.from(document.querySelectorAll("[data-open-dev]")).forEach(b=>b.addEventListener("click",()=>showView("dev")));
     $$("[data-go-home]").forEach(b=>b.addEventListener("click",()=>showView("home")));
     $$("[data-close-modal]").forEach(b=>b.addEventListener("click",closeSaveModal));
 
