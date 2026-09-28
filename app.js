@@ -1466,6 +1466,23 @@
     showView("dev");
   }
 
+  function enterCurrentStorySceneEditor(){
+    if(devStoryChapterId){
+      renderStoryDevEditor();
+      return;
+    }
+    const save=activeSave();
+    const preferredId=save?.story?.scene==="party-room"?"night":devSelectedId;
+    const chapter=devContent.chapters.find(entry=>String(entry.id)===String(preferredId))||devContent.chapters[0];
+    if(!chapter) return;
+    chapter.interactions=normalizeChapterInteractions(chapter.interactions);
+    devStoryChapterId=chapter.id;
+    devSelectedId=chapter.id;
+    devSelectedInteractionId=chapter.interactions[0]?.id||null;
+    devStoryPlacing=false;
+    renderGameUI();
+  }
+
   function startStoryInteractionPlacement(){
     if(!currentDevStoryChapter()) return;
     devStoryPlacing=true;
@@ -1862,6 +1879,7 @@
       renderDevSettings();
     });
     $("#dev-open-chapter-scene")?.addEventListener("click",openChapterSceneEditor);
+    $("#story-dev-enter")?.addEventListener("click",enterCurrentStorySceneEditor);
     $("#story-dev-add-interaction")?.addEventListener("click",startStoryInteractionPlacement);
     $("#story-dev-exit")?.addEventListener("click",closeChapterSceneEditor);
     $("#story-dev-save-interaction")?.addEventListener("click",saveStoryInteractionDetails);
