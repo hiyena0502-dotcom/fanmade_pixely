@@ -1366,22 +1366,34 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
 
 
 /* =========================================================
-   WARDROBE PREVIEW FIT v18 — smaller art, safer layer bounds
+   WARDROBE PREVIEW FIT v19 — shorter preview panel
    ========================================================= */
-.wardrobe-stage::before{z-index:0}
+.wardrobe-shell{
+  align-items:start;
+}
+.wardrobe-stage{
+  align-self:start;
+  min-height:500px;
+}
+.wardrobe-stage::before{
+  z-index:0;
+  inset:54px 10% 82px;
+}
 .wardrobe-stage::after{z-index:0}
 .wardrobe-portrait{
-  inset:7% 5% 8%;
+  inset:8% 5% 10%;
   z-index:1;
   overflow:visible;
   border-radius:18px;
 }
 .wardrobe-image-layer{
-  top:48%;
-  width:82%;
-  height:82%;
+  top:49%;
+  width:92%;
+  height:92%;
 }
 @media(max-width:680px){
-  .wardrobe-portrait{inset:7% 10% 9%}
-  .wardrobe-image-layer{width:80%;height:80%}
+  .wardrobe-stage{min-height:340px}
+  .wardrobe-stage::before{inset:42px 16% 65px}
+  .wardrobe-portrait{inset:8% 10% 11%}
+  .wardrobe-image-layer{width:90%;height:90%}
 }
