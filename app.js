@@ -3,7 +3,8 @@
 
   const STORAGE_KEY = "pixely-lost-sky-saves-v2";
   const WARDROBE_ASSET_KEY = "pixely-lost-sky-wardrobe-assets-v1";
-  const SITE_VERSION = "23";
+  const DEV_CONTENT_KEY = "pixely-lost-sky-dev-content-v1";
+  const SITE_VERSION = "24";
   const $ = (q, root = document) => root.querySelector(q);
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 
@@ -54,12 +55,10 @@
     face:[["eyes","눈"],["mouth","입"],["brows","눈썹"],["cheek","볼·표정"],["other","기타 얼굴"]],
     decoration:[["effect","이펙트"],["sticker","스티커"],["around","주변 장식"],["other","기타 장식"]]
   };
-  const wardrobeBuiltins={
-    outfit:catalogue.items.filter(item=>item.wardrobeSlot==="outfit"),
-    accessory:catalogue.items.filter(item=>item.wardrobeSlot==="accessory"),
-    face:catalogue.items.filter(item=>item.wardrobeSlot==="face"),
-    decoration:catalogue.items.filter(item=>item.wardrobeSlot==="decoration" || item.wardrobeSlot==="headwear")
-  };
+  function builtinWardrobeOptions(slot){
+    if(slot==="decoration") return catalogue.items.filter(item=>item.wardrobeSlot==="decoration" || item.wardrobeSlot==="headwear");
+    return catalogue.items.filter(item=>item.wardrobeSlot===slot);
+  }
   const defaultOutfit={layers:[]};
   const defaultTransform={x:0,y:0,scale:100,rotation:0};
 
@@ -131,7 +130,7 @@
   }
   let wardrobeAssets=readWardrobeAssets();
   function wardrobeOptionsFor(slot){
-    return [...(wardrobeBuiltins[slot]||[]),...wardrobeAssets.custom.filter(item=>item.slot===slot)];
+    return [...builtinWardrobeOptions(slot),...wardrobeAssets.custom.filter(item=>item.slot===slot)];
   }
   function wardrobeOptionById(slot,id){
     return wardrobeOptionsFor(slot).find(option=>option.id===id);
@@ -212,6 +211,67 @@
     {id:"birthday",no:"05",title:"푸른 하늘",label:"FINAL",desc:"현실의 잠뜰님을 데려와 함께 생일을 축하한다."}
   ];
 
+  function cloneData(value){
+    return JSON.parse(JSON.stringify(value));
+  }
+
+  const BASE_DEV_CONTENT={
+    chapters:cloneData(chapters),
+    cards:cloneData(catalogue.cards),
+    postcards:cloneData(catalogue.postcards),
+    items:cloneData(catalogue.items),
+    dialogues:[]
+  };
+
+  function normalizeDevArray(value,fallback){
+    return Array.isArray(value)
+      ? value.filter(entry=>entry&&typeof entry==="object"&&!Array.isArray(entry)).map(entry=>({...entry}))
+      : cloneData(fallback);
+  }
+
+  function readDevContent(){
+    try{
+      const raw=JSON.parse(localStorage.getItem(DEV_CONTENT_KEY)||"null");
+      if(!raw||typeof raw!=="object") return cloneData(BASE_DEV_CONTENT);
+      return {
+        chapters:normalizeDevArray(raw.chapters,BASE_DEV_CONTENT.chapters),
+        cards:normalizeDevArray(raw.cards,BASE_DEV_CONTENT.cards),
+        postcards:normalizeDevArray(raw.postcards,BASE_DEV_CONTENT.postcards),
+        items:normalizeDevArray(raw.items,BASE_DEV_CONTENT.items),
+        dialogues:normalizeDevArray(raw.dialogues,[])
+      };
+    }catch{
+      return cloneData(BASE_DEV_CONTENT);
+    }
+  }
+
+  let devContent=readDevContent();
+
+  function applyDevContent(){
+    chapters.splice(0,chapters.length,...cloneData(devContent.chapters));
+    catalogue.cards.splice(0,catalogue.cards.length,...cloneData(devContent.cards));
+    catalogue.postcards.splice(0,catalogue.postcards.length,...cloneData(devContent.postcards));
+    catalogue.items.splice(0,catalogue.items.length,...cloneData(devContent.items));
+  }
+
+  function persistDevContent(){
+    try{
+      localStorage.setItem(DEV_CONTENT_KEY,JSON.stringify(devContent));
+      applyDevContent();
+      return true;
+    }catch{
+      toast("개발자 설정 저장에 실패했습니다. 브라우저 저장 공간을 확인해 주세요.");
+      return false;
+    }
+  }
+
+  applyDevContent();
+
+  window.PixelyDevContent={
+    all:()=>cloneData(devContent),
+    dialogues:()=>cloneData(devContent.dialogues)
+  };
+
   function freshRoot(){ return {activeSlot:null,slots:[null,null,null]}; }
 
   function normalizeSave(save){
@@ -263,6 +323,9 @@
   let wardrobeEditorTarget="base";
   let pendingWardrobeFile=null;
   let outfitDraft={layers:[]};
+  let devSection="chapters";
+  let devCollectionType="cards";
+  let devSelectedId=null;
   let saveMode="manage";
   let toastTimer=null;
   let dismissedUpdate=null;
@@ -382,6 +445,7 @@
     });
     if(name==="collection") renderCollection();
     if(name==="chapters") renderChapters();
+    if(name==="dev") renderDevSettings();
     if(name==="wardrobe"){
       const save=activeSave();
       outfitDraft=save
@@ -957,6 +1021,198 @@
   }
 
 
+  const devSchemas={
+    chapters:[
+      {key:"id",label:"ID",type:"text",placeholder:"chapter-id"},
+      {key:"no",label:"번호",type:"text",placeholder:"01"},
+      {key:"label",label:"라벨",type:"text",placeholder:"CHAPTER 01"},
+      {key:"title",label:"제목",type:"text",placeholder:"챕터 제목"},
+      {key:"desc",label:"설명",type:"textarea",placeholder:"챕터 설명"}
+    ],
+    cards:[
+      {key:"id",label:"ID",type:"text",placeholder:"character-id"},
+      {key:"name",label:"이름",type:"text",placeholder:"인물 이름"},
+      {key:"type",label:"분류 TYPE",type:"text",placeholder:"PERSON / FAIRY / CREATURE"},
+      {key:"symbol",label:"표시 문자",type:"text",placeholder:"잠"},
+      {key:"color",label:"색상",type:"color"},
+      {key:"world",label:"상황극·세계",type:"text",placeholder:"비우면 기본 인물"},
+      {key:"desc",label:"설명",type:"textarea",placeholder:"카드 설명"},
+      {key:"memo",label:"꿈뜰이 메모",type:"textarea",placeholder:"카드 메모"}
+    ],
+    postcards:[
+      {key:"id",label:"ID",type:"text",placeholder:"postcard-id"},
+      {key:"name",label:"이름",type:"text",placeholder:"엽서 제목"},
+      {key:"type",label:"분류 TYPE",type:"text",placeholder:"STORY POSTCARD"},
+      {key:"symbol",label:"표시 문자",type:"text",placeholder:"✦"},
+      {key:"color",label:"색상",type:"color"},
+      {key:"desc",label:"설명",type:"textarea",placeholder:"엽서 설명"},
+      {key:"caption",label:"캡션",type:"textarea",placeholder:"엽서 한마디"}
+    ],
+    dialogues:[
+      {key:"id",label:"ID",type:"text",placeholder:"room-id"},
+      {key:"title",label:"대화방 이름",type:"text",placeholder:"꿈뜰이와 잠뜰"},
+      {key:"character",label:"주요 인물",type:"text",placeholder:"잠뜰"},
+      {key:"location",label:"장소",type:"text",placeholder:"생일 준비 장소"},
+      {key:"opening",label:"첫 대사·상황",type:"textarea",placeholder:"대화방을 열었을 때 시작 문장"},
+      {key:"note",label:"개발 메모",type:"textarea",placeholder:"대화 조건이나 연출 메모"}
+    ],
+    items:[
+      {key:"id",label:"ID",type:"text",placeholder:"item-id"},
+      {key:"name",label:"아이템 이름",type:"text",placeholder:"아이템 이름"},
+      {key:"type",label:"종류 TYPE",type:"text",placeholder:"KEY ITEM / MEMENTO / GIFT"},
+      {key:"symbol",label:"표시 문자",type:"text",placeholder:"✦"},
+      {key:"color",label:"색상",type:"color"},
+      {key:"desc",label:"아이템 설명",type:"textarea",placeholder:"인벤토리와 컬렉션에 표시되는 설명"},
+      {key:"wardrobeSlot",label:"옷장 분류",type:"select",options:[["","사용 안 함"],["outfit","옷"],["accessory","소품"],["face","얼굴"],["decoration","장식"]]},
+      {key:"wardrobeGroup",label:"옷장 세부 파츠",type:"text",placeholder:"예: top / eyes / hand"}
+    ]
+  };
+
+  function currentDevKey(){
+    return devSection==="collection"?devCollectionType:devSection;
+  }
+
+  function currentDevEntries(){
+    const key=currentDevKey();
+    return devContent[key]||[];
+  }
+
+  function devEntryTitle(entry,key=currentDevKey()){
+    if(key==="chapters") return entry.title||entry.id||"이름 없는 챕터";
+    if(key==="dialogues") return entry.title||entry.character||entry.id||"이름 없는 대화방";
+    return entry.name||entry.id||"이름 없는 항목";
+  }
+
+  function devNewTemplate(key){
+    const id=key.replace(/s$/,"")+"-"+Date.now().toString(36);
+    const templates={
+      chapters:{id,no:String((devContent.chapters.length+1)).padStart(2,"0"),label:"CHAPTER",title:"새 챕터",desc:""},
+      cards:{id,name:"새 카드",type:"PERSON",symbol:"?",color:"#7894a5",world:"",desc:"",memo:""},
+      postcards:{id,name:"새 엽서",type:"STORY POSTCARD",symbol:"✦",color:"#7894a5",desc:"",caption:""},
+      dialogues:{id,title:"새 대화방",character:"",location:"",opening:"",note:""},
+      items:{id,name:"새 아이템",type:"MEMENTO",symbol:"✦",color:"#7894a5",desc:"",wardrobeSlot:"",wardrobeGroup:""}
+    };
+    return templates[key]||{id};
+  }
+
+  function devFieldMarkup(field,value){
+    const safe=value==null?"":String(value);
+    if(field.type==="textarea"){
+      return '<label class="dev-field dev-field--wide"><span>'+escapeHTML(field.label)+'</span><textarea data-dev-field="'+escapeHTML(field.key)+'" placeholder="'+escapeHTML(field.placeholder||"")+'">'+escapeHTML(safe)+'</textarea></label>';
+    }
+    if(field.type==="select"){
+      const options=(field.options||[]).map(([id,label])=>'<option value="'+escapeHTML(id)+'" '+(safe===id?"selected":"")+'>'+escapeHTML(label)+'</option>').join("");
+      return '<label class="dev-field"><span>'+escapeHTML(field.label)+'</span><select data-dev-field="'+escapeHTML(field.key)+'">'+options+'</select></label>';
+    }
+    const type=field.type==="color"?"color":"text";
+    const fallback=type==="color" && !/^#[0-9a-f]{6}$/i.test(safe)?"#7894a5":safe;
+    return '<label class="dev-field"><span>'+escapeHTML(field.label)+'</span><input type="'+type+'" data-dev-field="'+escapeHTML(field.key)+'" value="'+escapeHTML(fallback)+'" placeholder="'+escapeHTML(field.placeholder||"")+'"></label>';
+  }
+
+  function renderDevSettings(){
+    $$("[data-dev-section]").forEach(button=>{
+      const active=button.dataset.devSection===devSection;
+      button.classList.toggle("is-active",active);
+      button.setAttribute("aria-pressed",active?"true":"false");
+    });
+    const collectionTypes=$("#dev-collection-types");
+    collectionTypes.hidden=devSection!=="collection";
+    $$("[data-dev-collection-type]").forEach(button=>{
+      const active=button.dataset.devCollectionType===devCollectionType;
+      button.classList.toggle("is-active",active);
+      button.setAttribute("aria-pressed",active?"true":"false");
+    });
+
+    const key=currentDevKey();
+    const entries=currentDevEntries();
+    if(!devSelectedId || !entries.some(entry=>String(entry.id)===String(devSelectedId))){
+      devSelectedId=entries[0]?.id||null;
+    }
+    const selected=entries.find(entry=>String(entry.id)===String(devSelectedId))||null;
+    const sectionNames={chapters:"챕터",cards:"컬렉션 카드",postcards:"컬렉션 엽서",dialogues:"대화방",items:"아이템"};
+    $("#dev-current-section").textContent=sectionNames[key]||key;
+    $("#dev-entry-count").textContent=entries.length+"개";
+    $("#dev-entry-list").innerHTML=entries.length
+      ? entries.map(entry=>'<button type="button" data-dev-entry="'+escapeHTML(entry.id||"")+'" class="'+(String(entry.id)===String(devSelectedId)?"is-active":"")+'"><b>'+escapeHTML(devEntryTitle(entry,key))+'</b><small>'+escapeHTML(entry.id||"NO ID")+'</small></button>').join("")
+      : '<p class="dev-empty">아직 등록된 항목이 없습니다.</p>';
+
+    const schema=devSchemas[key]||[];
+    $("#dev-editor-title").textContent=selected?"수정 · "+devEntryTitle(selected,key):"항목을 선택하세요";
+    $("#dev-editor-fields").innerHTML=selected
+      ? schema.map(field=>devFieldMarkup(field,selected[field.key])).join("")
+      : '<div class="dev-editor-empty">왼쪽에서 항목을 선택하거나 + 새 항목을 눌러 주세요.</div>';
+    $("#dev-save-entry").disabled=!selected;
+    $("#dev-delete-entry").disabled=!selected;
+    $("#dev-save-status").textContent="브라우저 개발 설정 · "+entries.length+"개";
+  }
+
+  function createDevEntry(){
+    const key=currentDevKey();
+    const entry=devNewTemplate(key);
+    devContent[key].push(entry);
+    devSelectedId=entry.id;
+    if(persistDevContent()){
+      renderDevSettings();
+      toast("새 "+(key==="items"?"아이템":"항목")+"을 만들었습니다.");
+    }
+  }
+
+  function saveDevEntry(){
+    const key=currentDevKey();
+    const entries=devContent[key]||[];
+    const index=entries.findIndex(entry=>String(entry.id)===String(devSelectedId));
+    if(index<0) return;
+    const original=entries[index];
+    const next={...original};
+    $$("[data-dev-field]",$("#dev-editor-fields")).forEach(field=>{
+      next[field.dataset.devField]=field.value;
+    });
+    next.id=String(next.id||"").trim();
+    if(!next.id){
+      toast("ID는 비워둘 수 없습니다.");
+      return;
+    }
+    if(entries.some((entry,i)=>i!==index&&String(entry.id)===next.id)){
+      toast("같은 ID가 이미 있습니다.");
+      return;
+    }
+    entries[index]=next;
+    devSelectedId=next.id;
+    if(persistDevContent()){
+      renderDevSettings();
+      renderHome();
+      toast("개발자 설정을 저장했습니다.");
+    }
+  }
+
+  function deleteDevEntry(){
+    const key=currentDevKey();
+    const entries=devContent[key]||[];
+    const index=entries.findIndex(entry=>String(entry.id)===String(devSelectedId));
+    if(index<0) return;
+    const name=devEntryTitle(entries[index],key);
+    if(!window.confirm(name+" 항목을 삭제할까요?")) return;
+    entries.splice(index,1);
+    devSelectedId=entries[Math.min(index,entries.length-1)]?.id||null;
+    if(persistDevContent()){
+      renderDevSettings();
+      renderHome();
+      toast("항목을 삭제했습니다.");
+    }
+  }
+
+  function resetDevContent(){
+    if(!window.confirm("챕터·컬렉션·대화방·아이템 개발 설정을 모두 기본값으로 되돌릴까요?")) return;
+    devContent=cloneData(BASE_DEV_CONTENT);
+    devSelectedId=null;
+    if(persistDevContent()){
+      renderDevSettings();
+      renderHome();
+      toast("개발자 설정을 기본값으로 복원했습니다.");
+    }
+  }
+
+
   function showUpdatePrompt(versionKey){
     if(!versionKey || dismissedUpdate===versionKey) return;
     const modal=$("#update-modal");
@@ -1014,9 +1270,10 @@
     });
     $("#save-manager-button").addEventListener("click",()=>openSaveModal("manage"));
 
-    $$("[data-open-collection]").forEach(b=>b.addEventListener("click",()=>showView("collection")));
-    $$("[data-open-wardrobe]").forEach(b=>b.addEventListener("click",()=>showView("wardrobe")));
-    $$("[data-open-chapters]").forEach(b=>b.addEventListener("click",()=>showView("chapters")));
+    $("[data-open-collection]").forEach(b=>b.addEventListener("click",()=>showView("collection")));
+    $("[data-open-wardrobe]").forEach(b=>b.addEventListener("click",()=>showView("wardrobe")));
+    $("[data-open-chapters]").forEach(b=>b.addEventListener("click",()=>showView("chapters")));
+    $("[data-open-dev]").forEach(b=>b.addEventListener("click",()=>showView("dev")));
     $$("[data-go-home]").forEach(b=>b.addEventListener("click",()=>showView("home")));
     $$("[data-close-modal]").forEach(b=>b.addEventListener("click",closeSaveModal));
 
@@ -1117,6 +1374,34 @@
       renderWardrobe();
     });
 
+    $("#dev-settings-tabs")?.addEventListener("click",event=>{
+      const button=event.target.closest("[data-dev-section]");
+      if(!button) return;
+      devSection=button.dataset.devSection;
+      devSelectedId=null;
+      renderDevSettings();
+    });
+    $("#dev-collection-types")?.addEventListener("click",event=>{
+      const button=event.target.closest("[data-dev-collection-type]");
+      if(!button) return;
+      devCollectionType=button.dataset.devCollectionType;
+      devSelectedId=null;
+      renderDevSettings();
+    });
+    $("#dev-entry-list")?.addEventListener("click",event=>{
+      const button=event.target.closest("[data-dev-entry]");
+      if(!button) return;
+      devSelectedId=button.dataset.devEntry;
+      renderDevSettings();
+    });
+    $("#dev-new-entry")?.addEventListener("click",createDevEntry);
+    $("#dev-save-entry")?.addEventListener("click",saveDevEntry);
+    $("#dev-delete-entry")?.addEventListener("click",deleteDevEntry);
+    $("#dev-reset-content")?.addEventListener("click",resetDevContent);
+    $("#dev-editor-fields")?.addEventListener("input",()=>{
+      $("#dev-save-status").textContent="수정됨 · 저장 필요";
+    });
+
     $("#save-slot-list").addEventListener("click",event=>{
       const newBtn=event.target.closest("[data-new-slot]");
       const loadBtn=event.target.closest("[data-load-slot]");
@@ -1131,7 +1416,7 @@
     document.addEventListener("keydown",event=>{
       if(event.key!=="Escape") return;
       if(!$("#save-modal").hidden) closeSaveModal();
-      else if(!$("[data-view='collection']").hidden || !$("[data-view='chapters']").hidden || !$("[data-view='story']").hidden || !$("[data-view='wardrobe']").hidden) showView("home");
+      else if(!$("[data-view='collection']").hidden || !$("[data-view='chapters']").hidden || !$("[data-view='story']").hidden || !$("[data-view='wardrobe']").hidden || !$("[data-view='dev']").hidden) showView("home");
     });
   }
 
