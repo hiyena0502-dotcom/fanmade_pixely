@@ -489,7 +489,7 @@
   function renderWardrobe(){
     const save=activeSave();
     const owned=new Set(save?.collection?.items||[]);
-    const decorationNames=(outfitDraft.decororations||outfitDraft.decorations||[]).map(id=>wardrobeOptionName("decoration",id)).filter(Boolean);
+    const decorationNames=(outfitDraft.decorations||[]).map(id=>wardrobeOptionName("decoration",id)).filter(Boolean);
     const equipped=[
       wardrobeOptionName("outfit",outfitDraft.outfit),
       wardrobeOptionName("accessory",outfitDraft.accessory),
