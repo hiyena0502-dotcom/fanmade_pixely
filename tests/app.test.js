@@ -8,7 +8,7 @@ const directory=path.join(__dirname,"..");
 const app=fs.readFileSync(path.join(directory,"app.js"),"utf8");
 const storageKey="pixely-lost-sky-saves-v2";
 
-function boot(saved,initialVersion="12"){
+function boot(saved,initialVersion="13"){
   const nodes=new Map();
   const listeners={};
   const requests=[];
@@ -72,17 +72,6 @@ function boot(saved,initialVersion="12"){
     setConfirm(value){confirmResult=value},
     setStorageFailure(value){failStorage=value},
     click(selector){node(selector).listeners.click()},
-    dialogueNext(){node("#dialogue-actions").children[0].listeners.click()},
-    spot(id){
-      const item=node("#room-hotspots").children.find(child=>child.dataset.spot===id);
-      assert.ok(item,`missing hotspot: ${id}`);
-      node("#room-hotspots").listeners.click({target:{closest(){return item}}});
-    },
-    selectItem(id){
-      const item=node("#story-inventory").children.find(child=>child.dataset.inventory===id);
-      assert.ok(item,`missing inventory item: ${id}`);
-      node("#story-inventory").listeners.click({target:{closest(){return item}}});
-    },
     slotAction(attribute,index){
       node("#save-slot-list").listeners.click({target:{closest(selector){
         return selector===`[data-${attribute}]` ? {dataset:{[attribute.replace(/-([a-z])/g,(_,letter)=>letter.toUpperCase())]:String(index)}} : null;
@@ -114,39 +103,33 @@ test("saving over a different occupied slot requires confirmation",()=>{
   assert.equal(JSON.parse(state.storage.get(storageKey)).slots[1].chapter,"첫 번째");
 });
 
-test("new game opens chapter one and persists the active slot",()=>{
+test("new game opens empty mission and inventory interface without starting an intro",()=>{
   const state=boot();
   state.click("#new-game-button");
   state.slotAction("new-slot",2);
   const saved=JSON.parse(state.storage.get(storageKey));
   assert.equal(saved.activeSlot,2);
   assert.deepEqual(saved.slots[2].collection.cards,["dreamer"]);
+  assert.deepEqual(saved.slots[2].missions,[]);
   assert.equal(state.node("view:story").hidden,false);
-  assert.match(state.node("#dialogue-text").textContent,/생일을 하루 앞둔 밤/);
+  assert.match(state.node("#mission-list").children[0].textContent,/등록된 미션이 없습니다/);
+  assert.match(state.node("#inventory-list").children[0].textContent,/가지고 있는 아이템이 없습니다/);
+  assert.equal(saved.slots[2].completedChapters.length,0);
 });
 
-test("chapter one delivers found items, records the postcard, and resumes after reload",()=>{
-  const state=boot();
-  state.click("#new-game-button");
-  state.slotAction("new-slot",0);
-  for(let i=0;i<6;i++) state.dialogueNext();
-  assert.equal(state.node("#room-hotspots").children.length,9);
-  state.spot("gongryong");
-  for(const [place,item,person] of [["box","ribbon","suhyeon"],["table","candles","deokgae"],["drawer","tape","rader"]]){
-    state.spot(place);
-    state.selectItem(item);
-    state.spot(person);
-  }
-  assert.equal(state.node("#story-counter").textContent,"준비 3 / 3");
-  state.spot("bed");
-  const saved=JSON.parse(state.storage.get(storageKey));
-  assert.equal(saved.slots[0].story.phase,"done");
-  assert.ok(saved.slots[0].completedChapters.includes("night"));
-  assert.ok(saved.slots[0].collection.postcards.includes("birthday-prep"));
-  assert.ok(saved.slots[0].collection.cards.includes("gongryong"));
-  const resumed=boot(saved);
-  resumed.click("#continue-button");
-  assert.match(resumed.node("#dialogue-text").textContent,/다음 날 아침/);
+test("existing saves open the interface without replaying the removed chapter",()=>{
+  const saved={activeSlot:0,slots:[{
+    chapter:"챕터 1 완료",location:"파티",savedAt:1,progress:15,
+    story:{phase:"done",found:["ribbon"],delivered:["ribbon"]},
+    completedChapters:["night"],collection:{cards:["dreamer"],items:["ribbon","plush"],postcards:[]}
+  },null,null]};
+  const state=boot(saved);
+  state.click("#continue-button");
+  assert.equal(state.node("view:story").hidden,false);
+  assert.match(state.node("#mission-list").children[0].textContent,/등록된 미션이 없습니다/);
+  assert.equal(state.node("#inventory-list").children.length,2);
+  assert.equal(state.node("#inventory-list").children[1].children[0].textContent,"치명적으로 귀여운 봉제인형");
+  assert.deepEqual(JSON.parse(state.storage.get(storageKey)).slots[0].story,saved.slots[0].story);
 });
 
 test("collection tabs switch without losing the selected state",()=>{
@@ -175,7 +158,7 @@ test("update prompt compares the loaded version on the first check and on later 
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
   assert.equal(state.requests[0].options.cache,"no-store");
-  state.setVersion("13");
+  state.setVersion("14");
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,false);
@@ -184,7 +167,7 @@ test("update prompt compares the loaded version on the first check and on later 
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
-  const stale=boot(undefined,"13");
+  const stale=boot(undefined,"14");
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(stale.node("#update-modal").hidden,false);
 });

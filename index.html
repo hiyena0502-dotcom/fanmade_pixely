@@ -7,8 +7,8 @@
   <meta name="theme-color" content="#111a3b" />
   <title>PIXELY : LOST SKY</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=12" />
-  <script src="app.js?v=12" defer></script>
+  <link rel="stylesheet" href="style.css?v=13" />
+  <script src="app.js?v=13" defer></script>
 </head>
 <body>
   <div class="game-root">
@@ -88,34 +88,21 @@
       </div>
     </section>
 
-    <section class="view story-view" data-view="story" hidden>
-      <header class="subpage-topbar story-topbar">
+    <section class="view game-ui-view" data-view="story" hidden>
+      <header class="subpage-topbar">
         <button class="back-button" type="button" data-go-home aria-label="홈으로">←</button>
-        <div><small>CHAPTER 01 · THE NIGHT BEFORE</small><h2>생일 전날 밤</h2></div>
-        <span class="story-counter" id="story-counter">준비 0 / 3</span>
+        <div><small>GAME MENU</small><h2>미션 · 인벤토리</h2></div>
       </header>
-      <main class="story-shell">
-        <div class="story-heading">
-          <div><small>PIXELY · BIRTHDAY PARTY</small><h3 id="story-heading">깜짝 파티 준비</h3></div>
-          <p id="story-objective">멤버들의 부탁을 듣고 준비물을 찾아 주세요.</p>
-        </div>
-        <div class="story-layout">
-          <section class="party-room" id="party-room" aria-label="생일 파티 준비 장소">
-            <div class="room-stars" aria-hidden="true">✦　·　✧　·　✦</div>
-            <div class="room-window" aria-hidden="true"><span>☾</span></div>
-            <div class="room-banner" aria-hidden="true">HAPPY BIRTHDAY</div>
-            <div class="room-table" aria-hidden="true"></div>
-            <div class="room-hotspots" id="room-hotspots"></div>
-          </section>
-          <aside class="story-sidebar">
-            <section class="story-panel game-window"><small>TO DO</small><h4>오늘 밤 할 일</h4><ul id="story-quests"></ul></section>
-            <section class="story-panel game-window"><small>BAG</small><h4>가방</h4><p class="bag-help">물건을 선택하고 필요한 멤버를 눌러 건네주세요.</p><div id="story-inventory" class="story-inventory"></div></section>
-          </aside>
-        </div>
-        <section class="story-dialogue game-window" aria-live="polite">
-          <span class="dialogue-speaker" id="dialogue-speaker">꿈뜰이</span>
-          <p id="dialogue-text"></p>
-          <div class="dialogue-actions" id="dialogue-actions"></div>
+      <main class="game-ui-shell">
+        <section class="game-ui-panel game-window" aria-labelledby="mission-title">
+          <small>MISSIONS</small>
+          <h3 id="mission-title">미션</h3>
+          <ul id="mission-list" aria-live="polite"></ul>
+        </section>
+        <section class="game-ui-panel game-window" aria-labelledby="inventory-title">
+          <small>INVENTORY</small>
+          <h3 id="inventory-title">인벤토리</h3>
+          <div id="inventory-list" class="inventory-list" aria-live="polite"></div>
         </section>
       </main>
     </section>
