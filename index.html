@@ -4,19 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="잠뜰님의 생일을 준비하며 여러 이야기의 세계를 여행하는 비공식 팬메이드 포인트앤클릭 어드벤처." />
-  <meta name="theme-color" content="#0a1220" />
+  <meta name="theme-color" content="#111a3b" />
   <title>PIXELY : LOST SKY</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=3" />
-  <script src="app.js?v=2" defer></script>
+  <link rel="stylesheet" href="style.css?v=4" />
+  <script src="app.js?v=3" defer></script>
 </head>
 <body>
   <div class="game-root">
     <section class="view title-view is-active" data-view="home">
       <div class="title-backdrop" aria-hidden="true">
         <div class="backdrop-sky"></div>
-        <div class="backdrop-grid"></div>
         <div class="backdrop-stars"></div>
+        <div class="backdrop-horizon"></div>
         <div class="art-placeholder">
           <span>MAIN VISUAL</span>
           <small>나중에 직접 그린 메인 일러스트가 들어갈 자리</small>
@@ -30,26 +30,33 @@
       </header>
 
       <aside class="command-window game-window">
-        <div class="window-caption">
-          <span>MAIN MENU</span>
-          <i>◆</i>
-        </div>
-        <button class="command-button command-button--continue" type="button" id="continue-button">
+        <div class="window-caption"><span>MAIN MENU</span><i>✦</i></div>
+
+        <button class="command-button" type="button" id="continue-button">
           <span class="command-cursor">▶</span>
           <span><b>이어하기</b><small id="continue-subtitle">저장된 이야기가 없습니다</small></span>
         </button>
+
         <button class="command-button" type="button" id="new-game-button">
           <span class="command-cursor">▶</span>
           <span><b>새 이야기</b><small>처음부터 시작합니다</small></span>
         </button>
+
         <button class="command-button" type="button" id="quick-save-button">
           <span class="command-cursor">▶</span>
           <span><b>저장하기</b><small id="quick-save-subtitle">현재 진행 상황 저장</small></span>
         </button>
+
+        <button class="command-button command-button--chapter" type="button" data-open-chapters>
+          <span class="command-cursor">▶</span>
+          <span><b>CHAPTERS</b><small>이야기 진행 기록</small></span>
+        </button>
+
         <button class="command-button command-button--collection" type="button" data-open-collection>
           <span class="command-cursor">▶</span>
-          <span><b>COLLECTION</b><small>인물 · 아이템 · 기록</small></span>
+          <span><b>COLLECTION</b><small>인물 · 아이템 다이어리</small></span>
         </button>
+
         <button class="command-button" type="button" id="save-manager-button">
           <span class="command-cursor">▶</span>
           <span><b>저장 관리</b><small>세이브 슬롯 확인</small></span>
@@ -74,53 +81,78 @@
       </section>
 
       <div class="title-help">
-        <span>마우스로 메뉴를 선택하세요.</span>
-        <span>※ 현재는 HOME / SAVE / COLLECTION 시스템부터 제작 중입니다.</span>
+        <span>클리어 전에는 새벽 밤하늘, 엔딩 후에는 맑은 하늘로 변합니다.</span>
+        <span>HOME · SAVE · CHAPTERS · COLLECTION</span>
       </div>
     </section>
 
-    <section class="view collection-view" data-view="collection" hidden>
-      <div class="collection-bg" aria-hidden="true"></div>
-      <header class="collection-topbar">
+    <section class="view chapters-view" data-view="chapters" hidden>
+      <div class="chapters-bg" aria-hidden="true"></div>
+      <header class="subpage-topbar">
         <button class="back-button" type="button" data-go-home>←</button>
-        <div>
-          <small>PLAYER ARCHIVE</small>
-          <h2>COLLECTION</h2>
-        </div>
-        <div class="collection-count">
-          <small>DISCOVERED</small>
-          <b><span id="collection-owned">0</span> / <span id="collection-total">0</span></b>
-        </div>
+        <div><small>STORY LOG</small><h2>CHAPTERS</h2></div>
+        <div class="chapter-summary"><small>PROGRESS</small><b id="chapters-progress">0%</b></div>
       </header>
 
-      <div class="collection-shell">
-        <nav class="collection-tabs game-window" aria-label="컬렉션 분류">
-          <button class="is-active" type="button" data-collection-tab="characters">인물</button>
-          <button type="button" data-collection-tab="items">아이템</button>
-          <button type="button" data-collection-tab="records">기록</button>
-        </nav>
-
-        <section class="collection-panel game-window">
-          <div class="collection-intro">
-            <div>
-              <small id="collection-eyebrow">CHARACTER FILE</small>
-              <h3 id="collection-heading">만난 인물</h3>
-            </div>
-            <p id="collection-description">이야기 속에서 직접 만난 인물이 하나씩 기록됩니다.</p>
-          </div>
-          <div class="collection-grid" id="collection-grid"></div>
+      <main class="chapters-shell">
+        <section class="chapter-intro">
+          <small>YOUR JOURNEY</small>
+          <h3>이야기 기록</h3>
+          <p>진행한 이야기는 챕터 단위로 이곳에 남습니다. 아직 만나지 못한 세계는 흐릿하게 잠겨 있어요.</p>
         </section>
-      </div>
+        <div class="chapter-list" id="chapter-list"></div>
+      </main>
+    </section>
+
+    <section class="view collection-view" data-view="collection" hidden>
+      <div class="diary-desk" aria-hidden="true"></div>
+      <header class="subpage-topbar collection-topbar">
+        <button class="back-button" type="button" data-go-home>←</button>
+        <div><small>TRAVEL DIARY</small><h2>COLLECTION</h2></div>
+        <div class="collection-count"><small>DISCOVERED</small><b><span id="collection-owned">0</span> / <span id="collection-total">0</span></b></div>
+      </header>
+
+      <main class="diary-wrap">
+        <section class="diary-book">
+          <div class="diary-spine" aria-hidden="true"></div>
+
+          <aside class="diary-left-page">
+            <p class="diary-date">PIXELY TRAVEL NOTE</p>
+            <h3>여행 다이어리</h3>
+            <p class="diary-note">여행 중 만난 인물과 손에 넣은 물건을 한 장씩 기록해둡니다.</p>
+
+            <nav class="diary-tabs" aria-label="컬렉션 분류">
+              <button class="is-active" type="button" data-collection-tab="characters">인물</button>
+              <button type="button" data-collection-tab="items">아이템</button>
+            </nav>
+
+            <div class="diary-decoration" aria-hidden="true">
+              <span class="tape tape--one"></span>
+              <span class="tape tape--two"></span>
+              <span class="doodle">✦</span>
+              <span class="doodle doodle--small">☁</span>
+            </div>
+          </aside>
+
+          <section class="diary-right-page">
+            <div class="diary-page-heading">
+              <div>
+                <small id="collection-eyebrow">CHARACTER NOTE</small>
+                <h3 id="collection-heading">만난 인물</h3>
+              </div>
+              <p id="collection-description">이야기 속에서 직접 만난 인물이 하나씩 기록됩니다.</p>
+            </div>
+            <div class="collection-grid" id="collection-grid"></div>
+          </section>
+        </section>
+      </main>
     </section>
 
     <div class="modal" id="save-modal" hidden>
       <button class="modal-backdrop" type="button" data-close-modal aria-label="닫기"></button>
       <section class="save-window game-window">
         <header class="save-window-header">
-          <div>
-            <small>SAVE DATA</small>
-            <h2 id="save-modal-title">저장 관리</h2>
-          </div>
+          <div><small>SAVE DATA</small><h2 id="save-modal-title">저장 관리</h2></div>
           <button type="button" class="close-button" data-close-modal>×</button>
         </header>
         <p class="save-window-guide" id="save-modal-guide">사용할 세이브 슬롯을 선택하세요.</p>
