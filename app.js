@@ -644,7 +644,11 @@
       : "개발자 설정 모드예요. 세이브 없이도 파츠를 추가·선택할 수 있고 현재 모습이 자동 저장됩니다.";
     const uploadSlot=$("#wardrobe-upload-slot");
     if(uploadSlot) uploadSlot.value=wardrobeSlot;
-    $$("[data-wardrobe-slot]").forEach(button=>{
+    const tabNote=$("#wardrobe-tab-note");
+    if(tabNote) tabNote.textContent=wardrobeSlot==="decoration"
+      ? "장식은 여러 개를 동시에 선택할 수 있어요. 선택한 장식은 모두 미리보기에 겹쳐집니다."
+      : "옷·소품·얼굴은 한 번에 하나만 선택됩니다. 다른 파츠를 누르면 바로 교체돼요.";
+    $("[data-wardrobe-slot]").forEach(button=>{
       const active=button.dataset.wardrobeSlot===wardrobeSlot;
       button.classList.toggle("is-active",active);
       button.setAttribute("aria-pressed",active?"true":"false");
@@ -744,6 +748,7 @@
     if(outfitDraft.face===id) outfitDraft.face="default";
     outfitDraft.decorations=(outfitDraft.decorations||[]).filter(itemId=>itemId!==id);
     wardrobeEditorTarget="base";
+    if(!activeSave()) wardrobeAssets.setupOutfit=normalizeSetupOutfit(validOutfit(outfitDraft,[]));
     persistWardrobeAssets();
     renderWardrobe();
     toast((removed?.name||"이미지")+"를 삭제했어요.");
