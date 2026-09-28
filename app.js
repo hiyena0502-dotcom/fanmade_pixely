@@ -3,7 +3,7 @@
 
   const STORAGE_KEY = "pixely-lost-sky-saves-v2";
   const WARDROBE_ASSET_KEY = "pixely-lost-sky-wardrobe-assets-v1";
-  const SITE_VERSION = "22";
+  const SITE_VERSION = "23";
   const $ = (q, root = document) => root.querySelector(q);
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 
@@ -212,7 +212,11 @@
       savedLabel:typeof save.savedLabel==="string" ? save.savedLabel : "",
       unlockedChapters:[...new Set(["night",...oldChapters.filter(id=>id!=="prologue")])],
       completedChapters:strings(save.completedChapters),
-      missions:Array.isArray(save.missions) ? save.missions.filter(mission=>mission && typeof mission.id==="string" && typeof mission.title==="string").map(mission=>({id:mission.id,title:mission.title,done:Boolean(mission.done)})) : [],
+      missions:Array.isArray(save.missions) ? save.missions.filter(mission=>mission && typeof mission.id==="string" && typeof mission.title==="string").map(mission=>({id:mission.id,title:mission.title,done:Boolean(mission.done)})) : [{id:"explore-party-room",title:"파티방을 둘러보자",done:false}],
+      story:{
+        scene:typeof save.story?.scene==="string" ? save.story.scene : "party-room",
+        inspected:strings(save.story?.inspected)
+      },
       collection:{
         cards:Array.isArray(save.collection?.cards)
           ? strings(save.collection.cards)
@@ -249,6 +253,7 @@
   let toastTimer=null;
   let dismissedUpdate=null;
   let pendingUpdateKey=null;
+  let storySelectedItem=null;
 
   function escapeHTML(value){
     return String(value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"})[char]);
@@ -291,7 +296,8 @@
       completedGame:false,
       unlockedChapters:["night"],
       completedChapters:[],
-      missions:[],
+      missions:[{id:"explore-party-room",title:"파티방을 둘러보자",done:false}],
+      story:{scene:"party-room",inspected:[]},
       collection:{cards:["dreamer"],items:[],postcards:[]},
       outfit:{layers:[]}
     };
@@ -471,44 +477,115 @@
     renderGameUI();
   }
 
+  const storyHotspots={
+    window:{label:"창문",text:"창밖은 조용한 밤이다. 아직 파티가 시작될 기색은 없다."},
+    table:{label:"테이블",text:"넓은 테이블이 비어 있다. 케이크도 선물도 장식도 아직 아무것도 없다."},
+    bookshelf:{label:"책장",text:"오래된 책과 작은 소품들이 정리되어 있다. 지금 당장 필요한 물건은 없어 보인다."},
+    gramophone:{label:"축음기",text:"오래된 축음기다. 파티 때 음악을 틀 수 있을지도 모르겠다."}
+  };
+
+  function currentStoryObjective(save){
+    return save?.missions?.find(mission=>!mission.done)?.title || "다음 준비를 기다리자.";
+  }
+
+  function storySay(label,text){
+    const box=$("#story-dialogue");
+    if(!box) return;
+    $("#story-dialogue-label").textContent=label;
+    $("#story-dialogue-text").textContent=text;
+    box.hidden=false;
+  }
+
+  function closeStoryPanels(){
+    ["story-inventory-panel","story-missions-panel","story-map-panel"].forEach(id=>{
+      const node=$("#"+id);
+      if(node) node.hidden=true;
+    });
+  }
+
+  function toggleStoryPanel(type){
+    const id={inventory:"story-inventory-panel",missions:"story-missions-panel",map:"story-map-panel"}[type];
+    if(!id) return;
+    const panel=$("#"+id);
+    if(!panel) return;
+    const willOpen=panel.hidden;
+    closeStoryPanels();
+    panel.hidden=!willOpen;
+  }
+
+  function inspectStoryHotspot(id){
+    const save=activeSave();
+    const data=storyHotspots[id];
+    if(!save || !data) return;
+    save.story=save.story||{scene:"party-room",inspected:[]};
+    if(!save.story.inspected.includes(id)){
+      save.story.inspected.push(id);
+      const inspectedCore=["window","table","bookshelf","gramophone"].filter(key=>save.story.inspected.includes(key)).length;
+      if(inspectedCore>=4){
+        const mission=save.missions.find(entry=>entry.id==="explore-party-room");
+        if(mission) mission.done=true;
+        if(!save.missions.some(entry=>entry.id==="wait-crew")){
+          save.missions.push({id:"wait-crew",title:"멤버들이 오면 생일 준비에 대해 물어보자",done:false});
+        }
+      }
+      save.savedAt=Date.now();
+      save.savedLabel=nowLabel();
+      persist();
+    }
+    renderGameUI();
+    storySay(data.label,data.text);
+  }
+
+  function selectStoryItem(itemId){
+    const save=activeSave();
+    if(!save?.collection?.items.includes(itemId)) return;
+    storySelectedItem=storySelectedItem===itemId?null:itemId;
+    renderGameUI();
+    const item=catalogue.items.find(entry=>entry.id===itemId);
+    if(item) storySay(item.name,item.desc||"가지고 있는 아이템이다.");
+  }
+
+  function quickStorySave(){
+    const save=activeSave();
+    if(!save) return;
+    save.savedAt=Date.now();
+    save.savedLabel=nowLabel();
+    if(persist()) toast("현재 진행 상황을 저장했어요.");
+  }
+
   function renderGameUI(){
     const save=activeSave();
-    const missions=$("#mission-list");
-    missions.replaceChildren();
-    if(!save?.missions.length){
-      const empty=document.createElement("li");
-      empty.className="game-ui-empty";
-      empty.textContent="등록된 미션이 없습니다.";
-      missions.append(empty);
+    if(!save) return;
+
+    $("#story-chapter-name").textContent="생일 전날";
+    $("#story-location-name").textContent="파티방";
+    $("#story-current-objective").textContent=currentStoryObjective(save);
+
+    const inventoryIds=Array.isArray(save.collection?.items)?save.collection.items:[];
+    $("#story-inventory-count").textContent=inventoryIds.length;
+
+    const quick=$("#story-quick-inventory");
+    quick.innerHTML=Array.from({length:5},(_,index)=>{
+      const id=inventoryIds[index];
+      if(!id) return '<button type="button" class="story-item-slot is-empty" aria-label="빈 인벤토리 칸"></button>';
+      const item=catalogue.items.find(entry=>entry.id===id);
+      return '<button type="button" class="story-item-slot '+(storySelectedItem===id?"is-selected":"")+'" data-story-item-id="'+escapeHTML(id)+'" title="'+escapeHTML(item?.name||"아이템")+'"><span>'+escapeHTML(item?.symbol||"□")+'</span></button>';
+    }).join("");
+
+    const inventory=$("#story-inventory-list");
+    if(!inventoryIds.length){
+      inventory.innerHTML='<div class="story-panel-empty"><span>□</span><b>가방이 비어 있어요</b><p>멤버들의 부탁을 해결하면 필요한 물건이 이곳에 들어옵니다.</p></div>';
     }else{
-      save.missions.forEach(mission=>{
-        const row=document.createElement("li");
-        row.className=mission.done?"is-done":"";
-        row.textContent=(mission.done?"✓ ":"○ ")+mission.title;
-        missions.append(row);
-      });
+      inventory.innerHTML=inventoryIds.map(id=>{
+        const item=catalogue.items.find(entry=>entry.id===id);
+        return '<button type="button" class="story-inventory-card '+(storySelectedItem===id?"is-selected":"")+'" data-story-item-id="'+escapeHTML(id)+'"><span>'+escapeHTML(item?.symbol||"□")+'</span><div><b>'+escapeHTML(item?.name||"이름 없는 아이템")+'</b><small>'+escapeHTML(item?.type||"ITEM")+'</small></div></button>';
+      }).join("");
     }
 
-    const inventory=$("#inventory-list");
-    inventory.replaceChildren();
-    if(!save?.collection.items.length){
-      const empty=document.createElement("p");
-      empty.className="game-ui-empty";
-      empty.textContent="가지고 있는 아이템이 없습니다.";
-      inventory.append(empty);
-    }else{
-      save.collection.items.forEach(id=>{
-        const item=catalogue.items.find(entry=>entry.id===id);
-        const row=document.createElement("article");
-        row.className="inventory-entry";
-        const name=document.createElement("strong");
-        name.textContent=item?.name||"이름 없는 아이템";
-        const description=document.createElement("p");
-        description.textContent=item?.desc||"아이템 정보를 준비 중입니다.";
-        row.append(name,description);
-        inventory.append(row);
-      });
-    }
+    const missionList=$("#story-mission-list");
+    missionList.innerHTML=(save.missions||[]).map(mission=>
+      '<li class="'+(mission.done?"is-done":"")+'"><span>'+(mission.done?"✓":"○")+'</span><b>'+escapeHTML(mission.title)+'</b></li>'
+    ).join("") || '<li><span>○</span><b>아직 등록된 목표가 없습니다.</b></li>';
   }
 
   function collectionOwnedSet(){
@@ -970,6 +1047,28 @@
       hideUpdatePrompt();
     });
 
+    $("[data-story-hotspot]").forEach(button=>button.addEventListener("click",()=>inspectStoryHotspot(button.dataset.storyHotspot)));
+    $("[data-story-exit]").forEach(button=>button.addEventListener("click",()=>{
+      const side=button.dataset.storyExit==="left"?"왼쪽 문":"오른쪽 문";
+      storySay("이동",side+"은 아직 잠겨 있다. 멤버들의 부탁을 받으면 이동할 수 있을 것 같다.");
+    }));
+    $("[data-story-drawer]").forEach(button=>button.addEventListener("click",()=>toggleStoryPanel(button.dataset.storyDrawer)));
+    $("[data-story-close-panel]").forEach(button=>button.addEventListener("click",closeStoryPanels));
+    $("#story-dialogue-close")?.addEventListener("click",()=>$("#story-dialogue").hidden=true);
+    $("#story-save-button")?.addEventListener("click",quickStorySave);
+    $("#story-quick-inventory")?.addEventListener("click",event=>{
+      const button=event.target.closest("[data-story-item-id]");
+      if(button) selectStoryItem(button.dataset.storyItemId);
+    });
+    $("#story-inventory-list")?.addEventListener("click",event=>{
+      const button=event.target.closest("[data-story-item-id]");
+      if(button) selectStoryItem(button.dataset.storyItemId);
+    });
+    $("[data-story-map-node='party-room']")?.addEventListener("click",()=>{
+      closeStoryPanels();
+      toast("현재 파티방에 있어요.");
+    });
+
     $(".diary-tabs")?.addEventListener("click",event=>{
       const button=event.target.closest("[data-collection-tab]");
       if(!button) return;
@@ -1061,6 +1160,8 @@
     document.addEventListener("keydown",event=>{
       if(event.key!=="Escape") return;
       if(!$("#save-modal").hidden) closeSaveModal();
+      else if(!$("#story-inventory-panel")?.hidden || !$("#story-missions-panel")?.hidden || !$("#story-map-panel")?.hidden){closeStoryPanels();}
+      else if(!$("#story-dialogue")?.hidden){$("#story-dialogue").hidden=true;}
       else if(!$("[data-view='collection']").hidden || !$("[data-view='chapters']").hidden || !$("[data-view='story']").hidden || !$("[data-view='wardrobe']").hidden) showView("home");
     });
   }

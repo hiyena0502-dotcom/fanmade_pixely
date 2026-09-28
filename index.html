@@ -7,8 +7,8 @@
   <meta name="theme-color" content="#111a3b" />
   <title>PIXELY : LOST SKY</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=22" />
-  <script src="app.js?v=22" defer></script>
+  <link rel="stylesheet" href="style.css?v=23" />
+  <script src="app.js?v=23" defer></script>
 </head>
 <body>
   <div class="game-root">
@@ -94,21 +94,97 @@
     </section>
 
     <section class="view game-ui-view" data-view="story" hidden>
-      <header class="subpage-topbar">
-        <button class="back-button" type="button" data-go-home aria-label="홈으로">←</button>
-        <div><small>GAME MENU</small><h2>미션 · 인벤토리</h2></div>
-      </header>
-      <main class="game-ui-shell">
-        <section class="game-ui-panel game-window" aria-labelledby="mission-title">
-          <small>MISSIONS</small>
-          <h3 id="mission-title">미션</h3>
-          <ul id="mission-list" aria-live="polite"></ul>
-        </section>
-        <section class="game-ui-panel game-window" aria-labelledby="inventory-title">
-          <small>INVENTORY</small>
-          <h3 id="inventory-title">인벤토리</h3>
-          <div id="inventory-list" class="inventory-list" aria-live="polite"></div>
-        </section>
+      <main class="story-stage">
+        <div class="story-room" id="story-room" aria-label="챕터 1 파티방">
+          <div class="story-room-art" aria-hidden="true">
+            <div class="room-wall-panels"></div>
+            <div class="room-window">
+              <span class="room-moon"></span>
+              <span class="room-window-cross room-window-cross--v"></span>
+              <span class="room-window-cross room-window-cross--h"></span>
+            </div>
+            <div class="room-curtain room-curtain--left"></div>
+            <div class="room-curtain room-curtain--right"></div>
+            <div class="room-chandelier"><i></i><i></i><i></i></div>
+            <div class="room-sideboard room-sideboard--left"></div>
+            <div class="room-bookshelf"><span></span><span></span><span></span><span></span></div>
+            <div class="room-gramophone"><i></i></div>
+            <div class="room-rug"></div>
+            <div class="room-table"><i></i><i></i><i></i><i></i></div>
+            <div class="room-chair room-chair--one"></div>
+            <div class="room-chair room-chair--two"></div>
+            <div class="room-door room-door--left"></div>
+            <div class="room-door room-door--right"></div>
+          </div>
+
+          <header class="story-hud">
+            <div class="story-heading">
+              <small>CHAPTER 1</small>
+              <b id="story-chapter-name">생일 전날</b>
+              <span><i></i><em id="story-location-name">파티방</em></span>
+            </div>
+            <button class="story-home-button" type="button" data-go-home aria-label="메인 화면으로">⌂</button>
+          </header>
+
+          <button class="story-exit story-exit--left" type="button" data-story-exit="left" aria-label="왼쪽으로 이동">‹</button>
+          <button class="story-exit story-exit--right" type="button" data-story-exit="right" aria-label="오른쪽으로 이동">›</button>
+
+          <button class="story-hotspot story-hotspot--window" type="button" data-story-hotspot="window"><span>창문 조사</span></button>
+          <button class="story-hotspot story-hotspot--table" type="button" data-story-hotspot="table"><span>테이블 조사</span></button>
+          <button class="story-hotspot story-hotspot--bookshelf" type="button" data-story-hotspot="bookshelf"><span>책장 조사</span></button>
+          <button class="story-hotspot story-hotspot--gramophone" type="button" data-story-hotspot="gramophone"><span>축음기 조사</span></button>
+
+          <section class="story-dialogue" id="story-dialogue" hidden aria-live="polite">
+            <div class="story-dialogue-mark">✦</div>
+            <div class="story-dialogue-copy">
+              <small id="story-dialogue-label">조사</small>
+              <p id="story-dialogue-text">아직 아무것도 없다.</p>
+            </div>
+            <button type="button" id="story-dialogue-close" aria-label="대화 닫기">×</button>
+          </section>
+
+          <aside class="story-side-panel" id="story-inventory-panel" hidden>
+            <header><div><small>INVENTORY</small><h3>가방</h3></div><button type="button" data-story-close-panel>×</button></header>
+            <p>현재 가지고 있는 물건입니다. 아이템을 누르면 선택할 수 있어요.</p>
+            <div class="story-inventory-list" id="story-inventory-list"></div>
+          </aside>
+
+          <aside class="story-side-panel" id="story-missions-panel" hidden>
+            <header><div><small>MISSIONS</small><h3>현재 목표</h3></div><button type="button" data-story-close-panel>×</button></header>
+            <ul class="story-mission-list" id="story-mission-list"></ul>
+          </aside>
+
+          <aside class="story-side-panel story-map-panel" id="story-map-panel" hidden>
+            <header><div><small>MAP</small><h3>이동</h3></div><button type="button" data-story-close-panel>×</button></header>
+            <p>한 번 가 본 장소는 나중에 빠르게 이동할 수 있게 됩니다.</p>
+            <div class="story-map">
+              <button type="button" class="is-current" data-story-map-node="party-room">파티방<small>현재 위치</small></button>
+              <button type="button" disabled>복도<small>아직 잠김</small></button>
+              <button type="button" disabled>주방<small>아직 잠김</small></button>
+              <button type="button" disabled>창고<small>아직 잠김</small></button>
+            </div>
+          </aside>
+        </div>
+
+        <footer class="story-toolbar">
+          <button class="story-bag-button" type="button" data-story-drawer="inventory">
+            <span class="story-bag-icon">▣</span>
+            <span><b>가방</b><small><em id="story-inventory-count">0</em> ITEMS</small></span>
+          </button>
+
+          <div class="story-quick-inventory" id="story-quick-inventory" aria-label="빠른 인벤토리"></div>
+
+          <button class="story-objective" type="button" id="story-objective-button" data-story-drawer="missions">
+            <small>현재 목표</small>
+            <b id="story-current-objective">파티방을 둘러보자.</b>
+          </button>
+
+          <nav class="story-actions" aria-label="게임 메뉴">
+            <button type="button" data-story-drawer="map"><span>⌖</span><b>지도</b></button>
+            <button type="button" data-open-collection><span>▤</span><b>여행일지</b></button>
+            <button type="button" id="story-save-button"><span>▣</span><b>저장</b></button>
+          </nav>
+        </footer>
       </main>
     </section>
 
