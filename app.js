@@ -5,7 +5,7 @@
   const SESSION_SAVE_KEY = STORAGE_KEY+"-session-fallback";
   const WARDROBE_ASSET_KEY = "pixely-lost-sky-wardrobe-assets-v1";
   const DEV_CONTENT_KEY = "pixely-lost-sky-dev-content-v1";
-  const SITE_VERSION = "31";
+  const SITE_VERSION = "32";
   const $ = (q, root = document) => root.querySelector(q);
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 
@@ -639,17 +639,24 @@
   }
 
   const storyIntroSteps=[
-    {phase:"dark",text:"내일은 잠뜰님의 생일이다."},
-    {phase:"dark",text:"그래서 나는 오늘, 조금 일찍 이곳에 왔다."},
-    {phase:"dark",text:"이유는 간단하다."},
-    {phase:"dark",text:"생일 축하하러 왔을 뿐이다."},
-    {phase:"dark",text:"……정말 그것뿐이었는데."},
-    {phase:"exterior",kicker:"꿈뜰",text:"여기 맞겠지?"},
-    {phase:"exterior",kicker:"꿈뜰",text:"생각보다 조용한데……."},
-    {phase:"exterior",voices:["???　“잠깐만요!”","???　“그거 거기 두면 안 된다니까!”","???　“아니 내가 안 뒀어!”"]},
-    {phase:"exterior",text:"익숙한 소음과 친근한 목소리다……"},
-    {phase:"exterior",text:"…잘 찾아온 것 같다."},
-    {phase:"chapter",kicker:"CHAPTER 1",title:"생일 전날",text:""}
+    {phase:"dark",kind:"narration",text:"내일은 잠뜰님의 생일이다."},
+    {phase:"dark",kind:"narration",text:"그래서 나는 오늘, 조금 일찍 이곳에 왔다."},
+    {phase:"dark",kind:"narration",text:"이유는 간단하다."},
+    {phase:"dark",kind:"narration",text:"생일 축하하러 왔을 뿐이다."},
+    {phase:"dark",kind:"narration",text:"……정말 그것뿐이었는데."},
+
+    {phase:"exterior",kind:"dialogue",speaker:"꿈뜰",text:"여기 맞겠지?"},
+    {phase:"exterior",kind:"dialogue",speaker:"꿈뜰",text:"생각보다 조용한데……."},
+
+    {phase:"exterior",kind:"dialogue",speaker:"수현",text:"잠깐만! 그 상자 거기 두면 안 돼!"},
+    {phase:"exterior",kind:"dialogue",speaker:"공룡",text:"아니, 내가 안 뒀다니까?!"},
+    {phase:"exterior",kind:"dialogue",speaker:"덕개",text:"그럼 바닥에 떨어진 리본은 누가 밟았는데?"},
+    {phase:"exterior",kind:"dialogue",speaker:"라더",text:"잠깐, 다들 한 번만 멈춰봐!"},
+
+    {phase:"exterior",kind:"narration",text:"익숙한 소음과 친근한 목소리다……"},
+    {phase:"exterior",kind:"narration",text:"…잘 찾아온 것 같다."},
+
+    {phase:"chapter",kind:"chapter",kicker:"CHAPTER 1",title:"생일 전날",text:"잠뜰님의 생일 파티를 준비하자."}
   ];
 
   function shouldPlayStoryIntro(save){
@@ -664,11 +671,20 @@
     overlay.classList.toggle("is-exterior",step.phase==="exterior");
     overlay.classList.toggle("is-chapter",step.phase==="chapter");
     overlay.classList.toggle("is-dark",step.phase==="dark");
+    overlay.classList.toggle("is-dialogue",step.kind==="dialogue");
+    overlay.classList.toggle("is-narration",step.kind==="narration");
 
-    $("#story-intro-kicker").textContent=step.kicker||"";
+    $("#story-intro-kicker").textContent=step.speaker||step.kicker||"";
     $("#story-intro-title").textContent=step.title||"";
     $("#story-intro-text").textContent=step.text||"";
-    $("#story-intro-voices").innerHTML=(step.voices||[]).map(line=>"<p>"+escapeHTML(line)+"</p>").join("");
+    $("#story-intro-voices").innerHTML="";
+
+    const copy=$(".story-intro-copy",overlay);
+    if(copy){
+      copy.classList.remove("is-reveal");
+      void copy.offsetWidth;
+      copy.classList.add("is-reveal");
+    }
   }
 
   function startStoryIntro(){
@@ -677,9 +693,14 @@
     closeStoryPanels();
     const dialogue=$("#story-dialogue");
     if(dialogue) dialogue.hidden=true;
+
     storyIntroIndex=0;
     storyIntroActive=true;
     overlay.hidden=false;
+
+    const copy=$(".story-intro-copy",overlay);
+    if(copy) copy.classList.remove("is-reveal");
+
     renderStoryIntroStep();
   }
 
