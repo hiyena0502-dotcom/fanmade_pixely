@@ -216,7 +216,7 @@ test("update prompt compares the loaded version on the first check and on later 
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
   assert.equal(state.requests[0].options.cache,"no-store");
-  state.setVersion("19");
+  state.setVersion("20");
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,false);
@@ -225,7 +225,7 @@ test("update prompt compares the loaded version on the first check and on later 
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
-  const stale=boot(undefined,"19");
+  const stale=boot(undefined,"20");
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(stale.node("#update-modal").hidden,false);
 });
