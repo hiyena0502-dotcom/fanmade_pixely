@@ -47,14 +47,20 @@
   };
 
   const wardrobeSlots=["outfit","accessory","face","decoration"];
-  const singleWardrobeSlots=["outfit","accessory","face"];
+  const wardrobeLabels={outfit:"옷",accessory:"소품",face:"얼굴",decoration:"장식"};
+  const wardrobeGroups={
+    outfit:[["top","상의"],["bottom","하의"],["outer","겉옷"],["shoes","신발"],["other","기타 의상"]],
+    accessory:[["hand","손에 드는 소품"],["wear","착용 소품"],["head","머리 소품"],["other","기타 소품"]],
+    face:[["eyes","눈"],["mouth","입"],["brows","눈썹"],["cheek","볼·표정"],["other","기타 얼굴"]],
+    decoration:[["effect","이펙트"],["sticker","스티커"],["around","주변 장식"],["other","기타 장식"]]
+  };
   const wardrobeBuiltins={
-    outfit:[{id:"default",name:"기본 옷",symbol:"◇"},...catalogue.items.filter(item=>item.wardrobeSlot==="outfit")],
-    accessory:[{id:"none",name:"소품 없음",symbol:"·"},...catalogue.items.filter(item=>item.wardrobeSlot==="accessory")],
-    face:[{id:"default",name:"기본 얼굴",symbol:"☺"},...catalogue.items.filter(item=>item.wardrobeSlot==="face")],
+    outfit:catalogue.items.filter(item=>item.wardrobeSlot==="outfit"),
+    accessory:catalogue.items.filter(item=>item.wardrobeSlot==="accessory"),
+    face:catalogue.items.filter(item=>item.wardrobeSlot==="face"),
     decoration:catalogue.items.filter(item=>item.wardrobeSlot==="decoration" || item.wardrobeSlot==="headwear")
   };
-  const defaultOutfit={outfit:"default",accessory:"none",face:"default",decorations:[]};
+  const defaultOutfit={layers:[]};
   const defaultTransform={x:0,y:0,scale:100,rotation:0};
 
   function clampNumber(value,min,max,fallback){
@@ -69,21 +75,29 @@
       rotation:clampNumber(value.rotation,-180,180,0)
     };
   }
+  function legacyLayerIds(value={}){
+    if(Array.isArray(value?.layers)) return [...new Set(value.layers.filter(item=>typeof item==="string"))];
+    const ids=[];
+    const push=value=>{
+      if(Array.isArray(value)) value.forEach(push);
+      else if(typeof value==="string" && value && value!=="default" && value!=="none") ids.push(value);
+    };
+    push(value?.outfit);
+    push(value?.accessory);
+    push(value?.face);
+    push(value?.decorations);
+    if(value?.headwear && value.headwear!=="none") push(value.headwear);
+    return [...new Set(ids)];
+  }
+  function normalizeSetupOutfit(value={}){
+    return {layers:legacyLayerIds(value)};
+  }
   function freshWardrobeAssets(){
     return {
       base:{image:"",name:"베이스",transform:{...defaultTransform}},
       custom:[],
-      setupOutfit:{...defaultOutfit,decorations:[]}
-    };
-  }
-  function normalizeSetupOutfit(value={}){
-    return {
-      outfit:typeof value.outfit==="string"?value.outfit:"default",
-      accessory:typeof value.accessory==="string"?value.accessory:"none",
-      face:typeof value.face==="string"?value.face:"default",
-      decorations:Array.isArray(value.decorations)
-        ? [...new Set(value.decorations.filter(item=>typeof item==="string"))]
-        : []
+      layerOrder:[],
+      setupOutfit:{layers:[]}
     };
   }
   function readWardrobeAssets(){
@@ -95,15 +109,20 @@
       ).map(item=>({
         id:item.id,
         slot:item.slot,
+        group:typeof item.group==="string"?item.group:"other",
         name:typeof item.name==="string"&&item.name.trim()?item.name.trim():"내 파츠",
         symbol:"IMG",
         image:item.image,
         custom:true,
         transform:normalizeWardrobeTransform(item.transform)
       })):[];
+      const ids=custom.map(item=>item.id);
+      const requestedOrder=Array.isArray(raw.layerOrder)?raw.layerOrder.filter(id=>ids.includes(id)):[];
+      const layerOrder=[...new Set([...requestedOrder,...ids])];
       return {
         base:{image:typeof raw.base?.image==="string"?raw.base.image:"",name:"베이스",transform:normalizeWardrobeTransform(raw.base?.transform)},
         custom,
+        layerOrder,
         setupOutfit:normalizeSetupOutfit(raw.setupOutfit)
       };
     }catch{
@@ -117,8 +136,19 @@
   function wardrobeOptionById(slot,id){
     return wardrobeOptionsFor(slot).find(option=>option.id===id);
   }
+  function wardrobeOptionByIdAny(id){
+    for(const slot of wardrobeSlots){
+      const found=wardrobeOptionById(slot,id);
+      if(found) return found;
+    }
+    return null;
+  }
   function wardrobeOptionUnlocked(option,owned){
-    return Boolean(option?.custom || option?.id==="none" || option?.id==="default" || owned.has(option?.id));
+    return Boolean(option?.custom || owned.has(option?.id));
+  }
+  function orderedLayerIds(ids){
+    const rank=new Map(wardrobeAssets.layerOrder.map((id,index)=>[id,index]));
+    return [...ids].sort((a,b)=>(rank.get(a)??999999)-(rank.get(b)??999999));
   }
   function developerOutfit(){
     return validOutfit(wardrobeAssets.setupOutfit,[]);
@@ -134,7 +164,7 @@
       return true;
     }catch{
       if(previous) wardrobeAssets=previous;
-      toast("이미지를 저장하지 못했습니다. 파일 크기를 줄이거나 기존 이미지를 정리해 주세요.");
+      toast("이미지 저장 공간이 부족합니다. 기존 파츠를 지우거나 PNG 용량을 줄여 주세요.");
       return false;
     }
   }
@@ -150,22 +180,11 @@
 
   function validOutfit(outfit,items){
     const owned=new Set(items);
-    const normalized={outfit:"default",accessory:"none",face:"default",decorations:[]};
-    singleWardrobeSlots.forEach(slot=>{
-      const choice=outfit?.[slot];
-      const option=wardrobeOptionById(slot,choice);
-      normalized[slot]=option&&wardrobeOptionUnlocked(option,owned)?choice:defaultOutfit[slot];
-    });
-    const requestedDecorations=Array.isArray(outfit?.decorations)
-      ? outfit.decorations
-      : outfit?.headwear && outfit.headwear!=="none"
-        ? [outfit.headwear]
-        : [];
-    normalized.decorations=[...new Set(requestedDecorations.map(String))].filter(choice=>{
-      const option=wardrobeOptionById("decoration",choice);
+    const layers=legacyLayerIds(outfit).filter(id=>{
+      const option=wardrobeOptionByIdAny(id);
       return option&&wardrobeOptionUnlocked(option,owned);
     });
-    return normalized;
+    return {layers:[...new Set(layers)]};
   }
 
   const chapters = [
@@ -225,7 +244,7 @@
   let collectionFilter="all";
   let wardrobeSlot="outfit";
   let wardrobeEditorTarget="base";
-  let outfitDraft={...defaultOutfit,decorations:[]};
+  let outfitDraft={layers:[]};
   let saveMode="manage";
   let toastTimer=null;
   let dismissedUpdate=null;
@@ -274,7 +293,7 @@
       completedChapters:[],
       missions:[],
       collection:{cards:["dreamer"],items:[],postcards:[]},
-      outfit:{...defaultOutfit,decorations:[]}
+      outfit:{layers:[]}
     };
   }
 
@@ -350,7 +369,7 @@
       outfitDraft=save
         ? {...validOutfit(save.outfit,save.collection?.items||[])}
         : {...developerOutfit()};
-      outfitDraft.decorations=[...(outfitDraft.decorations||[])];
+      outfitDraft.layers=[...(outfitDraft.layers||[])];
       renderWardrobe();
     }
     window.scrollTo(0,0);
