@@ -8,7 +8,7 @@ const directory=path.join(__dirname,"..");
 const app=fs.readFileSync(path.join(directory,"app.js"),"utf8");
 const storageKey="pixely-lost-sky-saves-v2";
 
-function boot(saved,initialVersion="13"){
+function boot(saved,initialVersion="14"){
   const nodes=new Map();
   const listeners={};
   const requests=[];
@@ -37,7 +37,12 @@ function boot(saved,initialVersion="13"){
     result.dataset.collectionTab=key;
     return result;
   });
-  const views=["home","chapters","collection","story"].map(key=>{
+  const wardrobeTabs=["outfit","headwear","accessory"].map(key=>{
+    const result=node(`wardrobe-tab:${key}`);
+    result.dataset.wardrobeSlot=key;
+    return result;
+  });
+  const views=["home","chapters","collection","wardrobe","story"].map(key=>{
     const result=node(`view:${key}`);
     result.dataset.view=key;
     return result;
@@ -45,11 +50,15 @@ function boot(saved,initialVersion="13"){
   const document={
     readyState:"complete",baseURI:"https://example.com/fanmade_pixely/",visibilityState:"visible",
     createElement(tag){return node(`element:${tag}:${++elementCount}`)},
-    querySelector:node,
+    querySelector(selector){
+      const view=selector.match(/^\[data-view=['"]([^'"]+)['"]\]$/);
+      return view?views.find(entry=>entry.dataset.view===view[1]):node(selector);
+    },
     querySelectorAll(selector){
       if(selector==="[data-view]") return views;
       if(selector===".diary-tabs button") return tabs;
-      if(["[data-open-collection]","[data-open-chapters]","[data-go-home]","[data-close-modal]"].includes(selector)) return [node(selector)];
+      if(selector==="[data-wardrobe-slot]") return wardrobeTabs;
+      if(["[data-open-collection]","[data-open-chapters]","[data-open-wardrobe]","[data-go-home]","[data-close-modal]"].includes(selector)) return [node(selector)];
       return [];
     },
     addEventListener(name,callback){listeners[name]=callback}
@@ -67,7 +76,7 @@ function boot(saved,initialVersion="13"){
   };
   vm.runInNewContext(app,context);
   return {
-    node,storage,requests,tick:()=>interval(),
+    node,storage,requests,context,tick:()=>interval(),
     setVersion(value){publishedVersion=value},
     setConfirm(value){confirmResult=value},
     setStorageFailure(value){failStorage=value},
@@ -143,6 +152,53 @@ test("collection tabs switch without losing the selected state",()=>{
   assert.match(state.node("#collection-grid").className,/postcards/);
 });
 
+test("collection filters separate existing characters and show an empty story group",()=>{
+  const state=boot({activeSlot:0,slots:[{collection:{cards:["dreamer","philip"],items:[]}},null,null]});
+  state.click("[data-open-collection]");
+  const filters=state.node("#collection-filters");
+  const choose=id=>filters.listeners.click({target:{closest(){return {dataset:{collectionFilter:id}}}}});
+  choose("fairy");
+  assert.equal(state.node("#collection-total").textContent,9);
+  assert.match(state.node("#collection-grid").innerHTML,/필립/);
+  assert.doesNotMatch(state.node("#collection-grid").innerHTML,/수상한 비둘기/);
+  choose("roleplay");
+  assert.equal(state.node("#collection-total").textContent,0);
+  assert.match(state.node("#collection-grid").innerHTML,/아직 이 페이지는 비어 있어요/);
+});
+
+test("wardrobe saves an earned item per slot and exposes equipment for future scenes",()=>{
+  const state=boot();
+  state.click("#new-game-button");
+  state.slotAction("new-slot",0);
+  state.click("[data-open-wardrobe]");
+  const avatar=state.context.window.PixelyAvatar;
+  assert.equal(state.node("#wardrobe-options").innerHTML.includes("치명적으로 귀여운 봉제인형"),false);
+  const option=id=>state.node("#wardrobe-options").listeners.click({target:{closest(){return {dataset:{wardrobeItem:id},disabled:false}}}});
+  option("plush");
+  assert.equal(avatar.outfitForActiveSave().accessory,"none");
+  assert.equal(state.context.window.PixelyInventory.grantItem("plush"),true);
+  state.node("#wardrobe-tabs").listeners.click({target:{closest(){return state.node("wardrobe-tab:accessory")}}});
+  option("plush");
+  state.click("#wardrobe-save-button");
+  const saved=JSON.parse(state.storage.get(storageKey));
+  assert.equal(saved.slots[0].outfit.accessory,"plush");
+  assert.deepEqual(saved.slots[0].collection.items,["plush"]);
+  assert.equal(avatar.outfitForActiveSave().accessory,"plush");
+  const restored=boot(saved);
+  assert.equal(restored.context.window.PixelyAvatar.outfitForActiveSave().accessory,"plush");
+  assert.equal(restored.context.window.PixelyInventory.grantItem("not-a-real-item"),false);
+});
+
+test("old save data keeps inventory empty and rejects unowned equipment",()=>{
+  const state=boot({activeSlot:0,slots:[{collection:{cards:["dreamer"],items:[]},outfit:{accessory:"plush"}},null,null]});
+  state.click("[data-open-wardrobe]");
+  assert.equal(state.context.window.PixelyAvatar.outfitForActiveSave().accessory,"none");
+  state.node("#wardrobe-tabs").listeners.click({target:{closest(){return state.node("wardrobe-tab:accessory")}}});
+  assert.match(state.node("#wardrobe-options").innerHTML,/여행 중 발견/);
+  assert.equal(state.context.window.PixelyInventory.grantItem("plush"),true);
+  assert.match(state.node("#wardrobe-options").innerHTML,/치명적으로 귀여운 봉제인형/);
+});
+
 test("a storage failure leaves the previous save intact and reports the error",()=>{
   const state=boot();
   state.setStorageFailure(true);
@@ -158,7 +214,7 @@ test("update prompt compares the loaded version on the first check and on later 
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
   assert.equal(state.requests[0].options.cache,"no-store");
-  state.setVersion("14");
+  state.setVersion("15");
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,false);
@@ -167,7 +223,7 @@ test("update prompt compares the loaded version on the first check and on later 
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
-  const stale=boot(undefined,"14");
+  const stale=boot(undefined,"15");
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(stale.node("#update-modal").hidden,false);
 });
