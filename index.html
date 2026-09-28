@@ -7,8 +7,8 @@
   <meta name="theme-color" content="#111a3b" />
   <title>PIXELY : LOST SKY</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=26" />
-  <script src="app.js?v=26" defer></script>
+  <link rel="stylesheet" href="style.css?v=27" />
+  <script src="app.js?v=27" defer></script>
 </head>
 <body>
   <div class="game-root">
@@ -380,8 +380,7 @@
           <nav class="dev-settings-tabs" id="dev-settings-tabs" aria-label="개발자 설정 분류">
             <button type="button" data-dev-section="chapters"><span>01</span><b>챕터</b><small>CHAPTERS</small></button>
             <button type="button" data-dev-section="collection"><span>02</span><b>컬렉션</b><small>CARDS · POST</small></button>
-            <button type="button" data-dev-section="dialogues"><span>03</span><b>대화방</b><small>DIALOGUE ROOMS</small></button>
-            <button type="button" data-dev-section="items"><span>04</span><b>아이템</b><small>ITEM DATA</small></button>
+            <button type="button" data-dev-section="items"><span>03</span><b>아이템</b><small>ITEM DATA</small></button>
           </nav>
 
           <div class="dev-sidebar-actions">
@@ -408,7 +407,7 @@
 
           <div class="dev-settings-toolbar">
             <button type="button" id="dev-new-entry">＋ 새 항목</button>
-            <p>왼쪽 목록에서 선택 → 오른쪽에서 수정 → 저장.</p>
+            <p>챕터를 선택하면 아래에서 그 챕터의 상호작용까지 따로 설정할 수 있어요.</p>
           </div>
 
           <div class="dev-settings-workspace">
@@ -428,12 +427,46 @@
                 <button type="button" class="danger" id="dev-delete-entry" disabled>삭제</button>
                 <button type="button" class="primary" id="dev-save-entry" disabled>저장 · 적용</button>
               </div>
+
+              <section class="dev-chapter-interactions" id="dev-chapter-interactions" hidden>
+                <header class="dev-interaction-header">
+                  <div>
+                    <small>CHAPTER INTERACTIONS</small>
+                    <h5>이 챕터의 상호작용</h5>
+                    <p>장면 안에서 눌러보거나, 대화하거나, 이동하거나, 아이템을 얻는 행동을 추가합니다.</p>
+                  </div>
+                  <div class="dev-interaction-header-actions">
+                    <span id="dev-interaction-count">0개</span>
+                    <button type="button" id="dev-add-interaction">＋ 상호작용 추가</button>
+                  </div>
+                </header>
+
+                <div class="dev-interaction-workspace">
+                  <aside class="dev-interaction-list-wrap">
+                    <div class="dev-entry-pane-title"><b>상호작용 목록</b><small>챕터 안에서 사용</small></div>
+                    <div class="dev-interaction-list" id="dev-interaction-list"></div>
+                  </aside>
+
+                  <section class="dev-interaction-detail">
+                    <div class="dev-editor-pane-title">
+                      <div><small>INTERACTION EDITOR</small><h6 id="dev-interaction-title">상호작용을 선택하세요</h6></div>
+                    </div>
+                    <div class="dev-editor-fields dev-interaction-fields" id="dev-interaction-fields">
+                      <div class="dev-editor-empty">+ 상호작용 추가를 누른 뒤 세부 설정을 입력하세요.</div>
+                    </div>
+                    <div class="dev-editor-actions">
+                      <button type="button" class="danger" id="dev-delete-interaction" disabled>상호작용 삭제</button>
+                      <button type="button" class="primary" id="dev-save-interaction" disabled>상호작용 저장</button>
+                    </div>
+                  </section>
+                </div>
+              </section>
             </section>
           </div>
 
           <footer class="dev-settings-note">
             <b>개발용 임시 설정</b>
-            <span>여기서 수정한 값은 이 브라우저에 저장되고 게임 화면에 바로 반영됩니다. 최종 확정 뒤 코드 기본값으로 고정할 수 있어요.</span>
+            <span>챕터·컬렉션·아이템을 편집합니다. 챕터 안의 상호작용은 챕터별로 따로 저장되며, 최종 확정 뒤 코드 기본값으로 고정할 수 있어요.</span>
           </footer>
         </section>
       </main>
