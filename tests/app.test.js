@@ -29,6 +29,7 @@ function boot(saved,initialVersion="15",wardrobeAssets){
         setAttribute(name,value){this[name]=value},
         addEventListener(name,callback){this.listeners[name]=callback},
         querySelectorAll(){return []},
+        getBoundingClientRect(){return {left:0,top:0,width:1000,height:600,right:1000,bottom:600}},
         replaceChildren(...children){this.children=children},
         append(child){this.children.push(child)}
       });
@@ -230,7 +231,7 @@ test("update prompt compares the loaded version on the first check and on later 
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
   assert.equal(state.requests[0].options.cache,"no-store");
-  state.setVersion("29");
+  state.setVersion("30");
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,false);
@@ -239,7 +240,7 @@ test("update prompt compares the loaded version on the first check and on later 
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
-  const stale=boot(undefined,"29");
+  const stale=boot(undefined,"30");
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(stale.node("#update-modal").hidden,false);
 });
@@ -281,7 +282,7 @@ test("developer wardrobe setup toggles multiple custom parts without a save slot
     layerOrder:["custom-eyes","custom-mouth"],
     setupOutfit:{layers:[]}
   };
-  const state=boot(undefined,"29",assets);
+  const state=boot(undefined,"30",assets);
   state.click("[data-open-wardrobe]");
   assert.equal(state.node("#wardrobe-slot-label").textContent,"DEV SETUP");
   const faceTab=state.node("wardrobe-tab:face");
@@ -323,7 +324,7 @@ test("developer settings screen exposes only chapters collection and items",()=>
 });
 
 test("developer settings can create an item entry without touching source code",()=>{
-  const state=boot(undefined,"29");
+  const state=boot(undefined,"30");
   state.click("[data-open-dev]");
   const itemTab=state.node("dev-tab:items");
   state.node("#dev-settings-tabs").listeners.click({target:{closest(){return itemTab}}});
@@ -335,27 +336,45 @@ test("developer settings can create an item entry without touching source code",
 });
 
 
-test("chapter editor provides nested interaction authoring",()=>{
+test("chapter interactions are edited on the actual story scene, not outside it",()=>{
   const html=fs.readFileSync(path.join(directory,"index.html"),"utf8");
-  assert.match(html,/id="dev-chapter-interactions"/);
-  assert.match(html,/id="dev-add-interaction"/);
-  assert.match(html,/id="dev-interaction-list"/);
-  assert.match(html,/id="dev-interaction-fields"/);
-  assert.match(html,/상호작용 추가/);
+  assert.doesNotMatch(html,/id="dev-chapter-interactions"/);
+  assert.match(html,/id="dev-open-chapter-scene"/);
+  assert.match(html,/id="story-dev-enter"/);
+  assert.match(html,/id="story-dev-toolbar"/);
+  assert.match(html,/id="story-dev-add-interaction"/);
+  assert.match(html,/id="story-dev-layer"/);
+  assert.match(html,/id="story-dev-inspector"/);
   assert.match(app,/const interactionSchema=/);
   assert.match(app,/interactionsForChapter/);
 });
 
-test("developer can add an interaction inside the selected chapter",()=>{
-  const state=boot(undefined,"29");
+test("developer can enter a chapter and place an interaction by clicking the actual scene",()=>{
+  const state=boot(undefined,"30");
   state.click("[data-open-dev]");
-  assert.equal(state.node("#dev-chapter-interactions").hidden,false);
-  state.click("#dev-add-interaction");
+  state.click("#dev-open-chapter-scene");
+  assert.equal(state.node("view:story").hidden,false);
+  assert.equal(state.node("#story-dev-toolbar").hidden,false);
+  state.click("#story-dev-add-interaction");
+  state.node("#story-dev-layer").listeners.click({
+    clientX:500,clientY:300,
+    target:{closest(){return null}}
+  });
   const stored=JSON.parse(state.storage.get(devContentKey));
   assert.equal(Array.isArray(stored.chapters[0].interactions),true);
   assert.equal(stored.chapters[0].interactions.length,1);
   assert.equal(stored.chapters[0].interactions[0].type,"inspect");
-  assert.equal(state.node("#dev-interaction-count").textContent,"1개");
+  assert.equal(stored.chapters[0].interactions[0].x,44);
+  assert.equal(stored.chapters[0].interactions[0].y,44);
+});
+
+test("a running chapter can enter interaction edit mode from its EDIT button",()=>{
+  const state=boot();
+  state.click("#new-game-button");
+  state.slotAction("new-slot",0);
+  state.click("#story-dev-enter");
+  assert.equal(state.node("#story-dev-toolbar").hidden,false);
+  assert.equal(state.node("#story-location-name").textContent,"장면 편집");
 });
 
 
@@ -375,4 +394,14 @@ test("desktop wardrobe uses a wide balanced workspace",()=>{
   assert.match(css,/grid-template-columns:minmax\(440px,520px\) minmax\(0,1fr\)/);
   assert.match(css,/\.wardrobe-dev-panel>[\s\S]*grid-template-columns:minmax\(0,1fr\) minmax\(0,1fr\)/);
   assert.match(css,/height:auto !important;[\s\S]*min-height:640px !important/);
+});
+
+
+test("story interaction editor provides visible draggable placement UI",()=>{
+  const css=fs.readFileSync(path.join(directory,"style.css"),"utf8");
+  assert.match(css,/IN-SCENE CHAPTER INTERACTION EDITOR v30/);
+  assert.match(css,/\.story-dev-layer\{/);
+  assert.match(css,/\.story-dev-hotspot\{/);
+  assert.match(css,/\[data-story-dev-resize\]/);
+  assert.match(css,/\.story-dev-inspector\{/);
 });
