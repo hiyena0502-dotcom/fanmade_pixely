@@ -1,452 +1,278 @@
 <!doctype html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="꿈뜰이와 함께 사라진 잠뜰의 흔적을 찾아가는 픽셀리 팬메이드 미스터리 어드벤처"
-    />
-    <meta name="theme-color" content="#0b1737" />
-    <title>PIXELY : LOST SKY</title>
-    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="collection-groups.css?v=6" />
-    <link rel="stylesheet" href="gacha-upgrade.css?v=2" />
-    <link rel="stylesheet" href="ux-pack.css?v=1" />
-    <link rel="stylesheet" href="mobile-usability-fix.css?v=1" />
-    <link rel="stylesheet" href="game-ui.css?v=1" />
-    <script src="script.js?v=2" defer></script>
-    <script src="pixely-game.js?v=12" defer></script>
-    <script src="upgrade-system.js?v=3" defer></script>
-    <script src="gacha-upgrade.js?v=4" defer></script>
-    <script src="collection-groups.js?v=13" defer></script>
-    <script src="ux-pack.js?v=1" defer></script>
-  </head>
-  <body>
-    <div class="sky" aria-hidden="true">
-      <div class="sun-glow"></div>
-      <div class="cloud cloud--one"><i></i><i></i><i></i></div>
-      <div class="cloud cloud--two"><i></i><i></i><i></i></div>
-      <div class="cloud cloud--three"><i></i><i></i><i></i></div>
-      <div class="pixel-sparkles">
-        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
-      </div>
-    </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="꿈뜰이와 함께 모든 세계에서 사라진 잠뜰의 흔적을 찾는 비공식 팬메이드 미스터리 어드벤처." />
+  <meta name="theme-color" content="#091225" />
+  <title>PIXELY : LOST SKY</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css?v=1" />
+  <script src="app.js?v=1" defer></script>
+</head>
+<body>
+  <div class="sky-bg" aria-hidden="true">
+    <span class="sky-orb sky-orb--one"></span>
+    <span class="sky-orb sky-orb--two"></span>
+    <span class="sky-grid"></span>
+    <span class="sky-stars"></span>
+  </div>
 
-    <main>
-      <section class="intro" id="intro" aria-labelledby="intro-title">
-        <div class="intro__copy">
-          <span class="intro__eyebrow">PIXELY MYSTERY ADVENTURE</span>
-          <h1 id="intro-title">
-            <span>모든 세계에서 사라진 단 한 사람</span>
-            잠뜰을 찾아서
-          </h1>
-          <p>꿈뜰이가 되어 여러 상황극 세계의 인물들을 만나고, 물건과 이야기를 조사하며 사라진 잠뜰의 흔적을 따라가세요.</p>
+  <div class="game-shell">
+    <header class="topbar">
+      <button class="brand" type="button" data-route="home" aria-label="홈으로">
+        <span class="brand-mark">P</span>
+        <span class="brand-copy">
+          <strong>PIXELY : LOST SKY</strong>
+          <small>FANMADE MYSTERY ADVENTURE</small>
+        </span>
+      </button>
+
+      <nav class="main-nav" aria-label="게임 메뉴">
+        <button class="nav-item is-active" type="button" data-route="home"><span>⌂</span><b>HOME</b></button>
+        <button class="nav-item" type="button" data-route="story"><span>▣</span><b>STORY</b></button>
+        <button class="nav-item" type="button" data-route="click"><span>✦</span><b>CLICK</b></button>
+        <button class="nav-item" type="button" data-route="capsule"><span>◈</span><b>CAPSULE</b></button>
+        <button class="nav-item" type="button" data-route="archive"><span>▦</span><b>ARCHIVE</b></button>
+      </nav>
+
+      <div class="hud">
+        <div class="hud-item">
+          <span class="hud-icon">✦</span>
+          <span><small>별가루</small><b data-dust>0</b></span>
         </div>
+        <div class="hud-item">
+          <span class="hud-icon">◆</span>
+          <span><small>기억 조각</small><b data-shards>0</b></span>
+        </div>
+      </div>
+    </header>
 
-        <button class="diary-door" id="enter-button" type="button">
-          <span class="diary-door__book" aria-hidden="true">
-            <span class="diary-door__band"></span>
-            <span class="diary-door__label">
-              <b>LOST SKY</b>
-              <small>case archive</small>
-            </span>
-            <span class="diary-door__stars">✦</span>
-          </span>
-          <span class="diary-door__caption">사건 파일 열기</span>
-          <span class="diary-door__hint">START INVESTIGATION</span>
-        </button>
+    <main class="screen-stage">
+      <section class="screen is-active" data-screen="home">
+        <div class="home-layout">
+          <article class="hero-panel panel">
+            <div class="eyebrow"><span></span> CASE 00 · PROLOGUE</div>
+            <div class="hero-copy">
+              <p class="hero-kicker">모든 세계에서 사라진 단 한 사람</p>
+              <h1>잠뜰을<br /><em>찾아주세요.</em></h1>
+              <p class="hero-description">
+                미스터리 수사반을 비롯한 여러 이야기의 세계는 그대로인데,
+                이상하게도 모든 세계의 ‘잠뜰’만 흔적 없이 사라졌습니다.
+                꿈뜰이가 되어 사람들의 이야기를 듣고 남겨진 물건을 조사하세요.
+              </p>
+            </div>
+            <div class="hero-actions">
+              <button class="primary-button" type="button" id="home-story-action">
+                <span>▣</span><span><b>첫 조사 시작</b><small>미스터리 수사반 · 하늘 경찰청</small></span><i>→</i>
+              </button>
+              <button class="text-button" type="button" data-route="archive">사건 기록 확인 <span>↗</span></button>
+            </div>
+            <div class="hero-decoration" aria-hidden="true">
+              <span class="missing-stamp">MISSING</span>
+              <span class="case-number">00</span>
+            </div>
+          </article>
 
-        <div class="intro__status" aria-hidden="true">
-          <span></span>
-          <small id="intro-sky-status">09.14 · CLEAR SKY</small>
+          <aside class="home-side">
+            <section class="panel status-panel">
+              <header class="panel-header">
+                <div><small>CURRENT CASE</small><h2>사라진 잠뜰들</h2></div>
+                <span class="status-dot">OPEN</span>
+              </header>
+              <div class="case-progress">
+                <div class="progress-copy"><span>프롤로그 조사</span><b id="home-progress-copy">0%</b></div>
+                <div class="progress-track"><i id="home-progress-bar"></i></div>
+              </div>
+              <dl class="case-stats">
+                <div><dt>확보한 단서</dt><dd data-clue-count>0</dd></div>
+                <div><dt>조사 물건</dt><dd data-item-count>0</dd></div>
+                <div><dt>수집 기록</dt><dd data-owned-count>0</dd></div>
+              </dl>
+            </section>
+
+            <section class="panel quick-panel">
+              <header class="panel-header compact">
+                <div><small>QUICK ACCESS</small><h2>다른 활동</h2></div>
+              </header>
+              <div class="quick-grid">
+                <button type="button" data-route="click"><span class="quick-icon">✦</span><b>별가루 모으기</b><small>짧게 클릭하고 쉬어가기</small></button>
+                <button type="button" data-route="capsule"><span class="quick-icon">◈</span><b>기억 캡슐</b><small>수집 기록 뽑기</small></button>
+              </div>
+            </section>
+          </aside>
         </div>
       </section>
 
-      <section class="diary-app" id="diary-app" aria-hidden="true">
-        <header class="app-bar">
-          <button class="brand" type="button" data-go-home aria-label="게임 홈으로 이동">
-            <span class="brand__mark">P</span>
-            <span>
-              <b>PIXELY : LOST SKY</b>
-              <small>MYSTERY ADVENTURE · CASE ARCHIVE</small>
-            </span>
-          </button>
-          <div class="app-bar__actions">
-            <div class="game-hud-chip game-hud-chip--case">
-              <span>⌖</span><span><small>CURRENT CASE</small><b>CASE 00 · MISSING</b></span>
-            </div>
-            <div class="game-hud-chip game-hud-chip--dust">
-              <span>✦</span><span><small>STARDUST</small><b><em data-dust-count>0</em></b></span>
-            </div>
-            <div class="game-hud-chip game-hud-chip--player">
-              <span>☁</span><span><small>PLAYER</small><b>꿈뜰이</b></span>
-            </div>
-            <button id="open-settings" type="button" hidden aria-hidden="true" tabindex="-1"></button>
-            <button class="sky-button" id="back-to-sky" type="button" aria-label="타이틀 화면으로">
-              <span aria-hidden="true">↩</span> 타이틀
-            </button>
-          </div>
-        </header>
+      <section class="screen" data-screen="story" hidden>
+        <div class="story-layout">
+          <aside class="panel character-panel">
+            <header class="panel-header compact">
+              <div><small>PEOPLE HERE</small><h2>등장 인물</h2></div>
+            </header>
+            <div class="character-list" id="character-list"></div>
+          </aside>
 
-        <div class="diary-wrap">
-          <nav class="diary-tabs" aria-label="다이어리 메뉴">
-            <button class="tab tab--home is-active" type="button" data-tab="home" aria-current="page">
-              <span aria-hidden="true">⌂</span><b>HOME</b>
-            </button>
-            <button class="tab tab--series" type="button" data-tab="series">
-              <span aria-hidden="true">✦</span><b>CLICK</b>
-            </button>
-            <button class="tab tab--gacha" type="button" data-tab="gacha">
-              <span aria-hidden="true">◈</span><b>CAPSULE</b>
-            </button>
-            <button class="tab tab--collection" type="button" data-tab="collection">
-              <span aria-hidden="true">▦</span><b>ARCHIVE</b>
-            </button>
-          </nav>
-
-          <div class="diary-book" id="diary-book">
-            <div class="book-cover" aria-hidden="true"></div>
-            <div class="ring-binder" aria-hidden="true">
-              <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
-            </div>
-
-            <section class="diary-panel is-active" data-panel="home" aria-labelledby="home-heading">
-              <div class="diary-spread is-active" data-spread="0">
-              <div class="paper-page paper-page--left home-left">
-                <div class="page-number">01</div>
-                <div class="washi-tape washi-tape--blue" aria-hidden="true"></div>
-                <p class="hand-note">CASE FILE · INVESTIGATION READY</p>
-                <div class="date-stamp">
-                  <b id="today-date">09.14</b>
-                  <span>CASE OPENED</span>
+          <section class="story-center">
+            <article class="scene-card panel">
+              <div class="scene-art">
+                <div class="scene-topline">
+                  <span id="scene-location">하늘 경찰청 · 미스터리 수사반</span>
+                  <span class="scene-time">CASE 00</span>
                 </div>
-                <h2 id="home-heading">모든 세계에서,<br />잠뜰이 사라졌다.</h2>
-                <p class="home-intro">
-                  미수반을 비롯한 여러 상황극 세계에는 모두가 그대로 남아 있습니다.
-                  단 한 사람, 각 세계의 잠뜰만 흔적 없이 사라졌습니다. 꿈뜰이가 직접 이야기를 듣고 단서를 모아 사건의 시작점을 찾아보세요.
-                </p>
-
-                <div class="member-dots" aria-label="픽셀리 멤버 컬러">
-                  <span class="member-dot member-dot--red" title="라더">라</span>
-                  <span class="member-dot member-dot--orange" title="덕개">덕</span>
-                  <span class="member-dot member-dot--yellow" title="각별">각</span>
-                  <span class="member-dot member-dot--green" title="공룡">공</span>
-                  <span class="member-dot member-dot--blue is-missing" title="잠뜰 · MISSING">?</span>
-                  <span class="member-dot member-dot--cyan" title="수현">수</span>
+                <div class="scene-room" aria-hidden="true">
+                  <span class="window-glow"></span>
+                  <span class="desk-shape"></span>
+                  <span class="chair-shape missing"></span>
+                  <span class="evidence-line evidence-line--one"></span>
+                  <span class="evidence-line evidence-line--two"></span>
+                  <span class="evidence-pin evidence-pin--one"></span>
+                  <span class="evidence-pin evidence-pin--two"></span>
                 </div>
-
-                <label class="today-note">
-                  <span>INVESTIGATION NOTE · 수사 메모</span>
-                  <textarea id="today-note" maxlength="120" rows="2" placeholder="의심되는 점이나 기억해둘 단서를 적어보세요."></textarea>
-                </label>
-
-                <div class="paper-plane" aria-hidden="true">➤</div>
-                <p class="scribble">keep every sparkling moment!</p>
-              </div>
-
-              <div class="paper-page paper-page--right home-right">
-                <div class="page-number">02</div>
-                <div class="page-heading">
-                  <div>
-                    <span>INVESTIGATION BOARD</span>
-                    <h3>사건 현황</h3>
-                  </div>
-                  <span class="tiny-sun" aria-hidden="true">⌖</span>
-                </div>
-
-                <div class="case-brief">
-                  <small>MAIN STORY · CASE 00</small>
-                  <h4>사라진 잠뜰들</h4>
-                  <p>여러 세계에서 같은 이름의 한 사람만 사라졌습니다. 아직 본격적인 조사는 시작되지 않았습니다.</p>
-                  <span class="case-brief__status">STORY SYSTEM · 준비 중</span>
-                </div>
-
-                <button class="feature-card feature-card--series home-recent-series" type="button" data-open-tab="series">
-                  <span class="feature-card__label">SIDE ACTIVITY · CLICK</span>
-                  <span class="feature-card__art" aria-hidden="true">
-                    <i class="file file--back"></i>
-                    <i class="file file--front"><b>✦</b></i>
-                    <i class="magnifier"></i>
-                  </span>
-                  <span class="feature-card__copy">
-                    <b id="home-recent-series-title">별가루 모으기</b>
-                    <small id="home-recent-series-copy">별을 눌러 별가루를 모으고 기억 캡슐을 열어보세요.</small>
-                  </span>
-                  <span class="round-arrow" aria-hidden="true">↗</span>
+                <button class="inspect-hotspot" type="button" id="inspect-desk">
+                  <span>⌕</span><b>잠뜰 경위의 책상 조사</b>
                 </button>
+              </div>
 
-                <button class="feature-card feature-card--gacha" type="button" data-open-tab="collection">
-                  <span class="feature-card__label">MEMORY ARCHIVE</span>
-                  <span class="mini-capsules" aria-hidden="true">
-                    <i></i><i></i><i></i>
-                  </span>
-                  <span class="feature-card__copy">
-                    <b id="home-recent-card-title">아직 만난 카드가 없어요</b>
-                    <small id="home-recent-card-copy">캡슐에서 첫 번째 기억을 발견해보세요.</small>
-                  </span>
-                  <span class="round-arrow" aria-hidden="true">↗</span>
-                </button>
-
-                <div class="home-stats">
-                  <div><span>수집한 기록</span><b><em data-owned-count>0</em> / <em data-total-cards>12</em></b></div>
-                  <div><span>열린 파일</span><b><em data-series-count>1</em>권</b></div>
-                  <button type="button" data-open-tab="collection">아카이브 보기 →</button>
-                </div>
-                <div class="home-progress">
-                  <span><i id="collection-progress-bar"></i></span>
-                  <small id="collection-progress-copy">아카이브 0% 기록</small>
+              <div class="dialogue-box">
+                <div class="speaker-avatar" id="speaker-avatar">?</div>
+                <div class="dialogue-copy">
+                  <div class="speaker-name" id="speaker-name">수사 기록</div>
+                  <p id="dialogue-text">잠뜰 경위의 자리가 비어 있다. 다른 멤버들은 모두 남아 있지만, 누구도 경위가 어디로 갔는지 알지 못한다.</p>
                 </div>
               </div>
-              </div>
+
+              <div class="choice-list" id="choice-list"></div>
+            </article>
+          </section>
+
+          <aside class="story-side">
+            <section class="panel objective-panel">
+              <header class="panel-header compact">
+                <div><small>OBJECTIVE</small><h2>현재 목표</h2></div>
+                <span class="objective-mark">⌖</span>
+              </header>
+              <p id="story-objective">사무실에 남은 사람들에게 말을 걸고 잠뜰 경위의 책상을 조사하자.</p>
             </section>
 
-            <section class="diary-panel" data-panel="series" aria-labelledby="series-heading" hidden>
-              <h2 class="sr-only" id="series-heading">별가루 클릭커</h2>
-              <div class="spread-stage" id="series-spreads"></div>
+            <section class="panel notebook-panel">
+              <div class="notebook-tabs">
+                <button class="is-active" type="button" data-notebook="items">물건</button>
+                <button type="button" data-notebook="clues">단서</button>
+              </div>
+              <div class="notebook-list" id="notebook-list"></div>
             </section>
 
-            <section class="diary-panel" data-panel="gacha" aria-labelledby="gacha-heading" hidden>
-              <div class="diary-spread is-active" data-spread="0">
-              <div class="paper-page paper-page--left gacha-info">
-                <div class="page-number">05</div>
-                <div class="washi-tape washi-tape--pink" aria-hidden="true"></div>
-                <span class="section-kicker">MEMORY CAPSULE STATION</span>
-                <h2 id="gacha-heading">하늘빛 기억 캡슐</h2>
-                <p>모은 별가루로 캡슐을 열고, 여행 중 발견한 인물·물건·장면의 기억을 아카이브에 수집하세요.</p>
-
-                <div class="rarity-list">
-                  <div><i class="rarity-dot rarity-dot--cloud"></i><span><b>CLOUD</b><small>포근한 일상의 조각</small></span></div>
-                  <div><i class="rarity-dot rarity-dot--sky"></i><span><b>SKY</b><small>반짝이는 멤버 카드</small></span></div>
-                  <div><i class="rarity-dot rarity-dot--star"></i><span><b>STAR</b><small>특별한 시리즈 기록</small></span></div>
-                  <div><i class="rarity-dot rarity-dot--rainbow"></i><span><b>RAINBOW</b><small>아주 희귀한 행운</small></span></div>
-                </div>
-
-                <div class="gacha-rule">
-                  <b>HOW TO PLAY</b>
-                  <ol>
-                    <li>하늘 구슬을 눌러 캡슐을 뽑아요.</li>
-                    <li>처음 만난 카드는 컬렉션에 저장돼요.</li>
-                    <li>중복 카드는 별가루 10개로 변해요.</li>
-                  </ol>
-                </div>
-              </div>
-
-              <div class="paper-page paper-page--right gacha-play">
-                <div class="page-number">06</div>
-                <div class="gacha-counts">
-                  <span>COLLECTION <b><em data-owned-count>0</em>/<em data-total-cards>12</em></b></span>
-                  <span>STARDUST <b>✦ <em data-dust-count>0</em></b></span>
-                </div>
-
-                <div class="gacha-machine" id="gacha-machine" aria-hidden="true">
-                  <div class="machine-top">
-                    <div class="machine-glass">
-                      <i class="ball ball--1"></i><i class="ball ball--2"></i><i class="ball ball--3"></i>
-                      <i class="ball ball--4"></i><i class="ball ball--5"></i><i class="ball ball--6"></i>
-                      <span>MEMORY<br /><b>CAPSULE</b></span>
-                    </div>
-                  </div>
-                  <div class="machine-base">
-                    <div class="machine-knob">✦</div>
-                    <div class="machine-slot"></div>
-                  </div>
-                </div>
-
-                <button class="draw-button" id="draw-button" type="button">
-                  <span>✦</span>
-                  <b>1회 뽑기</b>
-                  <small>행운을 눌러보세요!</small>
-                </button>
-                <p class="gacha-message" id="gacha-message" aria-live="polite">오늘도 좋은 기록을 만날 수 있을 거예요.</p>
-              </div>
-              </div>
-            </section>
-
-            <section class="diary-panel" data-panel="collection" aria-labelledby="collection-heading" hidden>
-              <h2 class="sr-only" id="collection-heading">픽셀 컬렉션</h2>
-              <div class="spread-stage" id="collection-spreads"></div>
-            </section>
-          </div>
-
-          <div class="spread-page-controls" id="spread-page-controls" aria-label="다이어리 펼침면 이동" hidden>
-            <button class="spread-page-controls__prev" id="spread-page-prev" type="button" aria-label="이전 펼침면">
-              <span aria-hidden="true">←</span><b>이전 페이지</b>
+            <button class="story-next-button" id="finish-prologue" type="button" hidden>
+              <span><small>NEXT</small><b>첫 번째 세계의 흔적 확인</b></span><i>→</i>
             </button>
-            <span class="spread-page-controls__label" id="spread-page-label">03–04 · 1 / 1</span>
-            <button class="spread-page-controls__next" id="spread-page-next" type="button" aria-label="다음 펼침면">
-              <b>다음 페이지</b><span aria-hidden="true">→</span>
-            </button>
-          </div>
+          </aside>
         </div>
-        <p class="fanmade-note">UNOFFICIAL FANMADE GAME · PIXELY : LOST SKY · 개인 팬 프로젝트</p>
+      </section>
+
+      <section class="screen" data-screen="click" hidden>
+        <div class="activity-layout">
+          <section class="panel activity-info">
+            <div class="eyebrow"><span></span> SIDE ACTIVITY</div>
+            <h1>별가루<br />모으기</h1>
+            <p>스토리 진행에는 필수가 아니에요. 잠깐 쉬어가고 싶을 때 별을 눌러 기억 캡슐에 사용할 별가루를 모아보세요.</p>
+            <div class="activity-stats">
+              <div><small>TOUCH</small><b>+<span id="click-power">1</span></b></div>
+              <div><small>BEST COMBO</small><b id="best-combo">0</b></div>
+              <div><small>TOTAL CLICK</small><b id="total-clicks">0</b></div>
+            </div>
+          </section>
+
+          <section class="panel click-zone">
+            <div class="combo-pill" id="combo-pill">READY</div>
+            <button class="star-button" id="star-button" type="button" aria-label="별가루 모으기">
+              <span class="star-halo"></span>
+              <span class="star-core">✦</span>
+              <b>CLICK</b>
+              <small id="star-gain">+1 STAR DUST</small>
+            </button>
+            <p>빠르게 이어서 누르면 콤보가 올라가요.</p>
+          </section>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="capsule" hidden>
+        <div class="activity-layout capsule-layout">
+          <section class="panel activity-info">
+            <div class="eyebrow"><span></span> MEMORY CAPSULE</div>
+            <h1>기억<br />캡슐</h1>
+            <p>별가루 100개로 캡슐 하나를 열 수 있어요. 인물, 물건, 장면의 작은 기록은 ARCHIVE에 자동으로 저장됩니다.</p>
+            <div class="capsule-rate">
+              <div><span class="rarity rarity--memory"></span><b>MEMORY</b><small>60%</small></div>
+              <div><span class="rarity rarity--sky"></span><b>SKY</b><small>30%</small></div>
+              <div><span class="rarity rarity--star"></span><b>STAR</b><small>10%</small></div>
+            </div>
+            <p class="tiny-note">중복 기록은 기억 조각으로 변환됩니다.</p>
+          </section>
+
+          <section class="panel capsule-zone">
+            <div class="capsule-machine" aria-hidden="true">
+              <div class="machine-glass">
+                <i></i><i></i><i></i><i></i><i></i>
+                <span>MEMORY</span>
+              </div>
+              <div class="machine-body">
+                <span class="machine-wheel">✦</span>
+                <span class="machine-slot"></span>
+              </div>
+            </div>
+            <button class="primary-button draw-button" id="draw-button" type="button">
+              <span>◈</span><span><b>캡슐 열기</b><small>별가루 100 사용</small></span><i>→</i>
+            </button>
+            <p id="capsule-message">어떤 기억이 기다리고 있을까요?</p>
+          </section>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="archive" hidden>
+        <section class="panel archive-shell">
+          <header class="archive-header">
+            <div>
+              <div class="eyebrow"><span></span> INVESTIGATION ARCHIVE</div>
+              <h1>사건 기록 보관소</h1>
+              <p>조사하면서 만난 물건과 단서, 캡슐에서 얻은 기억이 이곳에 정리됩니다.</p>
+            </div>
+            <div class="archive-summary">
+              <small>COLLECTION</small>
+              <b><span data-owned-count>0</span> / <span id="archive-total">0</span></b>
+            </div>
+          </header>
+
+          <div class="archive-tabs">
+            <button class="is-active" type="button" data-archive-tab="memories">기억</button>
+            <button type="button" data-archive-tab="case">사건 단서</button>
+            <button type="button" data-archive-tab="worlds">세계 기록</button>
+          </div>
+          <div class="archive-grid" id="archive-grid"></div>
+        </section>
       </section>
     </main>
 
-    <div class="result-modal" id="result-modal" role="dialog" aria-modal="true" aria-labelledby="result-title" hidden>
-      <div class="result-backdrop" data-close-modal></div>
-      <div class="result-box">
-        <div class="result-rays" aria-hidden="true"></div>
-        <span class="result-kicker" id="result-kicker">NEW MEMORY!</span>
-        <div class="result-card" id="result-card"></div>
-        <h2 id="result-title">새로운 카드를 만났어요!</h2>
-        <p id="result-copy">컬렉션에 소중히 보관했어요.</p>
-        <div class="result-actions">
-          <button class="result-button result-button--again" id="draw-again" type="button">한 번 더 뽑기</button>
-          <button class="result-button result-button--close" id="result-primary-action" type="button">다이어리에 붙이기</button>
-        </div>
-      </div>
-    </div>
+    <footer class="game-footer">
+      <span>UNOFFICIAL FANMADE PROJECT</span>
+      <span>PIXELY : LOST SKY</span>
+      <span>팬이 만든 비공식 창작 게임입니다.</span>
+    </footer>
+  </div>
 
-    <div class="settings-modal" id="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title" hidden>
-      <div class="settings-backdrop" data-close-settings></div>
-      <section class="settings-panel">
-        <header class="settings-header">
-          <div>
-            <span>DIARY CONTROL ROOM</span>
-            <h2 id="settings-title">다이어리 설정</h2>
-          </div>
-          <button type="button" data-close-settings aria-label="설정 닫기">×</button>
-        </header>
+  <div class="result-modal" id="result-modal" hidden>
+    <button class="modal-backdrop" type="button" data-close-modal aria-label="닫기"></button>
+    <section class="result-card">
+      <small id="result-rarity">NEW MEMORY</small>
+      <div class="result-symbol" id="result-symbol">✦</div>
+      <h2 id="result-title">새로운 기억!</h2>
+      <p id="result-copy"></p>
+      <button class="primary-button modal-button" type="button" data-close-modal>
+        <span>✓</span><span><b>ARCHIVE에 저장</b><small>기록 확인하기</small></span><i>→</i>
+      </button>
+    </section>
+  </div>
 
-        <nav class="settings-tabs" aria-label="설정 메뉴">
-          <button class="is-active" type="button" data-settings-tab="gacha">가챠 카드</button>
-          <button type="button" data-settings-tab="series">메인 시리즈</button>
-          <button type="button" data-settings-tab="reset">백업·초기화</button>
-        </nav>
-
-        <div class="settings-content">
-          <section class="settings-section is-active" data-settings-panel="gacha">
-            <div class="settings-section__heading">
-              <div><h3>가챠 카드 관리</h3><p>카드의 기본 정보와 기록 메모, 관련 시리즈를 관리해요.</p></div>
-              <button class="add-setting-button" type="button" data-add-item="gacha">＋ 카드 추가</button>
-            </div>
-            <div class="settings-item-list" id="gacha-settings-list"></div>
-          </section>
-
-          <section class="settings-section" data-settings-panel="series" hidden>
-            <div class="settings-section__heading">
-              <div><h3>메인 시리즈 관리</h3><p>다이어리에 보여줄 시리즈와 표지 색상을 관리해요.</p></div>
-              <button class="add-setting-button" type="button" data-add-item="series">＋ 시리즈 추가</button>
-            </div>
-            <div class="settings-item-list" id="series-settings-list"></div>
-
-            <div class="record-manager" id="record-manager">
-              <div class="record-manager__header">
-                <div>
-                  <span>SERIES RECORDS</span>
-                  <h3>시리즈 내부 기록</h3>
-                </div>
-                <label>
-                  <span class="sr-only">관리할 시리즈</span>
-                  <select id="record-series-select"></select>
-                </label>
-              </div>
-              <nav class="record-type-tabs" aria-label="시리즈 기록 종류">
-                <button class="is-active" type="button" data-record-type="characters">등장인물</button>
-                <button type="button" data-record-type="episodes">에피소드</button>
-                <button type="button" data-record-type="moments">명장면</button>
-                <button type="button" data-record-type="relationships">관계성</button>
-              </nav>
-              <div class="record-manager__toolbar">
-                <p id="record-manager-copy">등장인물의 이름과 메모를 기록해요.</p>
-                <button class="add-setting-button" id="add-record" type="button">＋ 기록 추가</button>
-              </div>
-              <div class="settings-item-list record-settings-list" id="record-settings-list"></div>
-            </div>
-          </section>
-
-          <section class="settings-section" data-settings-panel="reset" hidden>
-            <div class="settings-section__heading">
-              <div><h3>백업과 초기화</h3><p>소중한 기록을 파일로 보관하거나 원하는 범위만 초기화해요.</p></div>
-            </div>
-
-            <p class="storage-notice">
-              <span aria-hidden="true">ⓘ</span>
-              현재 다이어리 데이터는 이 브라우저에 저장됩니다. 다른 기기에서 사용하거나 브라우저 데이터를 삭제하기 전에는 백업 파일을 만들어주세요.
-            </p>
-
-            <div class="backup-card">
-              <div><span aria-hidden="true">⇩</span><p><b>다이어리 백업</b><small>카드, 시리즈와 컬렉션을 파일로 보관해요.</small></p></div>
-              <div class="backup-actions">
-                <button id="export-settings" type="button">내보내기</button>
-                <label for="import-settings">불러오기</label>
-                <input id="import-settings" type="file" accept="application/json,.json" hidden />
-              </div>
-            </div>
-
-            <div class="reset-grid">
-              <button type="button" data-reset="collection"><span>▦</span><b>컬렉션 초기화</b><small>뽑은 카드와 별가루만 비워요.</small></button>
-              <button type="button" data-reset="gacha"><span>✦</span><b>기본 카드로 되돌리기</b><small>가챠 카드 구성을 처음 상태로 돌려요.</small></button>
-              <button type="button" data-reset="series"><span>▤</span><b>기본 시리즈로 되돌리기</b><small>시리즈와 내부 기록을 처음 상태로 돌려요.</small></button>
-              <button class="reset-all" type="button" data-reset="all"><span>↻</span><b>전체 초기화</b><small>모든 설정과 기록을 처음으로 돌려요.</small></button>
-            </div>
-          </section>
-        </div>
-
-        <footer class="settings-footer">
-          <span><i></i> 변경사항 자동 저장</span>
-          <b id="settings-summary">카드 12개 · 시리즈 1개</b>
-        </footer>
-      </section>
-    </div>
-
-    <div class="editor-modal" id="editor-modal" role="dialog" aria-modal="true" aria-labelledby="editor-title" hidden>
-      <div class="settings-backdrop" data-close-editor></div>
-      <form class="editor-card" id="item-editor-form">
-        <header>
-          <div><span>EDIT A PAGE</span><h2 id="editor-title">새 카드 추가</h2></div>
-          <button type="button" data-close-editor aria-label="편집창 닫기">×</button>
-        </header>
-
-        <input id="editor-type" name="editorType" type="hidden" />
-        <input id="editor-id" name="editorId" type="hidden" />
-        <input id="editor-series-id" name="editorSeriesId" type="hidden" />
-
-        <div class="editor-fields" id="editor-fields"></div>
-
-        <footer>
-          <button class="editor-cancel" type="button" data-close-editor>취소</button>
-          <button class="editor-save" type="submit">저장하기</button>
-        </footer>
-      </form>
-    </div>
-
-    <div class="confirm-modal" id="confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" hidden>
-      <div class="settings-backdrop" data-cancel-confirm></div>
-      <section class="confirm-card">
-        <span class="confirm-icon" aria-hidden="true">!</span>
-        <h2 id="confirm-title">정말 변경할까요?</h2>
-        <p id="confirm-copy">이 작업은 되돌릴 수 없어요.</p>
-        <div>
-          <button type="button" data-cancel-confirm>취소</button>
-          <button class="confirm-backup" id="confirm-backup" type="button" hidden>먼저 백업하기</button>
-          <button class="confirm-danger" id="confirm-action" type="button">확인</button>
-        </div>
-      </section>
-    </div>
-
-    <div class="card-detail-modal" id="card-detail-modal" role="dialog" aria-modal="true" aria-labelledby="card-detail-title" hidden>
-      <div class="settings-backdrop" data-close-card-detail></div>
-      <section class="card-detail-sheet">
-        <button class="card-detail-close" type="button" data-close-card-detail aria-label="카드 상세 닫기">×</button>
-        <div class="card-detail-preview" id="card-detail-preview"></div>
-        <div class="card-detail-copy">
-          <span id="card-detail-rarity">SKY CARD</span>
-          <h2 id="card-detail-title">카드 이름</h2>
-          <p class="card-detail-note" id="card-detail-note">카드 메모</p>
-          <dl>
-            <div><dt>관련 시리즈</dt><dd id="card-detail-series">없음</dd></div>
-            <div><dt>획득 개수</dt><dd id="card-detail-count">1장</dd></div>
-          </dl>
-          <p class="card-detail-description" id="card-detail-description">상세 설명이 아직 없어요.</p>
-        </div>
-      </section>
-    </div>
-
-    <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-    <noscript>이 팬메이드 게임을 이용하려면 JavaScript를 켜주세요.</noscript>
-  </body>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
 </html>
