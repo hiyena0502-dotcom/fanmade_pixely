@@ -1267,7 +1267,6 @@
   .intro-inspect--left{left:13%;top:44%}
   .intro-inspect--right{right:12%;top:42%}
   .story-intro-explore-message{bottom:13%;width:calc(100% - 36px);font-size:11px}
-  .story-intro-enter-small{right:12px;bottom:12px}
 }
 @media(prefers-reduced-motion:reduce){
   .intro-leaves i,.intro-inspect{animation:none}
