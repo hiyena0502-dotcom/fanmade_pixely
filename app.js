@@ -5,7 +5,7 @@
   const SESSION_SAVE_KEY = STORAGE_KEY+"-session-fallback";
   const WARDROBE_ASSET_KEY = "pixely-lost-sky-wardrobe-assets-v1";
   const DEV_CONTENT_KEY = "pixely-lost-sky-dev-content-v1";
-  const SITE_VERSION = "39";
+  const SITE_VERSION = "40";
   const $ = (q, root = document) => root.querySelector(q);
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 
@@ -649,8 +649,8 @@
     {phase:"dark",kind:"narration",text:"생일 축하하러 왔을 뿐이다."},
     {phase:"dark",kind:"narration",text:"……정말 그것뿐이었는데."},
 
-    {phase:"exterior",kind:"dialogue",speaker:"꿈뜰",text:"여기 맞겠지?"},
-    {phase:"exterior",kind:"dialogue",speaker:"꿈뜰",text:"생각보다 조용한데……."},
+    {phase:"exterior",kind:"dialogue",speaker:"꿈뜰이",text:"여기 맞겠지?"},
+    {phase:"exterior",kind:"dialogue",speaker:"꿈뜰이",text:"생각보다 조용한데……."},
 
     {phase:"exterior",kind:"house"},
 
@@ -693,7 +693,7 @@
       house.hidden=!houseStep;
       house.disabled=!houseStep;
     }
-    if(hint) hint.textContent=houseStep?"집을 클릭해 가까이 가기":"CLICK / SPACE";
+    if(hint) hint.textContent=houseStep?"문을 클릭하기":"CLICK / SPACE";
 
     $("#story-intro-kicker").textContent=step.speaker||step.kicker||"";
     $("#story-intro-title").textContent=step.title||"";
