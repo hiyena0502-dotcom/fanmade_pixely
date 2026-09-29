@@ -1089,11 +1089,11 @@
 }
 
 .story-intro-overlay.is-exterior .story-intro-backdrop{
-  background-image:url("../assets/story/chapter1/house-wide.webp?v=54");
+  background-image:url("../assets/story/chapter1/house-wide.webp?v=56");
 }
 
 .story-intro-overlay.is-door .story-intro-backdrop{
-  background-image:url("../assets/story/chapter1/house-door-close.webp?v=54");
+  background-image:url("../assets/story/chapter1/house-door-close.webp?v=56");
 }
 
 .story-intro-overlay.is-approaching .story-intro-backdrop{
@@ -1154,7 +1154,7 @@
 /* CHAPTER 1 EXTERIOR MOTION + DOOR EXPLORATION · v51 */
 .intro-leaves{
   position:absolute;
-  z-index:5;
+  z-index:7;
   inset:0;
   overflow:hidden;
   pointer-events:none;
@@ -1168,64 +1168,71 @@
 
 .intro-leaves i{
   position:absolute;
-  left:var(--leaf-x,-10%);
+  left:0;
   top:var(--leaf-y,30%);
-  width:var(--leaf-w,13px);
-  height:var(--leaf-h,8px);
-  border-radius:82% 8% 78% 12%;
-  background:var(--leaf-color,#8b9b58);
-  opacity:0;
-  transform-origin:46% 52%;
-  translate:0 0;
-  rotate:var(--leaf-angle,24deg);
-  scale:var(--leaf-scale,1) 1;
-  filter:drop-shadow(0 2px 2px rgba(58,66,39,.16));
-  will-change:translate,rotate,scale,opacity;
-  animation:
-    intro-leaf-drift var(--leaf-time,9s) linear infinite,
-    intro-leaf-flutter var(--flutter-time,1.15s) ease-in-out infinite alternate;
-  animation-delay:var(--leaf-delay,0s),var(--flutter-delay,-.4s);
+  width:var(--leaf-size,22px);
+  height:calc(var(--leaf-size,22px) * .62);
+  border-radius:85% 12% 78% 8%;
+  background:var(--leaf-color,#8fa257);
+  box-shadow:
+    inset -3px -2px 0 rgba(74,78,42,.14),
+    0 3px 5px rgba(48,57,34,.14);
+  opacity:.9;
+  transform-origin:52% 48%;
+  will-change:transform,opacity;
+  animation:pixely-leaf-fly var(--leaf-time,8s) linear infinite;
+  animation-delay:var(--leaf-delay,0s);
 }
 
-.intro-leaves i:nth-child(1){--leaf-y:12%;--leaf-time:8.4s;--leaf-delay:-1.2s;--flutter-time:.92s;--leaf-color:#859851;--leaf-scale:.86;--leaf-angle:18deg;--leaf-spin:760deg}
-.intro-leaves i:nth-child(2){--leaf-y:24%;--leaf-time:11.2s;--leaf-delay:-7.1s;--flutter-time:1.28s;--leaf-color:#b49550;--leaf-scale:.72;--leaf-angle:72deg;--leaf-spin:610deg}
-.intro-leaves i:nth-child(3){--leaf-y:39%;--leaf-time:7.8s;--leaf-delay:-3.9s;--flutter-time:.84s;--leaf-color:#70894f;--leaf-scale:.62;--leaf-angle:-28deg;--leaf-spin:880deg}
-.intro-leaves i:nth-child(4){--leaf-y:55%;--leaf-time:12.1s;--leaf-delay:-9.2s;--flutter-time:1.42s;--leaf-color:#9e7447;--leaf-scale:.94;--leaf-angle:104deg;--leaf-spin:540deg}
-.intro-leaves i:nth-child(5){--leaf-y:18%;--leaf-time:9.9s;--leaf-delay:-7.9s;--flutter-time:1.08s;--leaf-color:#749051;--leaf-scale:.8;--leaf-angle:38deg;--leaf-spin:720deg}
-.intro-leaves i:nth-child(6){--leaf-y:66%;--leaf-time:9.1s;--leaf-delay:-2.8s;--flutter-time:.96s;--leaf-color:#b38451;--leaf-scale:.68;--leaf-angle:48deg;--leaf-spin:840deg}
-.intro-leaves i:nth-child(7){--leaf-y:31%;--leaf-time:12.8s;--leaf-delay:-10.1s;--flutter-time:1.52s;--leaf-color:#667d49;--leaf-scale:.58;--leaf-angle:-64deg;--leaf-spin:500deg}
-.intro-leaves i:nth-child(8){--leaf-y:74%;--leaf-time:9.5s;--leaf-delay:-5.7s;--flutter-time:1.04s;--leaf-color:#8e7948;--leaf-scale:.84;--leaf-angle:12deg;--leaf-spin:790deg}
-.intro-leaves i:nth-child(9){--leaf-y:46%;--leaf-time:10.6s;--leaf-delay:-2.1s;--flutter-time:1.22s;--leaf-color:#7b9250;--leaf-scale:.78;--leaf-angle:88deg;--leaf-spin:680deg}
-.intro-leaves i:nth-child(10){--leaf-y:8%;--leaf-time:13.4s;--leaf-delay:-11.7s;--flutter-time:1.36s;--leaf-color:#ae854d;--leaf-scale:.54;--leaf-angle:16deg;--leaf-spin:460deg}
-.intro-leaves i:nth-child(11){--leaf-y:84%;--leaf-time:8.7s;--leaf-delay:-6.4s;--flutter-time:.88s;--leaf-color:#72874d;--leaf-scale:.74;--leaf-angle:-42deg;--leaf-spin:820deg}
-.intro-leaves i:nth-child(12){--leaf-y:29%;--leaf-time:14.2s;--leaf-delay:-4.5s;--flutter-time:1.62s;--leaf-color:#a58d52;--leaf-scale:.5;--leaf-angle:132deg;--leaf-spin:430deg}
-.intro-leaves i:nth-child(13){--leaf-y:62%;--leaf-time:10.1s;--leaf-delay:-8.6s;--flutter-time:1.18s;--leaf-color:#6c864e;--leaf-scale:.9;--leaf-angle:58deg;--leaf-spin:710deg}
-.intro-leaves i:nth-child(14){--leaf-y:36%;--leaf-time:8.1s;--leaf-delay:-.8s;--flutter-time:.82s;--leaf-color:#b08a51;--leaf-scale:.64;--leaf-angle:-18deg;--leaf-spin:920deg}
-.intro-leaves i:nth-child(15){--leaf-y:70%;--leaf-time:13.1s;--leaf-delay:-12.2s;--flutter-time:1.46s;--leaf-color:#7e914f;--leaf-scale:.56;--leaf-angle:96deg;--leaf-spin:520deg}
-.intro-leaves i:nth-child(16){--leaf-y:51%;--leaf-time:9.3s;--leaf-delay:-6.9s;--flutter-time:1.02s;--leaf-color:#9b7049;--leaf-scale:.7;--leaf-angle:28deg;--leaf-spin:770deg}
+.intro-leaves i::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:48%;
+  width:55%;
+  height:1px;
+  background:rgba(78,72,40,.28);
+  transform:translate(-45%,-50%) rotate(-28deg);
+  transform-origin:left center;
+}
 
-@keyframes intro-leaf-drift{
+.intro-leaves i:nth-child(1){--leaf-y:10%;--leaf-time:7.7s;--leaf-delay:-1.1s;--leaf-size:25px;--leaf-color:#8ca15a;--leaf-wave-a:28px;--leaf-wave-b:-22px;--leaf-wave-c:35px;--leaf-scale:.95}
+.intro-leaves i:nth-child(2){--leaf-y:22%;--leaf-time:10.4s;--leaf-delay:-7.4s;--leaf-size:19px;--leaf-color:#c59a55;--leaf-wave-a:-24px;--leaf-wave-b:31px;--leaf-wave-c:-16px;--leaf-scale:.72}
+.intro-leaves i:nth-child(3){--leaf-y:36%;--leaf-time:6.9s;--leaf-delay:-3.2s;--leaf-size:21px;--leaf-color:#718d50;--leaf-wave-a:37px;--leaf-wave-b:-18px;--leaf-wave-c:24px;--leaf-scale:.8}
+.intro-leaves i:nth-child(4){--leaf-y:52%;--leaf-time:11.6s;--leaf-delay:-8.6s;--leaf-size:29px;--leaf-color:#b47a4f;--leaf-wave-a:-30px;--leaf-wave-b:18px;--leaf-wave-c:-35px;--leaf-scale:1.03}
+.intro-leaves i:nth-child(5){--leaf-y:16%;--leaf-time:8.8s;--leaf-delay:-6.7s;--leaf-size:23px;--leaf-color:#829b54;--leaf-wave-a:18px;--leaf-wave-b:-35px;--leaf-wave-c:21px;--leaf-scale:.86}
+.intro-leaves i:nth-child(6){--leaf-y:64%;--leaf-time:7.9s;--leaf-delay:-2.4s;--leaf-size:20px;--leaf-color:#c08b54;--leaf-wave-a:-21px;--leaf-wave-b:36px;--leaf-wave-c:-18px;--leaf-scale:.78}
+.intro-leaves i:nth-child(7){--leaf-y:29%;--leaf-time:12.2s;--leaf-delay:-10.2s;--leaf-size:17px;--leaf-color:#657f4d;--leaf-wave-a:24px;--leaf-wave-b:-14px;--leaf-wave-c:38px;--leaf-scale:.65}
+.intro-leaves i:nth-child(8){--leaf-y:76%;--leaf-time:8.4s;--leaf-delay:-5.6s;--leaf-size:27px;--leaf-color:#9b784b;--leaf-wave-a:-34px;--leaf-wave-b:22px;--leaf-wave-c:-23px;--leaf-scale:.92}
+.intro-leaves i:nth-child(9){--leaf-y:43%;--leaf-time:9.6s;--leaf-delay:-1.7s;--leaf-size:22px;--leaf-color:#7c9651;--leaf-wave-a:31px;--leaf-wave-b:-27px;--leaf-wave-c:17px;--leaf-scale:.82}
+.intro-leaves i:nth-child(10){--leaf-y:7%;--leaf-time:13s;--leaf-delay:-11.5s;--leaf-size:16px;--leaf-color:#bd8950;--leaf-wave-a:-17px;--leaf-wave-b:29px;--leaf-wave-c:-31px;--leaf-scale:.6}
+.intro-leaves i:nth-child(11){--leaf-y:84%;--leaf-time:7.5s;--leaf-delay:-5.9s;--leaf-size:24px;--leaf-color:#758d51;--leaf-wave-a:22px;--leaf-wave-b:-38px;--leaf-wave-c:26px;--leaf-scale:.88}
+.intro-leaves i:nth-child(12){--leaf-y:26%;--leaf-time:13.7s;--leaf-delay:-4.1s;--leaf-size:15px;--leaf-color:#b99b59;--leaf-wave-a:-29px;--leaf-wave-b:17px;--leaf-wave-c:-20px;--leaf-scale:.57}
+.intro-leaves i:nth-child(13){--leaf-y:59%;--leaf-time:9.1s;--leaf-delay:-8.1s;--leaf-size:30px;--leaf-color:#6f8950;--leaf-wave-a:35px;--leaf-wave-b:-20px;--leaf-wave-c:31px;--leaf-scale:1.02}
+.intro-leaves i:nth-child(14){--leaf-y:33%;--leaf-time:7.2s;--leaf-delay:-.6s;--leaf-size:20px;--leaf-color:#c08f52;--leaf-wave-a:-25px;--leaf-wave-b:34px;--leaf-wave-c:-19px;--leaf-scale:.74}
+.intro-leaves i:nth-child(15){--leaf-y:70%;--leaf-time:12.4s;--leaf-delay:-11.2s;--leaf-size:18px;--leaf-color:#83964f;--leaf-wave-a:19px;--leaf-wave-b:-26px;--leaf-wave-c:36px;--leaf-scale:.68}
+.intro-leaves i:nth-child(16){--leaf-y:47%;--leaf-time:8.2s;--leaf-delay:-6.3s;--leaf-size:26px;--leaf-color:#a66f49;--leaf-wave-a:-36px;--leaf-wave-b:25px;--leaf-wave-c:-28px;--leaf-scale:.9}
+
+@keyframes pixely-leaf-fly{
   0%{
-    translate:-12vw -1.5vh;
-    rotate:var(--leaf-angle,24deg);
-    opacity:0;
+    transform:translate3d(-14vw,0,0) rotate(0deg) scale(var(--leaf-scale,1)) scaleX(1);
+    opacity:.25;
   }
-  7%{opacity:.76}
-  21%{translate:22vw 2.4vh}
-  43%{translate:49vw -2.2vh}
-  64%{translate:74vw 3.6vh}
-  84%{translate:98vw -.8vh;opacity:.78}
+  7%{opacity:.94}
+  22%{
+    transform:translate3d(18vw,var(--leaf-wave-a,24px),0) rotate(150deg) scale(var(--leaf-scale,1)) scaleX(.48);
+  }
+  46%{
+    transform:translate3d(48vw,var(--leaf-wave-b,-20px),0) rotate(340deg) scale(var(--leaf-scale,1)) scaleX(-.76);
+  }
+  69%{
+    transform:translate3d(76vw,var(--leaf-wave-c,32px),0) rotate(535deg) scale(var(--leaf-scale,1)) scaleX(.62);
+  }
+  88%{opacity:.92}
   100%{
-    translate:120vw 2vh;
-    rotate:calc(var(--leaf-angle,24deg) + var(--leaf-spin,720deg));
-    opacity:0;
+    transform:translate3d(116vw,12px,0) rotate(760deg) scale(var(--leaf-scale,1)) scaleX(-.9);
+    opacity:.2;
   }
-}
-
-@keyframes intro-leaf-flutter{
-  0%{scale:var(--leaf-scale,1) .7;filter:drop-shadow(0 2px 2px rgba(58,66,39,.12)) brightness(.96)}
-  45%{scale:var(--leaf-scale,1) 1.08}
-  100%{scale:var(--leaf-scale,1) .82;filter:drop-shadow(0 4px 3px rgba(58,66,39,.18)) brightness(1.06)}
 }
 
 .story-intro-back{
@@ -1303,7 +1310,8 @@
   .story-intro-explore-message{bottom:13%;width:calc(100% - 36px);font-size:11px}
 }
 @media(prefers-reduced-motion:reduce){
-  .intro-leaves i,.intro-inspect{animation:none}
+  .intro-inspect{animation:none}
+  .intro-leaves i{animation-duration:18s}
 }
 
 
