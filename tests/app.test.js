@@ -432,7 +432,6 @@ test("feature CSS is split into maintainable modules without legacy patch stacks
 
 test("collection editor exposes existing items without adding defaults",()=>{
   const state=boot(undefined,"48");
-  const before=JSON.parse(JSON.stringify(state.catalogue?.items||[]));
   state.click("[data-open-dev]");
   const itemTab=state.node("dev-collection:items");
   state.node("#dev-collection-types").listeners.click({target:{closest(){return itemTab}}});
