@@ -19,7 +19,8 @@
 ## 파일
 
 - `index.html` — 화면 구조
-- `style.css` — 화면 스타일과 반응형 레이아웃
+- `style.css` — 기능별 CSS를 불러오는 진입점
+- `styles/` — `core`, `home`, `chapters`, `collection`, `story`, `wardrobe`, `editor` 화면별 스타일
 - `data/game-config.js` — 카드·아이템·챕터·옷장 분류·스토리 기본 데이터
 - `data/editor-schema.js` — DEV EDITOR 입력 필드와 상호작용 스키마
 - `app.js` — 저장, 화면 렌더링, 챕터 진행, 컬렉션, 옷장, DEV EDITOR 동작
@@ -83,3 +84,8 @@
 ### 코드 정리 · v45
 
 정적 콘텐츠와 에디터 스키마를 거대한 `app.js`에서 분리했습니다. `data/game-config.js`는 게임 기본 데이터만, `data/editor-schema.js`는 개발자 편집기의 입력 구조만 담당하고 `app.js`는 상태·저장·렌더링·이벤트 처리에 집중합니다. 기존 세이브/IndexedDB 키와 화면 동작은 바꾸지 않습니다.
+
+
+### CSS 구조 정리 · v46
+
+기존 4천 줄 이상의 단일 `style.css`에 누적되던 버전별 PATCH 블록을 화면 기능별 CSS로 분리했습니다. `style.css`는 import 진입점만 담당하고 실제 스타일은 `styles/core.css`, `home.css`, `chapters.css`, `collection.css`, `story.css`, `wardrobe.css`, `editor.css`에서 관리합니다. 이후 특정 화면을 수정할 때 해당 파일만 보면 되며, 새 버전 패치를 파일 맨 아래에 계속 덧붙이지 않는 구조를 기준으로 합니다.

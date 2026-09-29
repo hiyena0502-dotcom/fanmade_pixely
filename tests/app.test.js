@@ -8,6 +8,8 @@ const directory=path.join(__dirname,"..");
 const gameConfig=fs.readFileSync(path.join(directory,"data/game-config.js"),"utf8");
 const editorSchema=fs.readFileSync(path.join(directory,"data/editor-schema.js"),"utf8");
 const app=fs.readFileSync(path.join(directory,"app.js"),"utf8");
+const styleFiles=["style.css","styles/core.css","styles/home.css","styles/chapters.css","styles/collection.css","styles/story.css","styles/wardrobe.css","styles/editor.css"];
+const allCss=styleFiles.map(file=>fs.readFileSync(path.join(directory,file),"utf8")).join("\n");
 const storageKey="pixely-lost-sky-saves-v2";
 const wardrobeKey="pixely-lost-sky-wardrobe-assets-v1";
 const devContentKey="pixely-lost-sky-dev-content-v1";
@@ -164,7 +166,7 @@ test("Chapter 1 starts at the wide house and waits for a door click before the c
   assert.equal(state.node("#story-intro-next").disabled,true);
   state.click("#story-intro-house");
   assert.equal(state.node("#story-intro").classList.contains("is-approaching"),true);
-  const css=fs.readFileSync(path.join(directory,"style.css"),"utf8");
+  const css=allCss;
   assert.match(css,/is-exterior \.story-intro-backdrop\{\s*background-image:url\("\.\/assets\/story\/chapter1\/house-wide\.webp/);
   assert.match(css,/is-door \.story-intro-backdrop\{\s*background-image:url\("\.\/assets\/story\/chapter1\/house-door-close\.webp/);
   assert.match(css,/is-chapter \.story-intro-backdrop\{opacity:0/);
@@ -261,7 +263,7 @@ test("update prompt compares the loaded version on the first check and on later 
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
   assert.equal(state.requests[0].options.cache,"no-store");
-  state.setVersion("45");
+  state.setVersion("46");
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,false);
@@ -458,7 +460,7 @@ test("a running chapter can enter interaction edit mode from its EDIT button",()
 
 
 test("desktop chapters and collection use wide-screen layout rules",()=>{
-  const css=fs.readFileSync(path.join(directory,"style.css"),"utf8");
+  const css=allCss;
   assert.match(css,/@media\(min-width:1100px\)/);
   assert.match(css,/\.chapters-shell\{[\s\S]*grid-template-columns:minmax\(260px,330px\) minmax\(0,1fr\)/);
   assert.match(css,/\.diary-wrap\{[\s\S]*width:min\(1500px,calc\(100vw - 80px\)\)/);
@@ -467,7 +469,7 @@ test("desktop chapters and collection use wide-screen layout rules",()=>{
 
 
 test("desktop wardrobe uses a wide balanced workspace",()=>{
-  const css=fs.readFileSync(path.join(directory,"style.css"),"utf8");
+  const css=allCss;
   assert.match(css,/DESKTOP WARDROBE WORKSPACE v29/);
   assert.match(css,/width:min\(1520px,calc\(100vw - 64px\)\)/);
   assert.match(css,/grid-template-columns:minmax\(440px,520px\) minmax\(0,1fr\)/);
@@ -477,7 +479,7 @@ test("desktop wardrobe uses a wide balanced workspace",()=>{
 
 
 test("story interaction editor provides visible draggable placement UI",()=>{
-  const css=fs.readFileSync(path.join(directory,"style.css"),"utf8");
+  const css=allCss;
   assert.match(css,/IN-SCENE CHAPTER INTERACTION EDITOR v30/);
   assert.match(css,/\.story-dev-layer\{/);
   assert.match(css,/\.story-dev-hotspot\{/);
@@ -502,6 +504,16 @@ test("static game and editor configuration are split from the runtime",()=>{
   assert.doesNotMatch(app,/const catalogue = \{/);
   assert.doesNotMatch(app,/const devSchemas=\{/);
   const html=fs.readFileSync(path.join(directory,"index.html"),"utf8");
-  assert.match(html,/data\/game-config\.js\?v=45/);
-  assert.match(html,/data\/editor-schema\.js\?v=45/);
+  assert.match(html,/data\/game-config\.js\?v=46/);
+  assert.match(html,/data\/editor-schema\.js\?v=46/);
+});
+
+
+test("feature CSS is split into maintainable modules without legacy patch stacks",()=>{
+  const entry=fs.readFileSync(path.join(directory,"style.css"),"utf8");
+  for(const file of ["core","home","chapters","collection","story","wardrobe","editor"]){
+    assert.match(entry,new RegExp('styles/'+file+'\\.css\\?v=46'));
+    assert.ok(fs.statSync(path.join(directory,"styles",file+".css")).size>100);
+  }
+  assert.doesNotMatch(allCss,/VISUAL PATCH v|WARDROBE PATCH v|WARDROBE IMAGE EDITOR v|WARDROBE PREVIEW \+ DEV EDITOR v|WARDROBE ALL-MULTI|SIMPLE WARDROBE DEV EDITOR|CHAPTER INTERACTION EDITOR v|DESKTOP WARDROBE WORKSPACE v|WARDROBE RE-EDIT v|WARDROBE TRANSFORM NUMBER INPUTS v/);
 });
