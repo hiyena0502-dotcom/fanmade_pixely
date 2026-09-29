@@ -1656,3 +1656,26 @@
     grid-column:1;
   }
 }
+
+
+/* COLLECTION-ONLY EDITOR v47 */
+.dev-collection-only-shell{
+  display:block;
+  width:min(1180px,94vw);
+}
+.dev-collection-only-shell .dev-settings-main{
+  width:100%;
+  min-width:0;
+}
+.dev-collection-only-shell .dev-subtabs{
+  margin-top:14px;
+}
+.dev-collection-only-shell .dev-settings-workspace{
+  grid-template-columns:260px minmax(0,1fr);
+  min-height:520px;
+}
+@media(max-width:760px){
+  .dev-collection-only-shell .dev-settings-workspace{
+    grid-template-columns:1fr;
+  }
+}
