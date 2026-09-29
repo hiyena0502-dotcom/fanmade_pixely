@@ -4130,3 +4130,48 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
   .wardrobe-part-submit-row{grid-column:1}
   .wardrobe-option-wrap>.wardrobe-option{padding-right:48px}
 }
+
+
+/* =========================================================
+   WARDROBE TRANSFORM NUMBER INPUTS v35
+   ========================================================= */
+.wardrobe-transform-control{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 64px;
+  gap:8px;
+  align-items:center;
+}
+.wardrobe-transform-control>input[type="range"]{
+  min-width:0;
+  width:100%;
+}
+.wardrobe-transform-control>input[type="number"]{
+  width:64px;
+  height:28px;
+  padding:0 5px;
+  border:1px solid rgba(87,132,150,.22);
+  border-radius:7px;
+  outline:none;
+  background:#fff;
+  color:#527384;
+  font-size:8px;
+  font-weight:800;
+  text-align:center;
+  font-variant-numeric:tabular-nums;
+}
+.wardrobe-transform-control>input[type="number"]:focus{
+  border-color:#83b5c7;
+  box-shadow:0 0 0 2px rgba(101,169,193,.12);
+}
+.wardrobe-transform-control>input[type="number"]:disabled{
+  opacity:.4;
+  background:#edf2f4;
+}
+@media(max-width:680px){
+  .wardrobe-transform-control{
+    grid-template-columns:minmax(0,1fr) 58px;
+  }
+  .wardrobe-transform-control>input[type="number"]{
+    width:58px;
+  }
+}
