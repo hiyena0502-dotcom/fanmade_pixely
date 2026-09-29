@@ -420,7 +420,7 @@
     validateDraft:()=>cloneData(checkEditorData())
   };
 
-  function freshRoot(){  function freshRoot(){ return {activeSlot:null,slots:[null,null,null]}; }
+  function freshRoot(){ return {activeSlot:null,slots:[null,null,null]}; }
 
   function normalizeSave(save){
     if(!save || typeof save!=="object" || Array.isArray(save)) return null;
@@ -1706,7 +1706,7 @@
     toast("컬렉션 항목을 삭제했습니다.");
   }
 
-  function showUpdatePrompt  function showUpdatePrompt(versionKey){
+  function showUpdatePrompt(versionKey){
     if(!versionKey || dismissedUpdate===versionKey) return;
     const modal=$("#update-modal");
     if(!modal || !modal.hidden) return;
