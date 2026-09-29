@@ -280,6 +280,8 @@ test("deployed version and asset cache keys match the script",()=>{
   const version=JSON.parse(fs.readFileSync(path.join(directory,"site-version.json"),"utf8")).version;
   assert.match(app,new RegExp(`SITE_VERSION = "${version}"`));
   assert.match(html,new RegExp(`style\\.css\\?v=${version}`));
+  assert.match(html,new RegExp(`data/game-config\\.js\\?v=${version}`));
+  assert.match(html,new RegExp(`data/editor-schema\\.js\\?v=${version}`));
   assert.match(html,new RegExp(`app\\.js\\?v=${version}`));
 });
 
