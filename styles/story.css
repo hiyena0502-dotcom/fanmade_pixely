@@ -595,11 +595,14 @@
   transform-origin:50% 67%;
 }
 
-/* USER CLOUD ART · v62 — full transparent sheet, always visible on exterior */
+/* USER CLOUD ART · v63 — lowered so clouds stay clearly visible */
 .story-sky-clouds{
   position:absolute;
-  z-index:5;
-  inset:0;
+  z-index:2;
+  top:7%;
+  left:0;
+  right:0;
+  bottom:0;
   overflow:hidden;
   pointer-events:none;
   display:none;
@@ -619,7 +622,7 @@
   position:absolute;
   top:0;
   left:0;
-  width:100%;
+  width:110%;
   max-width:none;
   height:auto;
   display:block;
@@ -628,13 +631,15 @@
   pointer-events:none;
   user-select:none;
   will-change:transform;
-  filter:drop-shadow(0 3px 4px rgba(78,105,118,.10));
+  filter:
+    drop-shadow(0 3px 3px rgba(78,105,118,.12))
+    drop-shadow(0 8px 10px rgba(78,105,118,.08));
 }
 .story-sky-clouds__sheet--a{
-  animation:pixely-cloud-sheet-a 30s linear infinite;
+  animation:pixely-cloud-sheet-a 26s linear infinite;
 }
 .story-sky-clouds__sheet--b{
-  animation:pixely-cloud-sheet-b 30s linear infinite;
+  animation:pixely-cloud-sheet-b 26s linear infinite;
 }
 
 @keyframes pixely-cloud-sheet-a{
@@ -647,14 +652,17 @@
 }
 
 @media(max-width:680px){
+  .story-sky-clouds{
+    top:10%;
+  }
   .story-sky-clouds__sheet{
-    width:135%;
+    width:145%;
   }
 }
 
 @media(prefers-reduced-motion:reduce){
-  .story-sky-clouds__sheet--a{animation-duration:60s}
-  .story-sky-clouds__sheet--b{animation-duration:60s}
+  .story-sky-clouds__sheet--a{animation-duration:52s}
+  .story-sky-clouds__sheet--b{animation-duration:52s}
 }
 
 .intro-ground{
@@ -1151,11 +1159,11 @@
 }
 
 .story-intro-overlay.is-exterior .story-intro-backdrop{
-  background-image:url("../assets/story/chapter1/house-wide.webp?v=62");
+  background-image:url("../assets/story/chapter1/house-wide.webp?v=63");
 }
 
 .story-intro-overlay.is-door .story-intro-backdrop{
-  background-image:url("../assets/story/chapter1/house-door-close.webp?v=62");
+  background-image:url("../assets/story/chapter1/house-door-close.webp?v=63");
 }
 
 .story-intro-overlay.is-approaching .story-intro-backdrop{
