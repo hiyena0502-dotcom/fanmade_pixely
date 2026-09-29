@@ -595,19 +595,14 @@
   transform-origin:50% 67%;
 }
 
-/* USER CLOUD ART · v64 — valid cloud asset, lowered and visible */
+/* EXTERIOR MOVING CLOUDS · v65 — pure CSS, no image asset dependency */
 .story-sky-clouds{
   position:absolute;
-  z-index:2;
-  top:7%;
-  left:0;
-  right:0;
-  bottom:0;
+  z-index:4;
+  inset:0;
   overflow:hidden;
   pointer-events:none;
   display:none;
-  opacity:1;
-  visibility:visible;
 }
 .story-intro-overlay.is-exterior .story-sky-clouds{
   display:block !important;
@@ -618,51 +613,118 @@
   display:none !important;
 }
 
-.story-sky-clouds__sheet{
+.sky-cloud{
   position:absolute;
-  top:0;
   left:0;
-  width:110%;
-  max-width:none;
-  height:auto;
-  display:block;
-  opacity:1 !important;
-  visibility:visible !important;
-  pointer-events:none;
-  user-select:none;
+  top:var(--cloud-top,8%);
+  width:var(--cloud-w,230px);
+  height:calc(var(--cloud-w,230px) * .30);
+  border-radius:999px;
+  background:rgba(255,255,255,.98);
+  box-shadow:
+    0 8px 18px rgba(94,135,153,.11),
+    inset 0 -8px 16px rgba(223,233,232,.20);
+  opacity:.98;
   will-change:transform;
-  filter:
-    drop-shadow(0 3px 3px rgba(78,105,118,.12))
-    drop-shadow(0 8px 10px rgba(78,105,118,.08));
+  animation:pixely-visible-cloud var(--cloud-speed,24s) linear infinite;
+  animation-delay:var(--cloud-delay,0s);
 }
-.story-sky-clouds__sheet--a{
-  animation:pixely-cloud-sheet-a 26s linear infinite;
+.sky-cloud::before,
+.sky-cloud::after,
+.sky-cloud b,
+.sky-cloud em{
+  content:"";
+  position:absolute;
+  display:block;
+  background:inherit;
+  border-radius:50%;
+  box-shadow:inherit;
 }
-.story-sky-clouds__sheet--b{
-  animation:pixely-cloud-sheet-b 26s linear infinite;
+.sky-cloud::before{
+  width:42%;
+  aspect-ratio:1;
+  left:11%;
+  bottom:8%;
+}
+.sky-cloud::after{
+  width:48%;
+  aspect-ratio:1;
+  right:10%;
+  bottom:5%;
+}
+.sky-cloud b{
+  width:35%;
+  aspect-ratio:1;
+  left:39%;
+  bottom:21%;
+}
+.sky-cloud em{
+  width:28%;
+  aspect-ratio:1;
+  left:2%;
+  bottom:-2%;
 }
 
-@keyframes pixely-cloud-sheet-a{
-  from{transform:translate3d(0,0,0)}
-  to{transform:translate3d(-100%,0,0)}
+.sky-cloud--1{
+  --cloud-top:5%;
+  --cloud-w:250px;
+  --cloud-speed:23s;
+  --cloud-delay:-2s;
+  --cloud-drift:12px;
 }
-@keyframes pixely-cloud-sheet-b{
-  from{transform:translate3d(100%,0,0)}
-  to{transform:translate3d(0,0,0)}
+.sky-cloud--2{
+  --cloud-top:17%;
+  --cloud-w:120px;
+  --cloud-speed:31s;
+  --cloud-delay:-18s;
+  --cloud-drift:-8px;
+}
+.sky-cloud--3{
+  --cloud-top:7%;
+  --cloud-w:285px;
+  --cloud-speed:27s;
+  --cloud-delay:-10s;
+  --cloud-drift:7px;
+}
+.sky-cloud--4{
+  --cloud-top:24%;
+  --cloud-w:155px;
+  --cloud-speed:34s;
+  --cloud-delay:-25s;
+  --cloud-drift:11px;
+}
+.sky-cloud--5{
+  --cloud-top:10%;
+  --cloud-w:205px;
+  --cloud-speed:29s;
+  --cloud-delay:-21s;
+  --cloud-drift:-6px;
+}
+
+@keyframes pixely-visible-cloud{
+  0%{
+    transform:translate3d(112vw,0,0);
+  }
+  50%{
+    transform:translate3d(42vw,var(--cloud-drift,8px),0);
+  }
+  100%{
+    transform:translate3d(-34vw,0,0);
+  }
 }
 
 @media(max-width:680px){
-  .story-sky-clouds{
-    top:10%;
-  }
-  .story-sky-clouds__sheet{
-    width:145%;
-  }
+  .sky-cloud--1{--cloud-w:185px;--cloud-top:7%}
+  .sky-cloud--2{--cloud-w:92px;--cloud-top:18%}
+  .sky-cloud--3{--cloud-w:205px;--cloud-top:9%}
+  .sky-cloud--4{--cloud-w:115px;--cloud-top:23%}
+  .sky-cloud--5{--cloud-w:150px;--cloud-top:12%}
 }
 
 @media(prefers-reduced-motion:reduce){
-  .story-sky-clouds__sheet--a{animation-duration:52s}
-  .story-sky-clouds__sheet--b{animation-duration:52s}
+  .sky-cloud{
+    animation-duration:48s;
+  }
 }
 
 .intro-ground{
@@ -1159,11 +1221,11 @@
 }
 
 .story-intro-overlay.is-exterior .story-intro-backdrop{
-  background-image:url("../assets/story/chapter1/house-wide.webp?v=64");
+  background-image:url("../assets/story/chapter1/house-wide.webp?v=65");
 }
 
 .story-intro-overlay.is-door .story-intro-backdrop{
-  background-image:url("../assets/story/chapter1/house-door-close.webp?v=64");
+  background-image:url("../assets/story/chapter1/house-door-close.webp?v=65");
 }
 
 .story-intro-overlay.is-approaching .story-intro-backdrop{
