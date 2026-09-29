@@ -4197,3 +4197,32 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
 .story-intro-overlay.is-door .intro-house{
   display:none !important;
 }
+
+
+/* =========================================================
+   CHAPTER 01 EXTERIOR IMAGE FIX v38
+   확정 이미지 타일 조합 — 한 장처럼 표시
+   ========================================================= */
+.story-intro-overlay.is-exterior .story-intro-backdrop,
+.story-intro-overlay.is-door .story-intro-backdrop{
+  background-color:#b9dff0 !important;
+  background-image:
+    url("./assets/story/chapter1/house-tl.avif?v=38"),
+    url("./assets/story/chapter1/house-tr.avif?v=38"),
+    url("./assets/story/chapter1/house-bl.avif?v=38"),
+    url("./assets/story/chapter1/house-br-left.avif?v=38"),
+    url("./assets/story/chapter1/house-br-right.avif?v=38") !important;
+  background-repeat:no-repeat !important;
+  background-size:
+    50% 50%,
+    50% 50%,
+    50% 50%,
+    25% 50%,
+    25% 50% !important;
+  background-position:
+    0 0,
+    100% 0,
+    0 100%,
+    66.6667% 100%,
+    100% 100% !important;
+}
