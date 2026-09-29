@@ -7,10 +7,10 @@
   <meta name="theme-color" content="#111a3b" />
   <title>PIXELY : LOST SKY</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=59" />
-  <script src="data/game-config.js?v=59" defer></script>
-  <script src="data/editor-schema.js?v=59" defer></script>
-  <script src="app.js?v=59" defer></script>
+  <link rel="stylesheet" href="style.css?v=60" />
+  <script src="data/game-config.js?v=60" defer></script>
+  <script src="data/editor-schema.js?v=60" defer></script>
+  <script src="app.js?v=60" defer></script>
 </head>
 <body>
   <div class="game-root">
@@ -179,7 +179,6 @@
 
         <section class="story-intro-overlay" id="story-intro" hidden aria-live="polite">
           <div class="story-intro-backdrop" aria-hidden="true">
-            <div class="intro-cloud-art" aria-hidden="true"></div>
             <div class="intro-house">
               <div class="intro-house-roof"></div>
               <div class="intro-house-body">
@@ -197,6 +196,8 @@
               <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
             </div>
           </div>
+
+          <img class="moving-cloud-layer" src="assets/story/chapter1/cloud-overlay.webp?v=60" alt="" aria-hidden="true" draggable="false" />
 
           <button class="intro-house-hit" id="story-intro-house" type="button" hidden aria-label="문 조사하기">
             <span aria-hidden="true">⌕</span>
