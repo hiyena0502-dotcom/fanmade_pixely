@@ -1,9 +1,9 @@
-/* PIXELY : LOST SKY · stylesheet entry v56
+/* PIXELY : LOST SKY · stylesheet entry v57
    Feature styles are split so each screen can be maintained without stacked patch blocks. */
-@import url("./styles/core.css?v=56");
-@import url("./styles/home.css?v=56");
-@import url("./styles/chapters.css?v=56");
-@import url("./styles/collection.css?v=56");
-@import url("./styles/story.css?v=56");
-@import url("./styles/wardrobe.css?v=56");
-@import url("./styles/editor.css?v=56");
+@import url("./styles/core.css?v=57");
+@import url("./styles/home.css?v=57");
+@import url("./styles/chapters.css?v=57");
+@import url("./styles/collection.css?v=57");
+@import url("./styles/story.css?v=57");
+@import url("./styles/wardrobe.css?v=57");
+@import url("./styles/editor.css?v=57");
