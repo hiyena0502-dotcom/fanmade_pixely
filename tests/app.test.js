@@ -431,13 +431,18 @@ test("story intro image paths are relative to the modular story stylesheet",()=>
   assert.doesNotMatch(css,/url\("\.\/assets\/story/);
 });
 
-test("travel diary back button is a dedicated return control",()=>{
-  const html=fs.readFileSync(path.join(directory,"index.html"),"utf8");
-  assert.match(html,/id="collection-back-button"/);
-  assert.match(app,/function openCollection\(\)/);
-  assert.match(app,/return \$\$\("\[data-view\]"\)\.find\(view=>!view\.hidden\)\?\.dataset\.view\|\|"home"/);
-  assert.match(app,/collectionReturnView=from==="story"\?"story":"home"/);
-  assert.match(app,/function closeCollection\(\)/);
+test("travel diary opens from the story room and returns to the story room",()=>{
+  const state=boot();
+  state.click("#new-game-button");
+  state.slotAction("new-slot",0);
+  assert.equal(state.node("view:story").hidden,false);
+
+  state.click("[data-open-collection]");
+  assert.equal(state.node("view:collection").hidden,false);
+
+  state.click("#collection-back-button");
+  assert.equal(state.node("view:story").hidden,false);
+  assert.equal(state.node("view:home").hidden,true);
 });
 
 
