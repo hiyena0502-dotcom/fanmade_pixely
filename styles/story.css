@@ -1089,11 +1089,11 @@
 }
 
 .story-intro-overlay.is-exterior .story-intro-backdrop{
-  background-image:url("../assets/story/chapter1/house-wide.webp?v=53");
+  background-image:url("../assets/story/chapter1/house-wide.webp?v=54");
 }
 
 .story-intro-overlay.is-door .story-intro-backdrop{
-  background-image:url("../assets/story/chapter1/house-door-close.webp?v=53");
+  background-image:url("../assets/story/chapter1/house-door-close.webp?v=54");
 }
 
 .story-intro-overlay.is-approaching .story-intro-backdrop{
@@ -1468,4 +1468,61 @@
 
 @media(prefers-reduced-motion:reduce){
   .story-intro-overlay.is-exterior .intro-house-hit span{animation:none}
+}
+
+
+/* EXTERIOR HOME SHORTCUT · v54 */
+.story-intro-home{
+  position:absolute;
+  z-index:16;
+  right:24px;
+  top:24px;
+  min-width:92px;
+  height:48px;
+  padding:0 16px;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  border:2px solid rgba(255,226,157,.78);
+  border-radius:12px;
+  background:rgba(25,38,34,.92);
+  color:#fff0c5;
+  box-shadow:
+    0 10px 28px rgba(17,27,24,.34),
+    0 0 0 4px rgba(255,222,145,.09);
+  font-weight:1000;
+  cursor:pointer;
+  backdrop-filter:blur(8px);
+}
+.story-intro-home span{
+  font-size:20px;
+  line-height:1;
+}
+.story-intro-home b{
+  font-size:12px;
+  letter-spacing:.04em;
+}
+.story-intro-home:hover{
+  border-color:#ffe4a2;
+  background:rgba(48,65,57,.98);
+  transform:translateY(-2px);
+}
+.story-intro-overlay.is-exterior .story-intro-home,
+.story-intro-overlay.is-door .story-intro-home{
+  display:flex;
+}
+
+@media(max-width:680px){
+  .story-intro-home{
+    right:10px;
+    top:10px;
+    min-width:78px;
+    height:42px;
+    padding:0 11px;
+    gap:6px;
+    border-radius:10px;
+  }
+  .story-intro-home span{font-size:18px}
+  .story-intro-home b{font-size:11px}
 }
