@@ -1,0 +1,128 @@
+/* PIXELY : LOST SKY · CHAPTERS
+   Chapter log screen.
+   Consolidated from the former monolithic patch stylesheet in v46. */
+
+.chapters-view{background:linear-gradient(180deg,#10182f,#182b4e 55%,#273f63)}
+
+.chapters-bg{position:absolute;inset:0;background:radial-gradient(circle at 80% 12%,rgba(116,134,215,.12),transparent 26%),radial-gradient(circle at 15% 70%,rgba(119,179,218,.08),transparent 30%)}
+
+.chapter-summary{text-align:right}
+
+.chapter-summary b{display:block;margin-top:5px}
+
+.chapters-shell{position:relative;z-index:2;width:min(1040px,calc(100% - 36px));margin:38px auto 70px}
+
+.chapter-intro{max-width:620px;margin-bottom:28px}
+
+.chapter-intro small{color:#839ab0;font-size:8px;font-weight:1000;letter-spacing:.2em}
+
+.chapter-intro h3{margin:8px 0 0;font-size:32px}
+
+.chapter-intro p{margin:12px 0 0;color:#95a8ba;font-size:11px;line-height:1.7}
+
+.chapter-list{display:grid;gap:12px;position:relative}
+
+.chapter-list::before{content:"";position:absolute;left:31px;top:26px;bottom:26px;width:1px;background:linear-gradient(#7694b8,rgba(118,148,184,.08))}
+
+.chapter-card{position:relative;display:grid;grid-template-columns:64px 1fr auto;gap:16px;align-items:center;min-height:100px;padding:16px 18px;border:1px solid rgba(217,236,255,.12);border-radius:16px;background:rgba(10,21,40,.5);backdrop-filter:blur(8px)}
+
+.chapter-card.is-locked{opacity:.42}
+
+.chapter-number{position:relative;z-index:2;display:grid;place-items:center;width:48px;height:48px;border:1px solid rgba(219,238,255,.18);border-radius:50%;background:#182b4a;color:#bcd5e8;font-size:9px;font-weight:1000}
+
+.chapter-card.is-open .chapter-number{border-color:rgba(143,209,248,.4);background:#24537a;color:#fff}
+
+.chapter-card.is-complete .chapter-number{background:#d9c47d;color:#394252;border-color:#f0dda1}
+
+.chapter-copy small{color:#6f879e;font-size:7px;font-weight:1000;letter-spacing:.15em}
+
+.chapter-copy b{display:block;margin-top:5px;font-size:14px}
+
+.chapter-copy p{margin:7px 0 0;color:#899db0;font-size:9px;line-height:1.5}
+
+.chapter-status{padding:7px 9px;border:1px solid rgba(255,255,255,.1);border-radius:999px;color:#849aae;font-size:7px;font-weight:1000}
+
+.chapter-card.is-open .chapter-status{color:#a8ddff}
+
+.chapter-card.is-complete .chapter-status{color:#f3dfa1}
+
+@media(max-width:680px){
+.chapter-card{grid-template-columns:48px 1fr;padding:13px}
+
+.chapter-number{width:38px;height:38px}
+
+.chapter-status{grid-column:2;justify-self:start}
+
+.chapter-list::before{left:19px}
+}
+
+@media(min-width:1100px){
+.chapters-view{
+    min-height:100vh;
+  }
+
+.chapters-shell{
+    width:min(1460px,calc(100vw - 96px));
+    margin:clamp(30px,4vh,54px) auto 72px;
+    display:grid;
+    grid-template-columns:minmax(260px,330px) minmax(0,1fr);
+    gap:clamp(34px,4vw,72px);
+    align-items:start;
+  }
+
+.chapter-intro{
+    position:sticky;
+    top:118px;
+    max-width:none;
+    margin:0;
+    padding:8px 0 0;
+  }
+
+.chapter-intro h3{
+    font-size:clamp(30px,2.25vw,40px);
+  }
+
+.chapter-intro p{
+    max-width:300px;
+    font-size:11px;
+    line-height:1.8;
+  }
+
+.chapter-list{
+    gap:13px;
+    min-width:0;
+  }
+
+.chapter-card{
+    min-height:112px;
+    grid-template-columns:72px minmax(0,1fr) auto;
+    gap:18px;
+    padding:18px 22px;
+    border-radius:15px;
+  }
+
+.chapter-number{
+    width:52px;
+    height:52px;
+  }
+
+.chapter-copy b{
+    font-size:15px;
+  }
+
+.chapter-copy p{
+    max-width:760px;
+    font-size:9px;
+    line-height:1.65;
+  }
+
+.chapter-list::before{
+    left:35px;
+  }
+}
+
+@media(min-width:1500px){
+.chapters-shell{
+    grid-template-columns:340px minmax(0,1fr);
+  }
+}
