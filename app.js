@@ -5,7 +5,7 @@
   const SESSION_SAVE_KEY = STORAGE_KEY+"-session-fallback";
   const WARDROBE_ASSET_KEY = "pixely-lost-sky-wardrobe-assets-v1";
   const DEV_CONTENT_KEY = "pixely-lost-sky-dev-content-v1";
-  const SITE_VERSION = "34";
+  const SITE_VERSION = "35";
   const $ = (q, root = document) => root.querySelector(q);
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 
@@ -1200,8 +1200,10 @@
     const t=normalizeWardrobeTransform(asset?.transform);
     [["x",t.x],["y",t.y],["scale",t.scale],["rotation",t.rotation]].forEach(([key,value])=>{
       const input=$('[data-wardrobe-transform="'+key+'"]');
+      const number=$('[data-wardrobe-transform-number="'+key+'"]');
       const output=$('[data-wardrobe-transform-value="'+key+'"]');
       if(input){input.value=String(value);input.disabled=!asset?.image}
+      if(number){number.value=String(value);number.disabled=!asset?.image}
       if(output) output.textContent=key==="scale"?Math.round(value)+"%":key==="rotation"?Math.round(value)+"°":Math.round(value);
     });
     const isCustom=wardrobeEditorTarget!=="base" && Boolean(asset?.custom);
@@ -1381,8 +1383,12 @@
     const [min,max,fallback]=ranges[key]||[0,0,0];
     asset.transform={...normalizeWardrobeTransform(asset.transform),[key]:clampNumber(value,min,max,fallback)};
     renderWardrobePreview();
+    const range=$('[data-wardrobe-transform="'+key+'"]');
+    const number=$('[data-wardrobe-transform-number="'+key+'"]');
     const output=$('[data-wardrobe-transform-value="'+key+'"]');
     const next=asset.transform[key];
+    if(range) range.value=String(next);
+    if(number) number.value=String(next);
     if(output) output.textContent=key==="scale"?Math.round(next)+"%":key==="rotation"?Math.round(next)+"°":Math.round(next);
     if(persist) persistWardrobeAssets();
   }
@@ -2192,6 +2198,22 @@
     Array.from(document.querySelectorAll("[data-wardrobe-transform]")).forEach(input=>{
       input.addEventListener("input",event=>updateWardrobeTransform(event.target.dataset.wardrobeTransform,event.target.value,false));
       input.addEventListener("change",event=>updateWardrobeTransform(event.target.dataset.wardrobeTransform,event.target.value,true));
+    });
+    Array.from(document.querySelectorAll("[data-wardrobe-transform-number]")).forEach(input=>{
+      input.addEventListener("input",event=>{
+        if(event.target.value==="" || !Number.isFinite(Number(event.target.value))) return;
+        updateWardrobeTransform(event.target.dataset.wardrobeTransformNumber,event.target.value,false);
+      });
+      input.addEventListener("change",event=>{
+        if(event.target.value==="" || !Number.isFinite(Number(event.target.value))){
+          renderWardrobeEditor();
+          return;
+        }
+        updateWardrobeTransform(event.target.dataset.wardrobeTransformNumber,event.target.value,true);
+      });
+      input.addEventListener("keydown",event=>{
+        if(event.key==="Enter") event.target.blur();
+      });
     });
     Array.from(document.querySelectorAll("[data-layer-move]")).forEach(button=>button.addEventListener("click",()=>moveWardrobeLayer(button.dataset.layerMove)));
     $("#wardrobe-reset-transform").addEventListener("click",resetWardrobeTransform);

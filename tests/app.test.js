@@ -405,3 +405,13 @@ test("story interaction editor provides visible draggable placement UI",()=>{
   assert.match(css,/\[data-story-dev-resize\]/);
   assert.match(css,/\.story-dev-inspector\{/);
 });
+
+
+test("wardrobe transform controls support direct numeric input",()=>{
+  const html=fs.readFileSync(path.join(directory,"index.html"),"utf8");
+  for(const key of ["x","y","scale","rotation"]){
+    assert.match(html,new RegExp('data-wardrobe-transform-number="'+key+'"'));
+  }
+  assert.match(app,/data-wardrobe-transform-number/);
+  assert.match(app,/wardrobeTransformNumber/);
+});
