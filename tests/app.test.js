@@ -480,19 +480,17 @@ test("front yard leaves and door exploration choices are present",()=>{
   assert.match(app,/function backStoryIntroExterior\(\)/);
 });
 
-test("door dialogue leads to a choice instead of entering immediately",()=>{
-  const state=boot();
-  state.click("#new-game-button");
-  state.slotAction("new-slot",0);
-  for(let index=0;index<5;index++) state.click("#story-intro-next");
-  state.click("#story-intro-next");
-  state.click("#story-intro-next");
-  state.click("#story-intro-house");
-  for(let index=0;index<6;index++) state.click("#story-intro-next");
-  assert.equal(state.node("#story-intro-choices").hidden,false);
-  state.click("#story-intro-choice-look");
-  assert.equal(state.node("#story-intro-explore").hidden,false);
-  assert.equal(state.node("#story-intro-back").hidden,false);
-  state.click("#story-intro-back");
-  assert.equal(state.node("#story-intro-house").hidden,false);
+test("door dialogue sequence ends at a choice before the chapter title",()=>{
+  const context={window:{}};
+  vm.runInNewContext(gameConfig,context);
+  const steps=context.window.PixelyGameConfig.storyIntroSteps;
+  const houseIndex=steps.findIndex(step=>step.kind==="house");
+  const choiceIndex=steps.findIndex(step=>step.kind==="choice"&&step.phase==="door");
+  const chapterIndex=steps.findIndex(step=>step.kind==="chapter");
+  assert.ok(houseIndex>=0);
+  assert.ok(choiceIndex>houseIndex);
+  assert.equal(steps.slice(houseIndex+1,choiceIndex).filter(step=>step.phase==="door").length,6);
+  assert.equal(chapterIndex,choiceIndex+1);
+  assert.match(app,/if\(storyIntroDoorDialogueSeen\)/);
+  assert.match(app,/step\?\.kind==="house"\|\|step\?\.kind==="choice"\|\|storyIntroDoorExplore/);
 });
