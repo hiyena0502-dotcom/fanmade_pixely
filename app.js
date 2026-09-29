@@ -34,7 +34,7 @@
       for(const [key,value] of Object.entries(values)) transaction.objectStore("data").put(value,key);
     });
   }
-  const SITE_VERSION = "43";
+  const SITE_VERSION = "44";
   const $ = (q, root = document) => root.querySelector(q);
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 
@@ -159,6 +159,7 @@
     }
   }
   let wardrobeAssets=readWardrobeAssets();
+  let committedWardrobeAssets=cloneData(wardrobeAssets);
   let devStorageReady=null;
   let wardrobeRevision=0;
   function wardrobeOptionsFor(slot){
@@ -181,6 +182,7 @@
     const rank=new Map(wardrobeAssets.layerOrder.map((id,index)=>[id,index]));
     return [...ids].sort((a,b)=>(rank.get(a)??999999)-(rank.get(b)??999999));
   }
+  function wardrobeSave(){return wardrobeFromEditor?null:activeSave();}
   function developerOutfit(){
     return validOutfit(wardrobeAssets.setupOutfit,[]);
   }
@@ -205,9 +207,16 @@
     meter.dataset.state=bytes>4.2*1024*1024?"warn":"ok";
   }
   function persistWardrobeAssets(previous){
+    if(wardrobeFromEditor){
+      editorWardrobeDraft=cloneData(wardrobeAssets);
+      rememberEditorDraft();
+      updateWardrobeStorageMeter();
+      return true;
+    }
     wardrobeRevision++;
     if(typeof indexedDB!=="undefined"){
       const snapshot=JSON.parse(JSON.stringify(wardrobeAssets));
+      committedWardrobeAssets=cloneData(snapshot);
       const ready=devStorageReady||devDatabase;
       Promise.resolve(ready).then(db=>{
         if(!db){localStorage.setItem(WARDROBE_ASSET_KEY,JSON.stringify(snapshot));return false;}
@@ -217,7 +226,7 @@
         updateWardrobeStorageMeter();
       }).catch(()=>{
         try{localStorage.setItem(WARDROBE_ASSET_KEY,JSON.stringify(snapshot));}
-        catch{if(previous) wardrobeAssets=previous;toast("옷장 저장 실패: JSON으로 백업하거나 이미지 크기를 줄여 주세요.");}
+        catch{if(previous){wardrobeAssets=previous;committedWardrobeAssets=cloneData(previous);}toast("옷장 저장 실패: JSON으로 백업하거나 이미지 크기를 줄여 주세요.");}
         updateWardrobeStorageMeter();
       });
       updateWardrobeStorageMeter();
@@ -225,10 +234,11 @@
     }
     try{
       localStorage.setItem(WARDROBE_ASSET_KEY,JSON.stringify(wardrobeAssets));
+      committedWardrobeAssets=cloneData(wardrobeAssets);
       updateWardrobeStorageMeter();
       return true;
     }catch{
-      if(previous) wardrobeAssets=previous;
+      if(previous){wardrobeAssets=previous;committedWardrobeAssets=cloneData(previous);}
       updateWardrobeStorageMeter();
       toast("브라우저 저장 공간이 부족합니다. 큰 이미지를 줄이거나 기존 파츠를 지워 주세요.");
       return false;
@@ -333,7 +343,7 @@
   let devContent=readDevContent();
   let editorDraft=cloneData(devContent);
   let editorWardrobeDraft=null;
-  let editorHistory=[cloneData(editorDraft)];
+  let editorHistory=[{content:cloneData(editorDraft),wardrobe:null}];
   let editorHistoryIndex=0;
   let editorSaveState="saved";
 
@@ -348,7 +358,7 @@
         devContent={chapters:normalizeDevChapters(storedContent.chapters,BASE_DEV_CONTENT.chapters),cards:normalizeDevArray(storedContent.cards,BASE_DEV_CONTENT.cards),postcards:normalizeDevArray(storedContent.postcards,BASE_DEV_CONTENT.postcards),items:normalizeDevArray(storedContent.items,BASE_DEV_CONTENT.items)};
         if(!hadUnsavedDraft){
           editorDraft=cloneData(devContent);
-          editorHistory=[cloneData(editorDraft)];editorHistoryIndex=0;
+          editorHistory=[{content:cloneData(editorDraft),wardrobe:null}];editorHistoryIndex=0;
         }
         applyDevContent();
       }else{
@@ -357,6 +367,7 @@
       if(wardrobeRevision===startingWardrobeRevision){
         if(storedWardrobe) wardrobeAssets=storedWardrobe;
         else await writeDevDatabase(db,{wardrobe:wardrobeAssets});
+        committedWardrobeAssets=cloneData(wardrobeAssets);
       }
       try{localStorage.removeItem(DEV_CONTENT_KEY);localStorage.removeItem(WARDROBE_ASSET_KEY)}catch{}
       renderHome();
@@ -385,8 +396,10 @@
   }
   function rememberEditorDraft(){
     editorHistory=editorHistory.slice(0,editorHistoryIndex+1);
-    editorHistory.push(cloneData(editorDraft));
-    if(editorHistory.length>60) editorHistory.shift();
+    editorHistory.push({content:cloneData(editorDraft),wardrobe:editorWardrobeDraft?cloneData(editorWardrobeDraft):null});
+    const imageSize=JSON.stringify(editorWardrobeDraft||{}).length;
+    const historyLimit=imageSize>8000000?3:imageSize>2000000?8:60;
+    if(editorHistory.length>historyLimit) editorHistory.shift();
     editorHistoryIndex=editorHistory.length-1;
     editorStatus("dirty");
     updateEditorHistoryButtons();
@@ -403,7 +416,13 @@
     const next=editorHistoryIndex+direction;
     if(next<0||next>=editorHistory.length) return;
     editorHistoryIndex=next;
-    editorDraft=cloneData(editorHistory[next]);
+    editorDraft=cloneData(editorHistory[next].content);
+    editorWardrobeDraft=editorHistory[next].wardrobe?cloneData(editorHistory[next].wardrobe):null;
+    if(wardrobeFromEditor){
+      wardrobeAssets=cloneData(editorWardrobeDraft||committedWardrobeAssets);
+      outfitDraft=developerOutfit();
+      renderWardrobe();
+    }
     editorStatus(editorDirty()?"dirty":"saved");
     updateEditorHistoryButtons();
     renderDevSettings();
@@ -466,6 +485,7 @@
 
   function finishEditorSave(){
     devContent=cloneData(editorDraft);
+    if(editorWardrobeDraft) committedWardrobeAssets=cloneData(editorWardrobeDraft);
     editorWardrobeDraft=null;
     applyDevContent();
     editorStatus("saved");
@@ -790,6 +810,7 @@
   }
 
   function showView(name){
+    if(name!=="dev" && wardrobeFromEditor) unmountWardrobeEditor();
     $$("[data-view]").forEach(view=>{
       const active=view.dataset.view===name;
       view.hidden=!active;
@@ -806,8 +827,6 @@
     if(name==="dev") renderDevSettings();
     if(name==="story") renderGameUI();
     if(name==="wardrobe"){
-      const back=$("#wardrobe-return-editor");
-      if(back) back.hidden=!wardrobeFromEditor;
       const save=activeSave();
       outfitDraft=save
         ? {...validOutfit(save.outfit,save.collection?.items||[])}
@@ -1428,7 +1447,7 @@
     wardrobeSlot=targetSlot;
     wardrobeEditorTarget=asset.id;
     if(!wardrobeAssets.layerOrder.includes(asset.id)) wardrobeAssets.layerOrder.push(asset.id);
-    if(!activeSave()) wardrobeAssets.setupOutfit=normalizeSetupOutfit(validOutfit(outfitDraft,[]));
+    if(!wardrobeSave()) wardrobeAssets.setupOutfit=normalizeSetupOutfit(validOutfit(outfitDraft,[]));
 
     if(!persistWardrobeAssets(previous)){
       setUploadStatus("수정 저장에 실패했어요. 브라우저 저장 공간을 확인해 주세요.","error");
@@ -1489,7 +1508,7 @@
     $("#wardrobe-delete-image").textContent=wardrobeEditorTarget==="base"?"베이스 이미지 제거":"선택 파츠 삭제";
   }
   function renderWardrobe(){
-    const save=activeSave();
+    const save=wardrobeSave();
     const owned=new Set(save?.collection?.items||[]);
     const selected=selectedLayerIds().map(id=>wardrobeOptionByIdAny(id)).filter(Boolean);
     const equipped=selected.map(item=>item.name).filter(Boolean);
@@ -1499,8 +1518,10 @@
     if(selectedCount) selectedCount.textContent=selected.length+"개 적용 중";
     updateWardrobeStorageMeter();
     $("#wardrobe-save-button").disabled=false;
-    $("#wardrobe-save-button").textContent=save?"이 모습 저장하기 ✦":"개발자 기본 모습 저장";
-    $("#wardrobe-status").textContent=save
+    $("#wardrobe-save-button").textContent=save?"이 모습 저장하기 ✦":wardrobeFromEditor?"옷장 초안에 반영":"개발자 기본 모습 저장";
+    $("#wardrobe-status").textContent=wardrobeFromEditor
+      ? "개발자 옷장 초안입니다. 파츠 위치와 선택을 조정한 뒤 상단의 모두 저장으로 적용하세요."
+      : save
       ? "모든 분류에서 여러 파츠를 동시에 선택할 수 있어요. 저장하면 이 슬롯의 모습으로 기록됩니다."
       : "개발자 설정 모드예요. 세이브 없이 파츠를 등록·겹치기·순서 변경할 수 있고 선택은 자동 저장됩니다.";
     const uploadSlot=$("#wardrobe-upload-slot");
@@ -1626,9 +1647,9 @@
       wardrobeSlot=targetSlot;
       outfitDraft.layers=[...new Set([...(outfitDraft.layers||[]),id])];
       wardrobeEditorTarget=id;
-      if(!activeSave()) wardrobeAssets.setupOutfit=normalizeSetupOutfit(validOutfit(outfitDraft,[]));
+      if(!wardrobeSave()) wardrobeAssets.setupOutfit=normalizeSetupOutfit(validOutfit(outfitDraft,[]));
       if(!persistWardrobeAssets(previous)){
-        outfitDraft=activeSave()?validOutfit(outfitDraft,activeSave()?.collection?.items||[]):developerOutfit();
+        outfitDraft=wardrobeSave()?validOutfit(outfitDraft,wardrobeSave()?.collection?.items||[]):developerOutfit();
         setUploadStatus("등록 실패 · 저장 공간이 부족할 수 있어요.","error");
         return;
       }
@@ -1704,7 +1725,7 @@
     wardrobeAssets.layerOrder=wardrobeAssets.layerOrder.filter(itemId=>itemId!==id);
     outfitDraft.layers=(outfitDraft.layers||[]).filter(itemId=>itemId!==id);
     wardrobeEditorTarget="base";
-    if(!activeSave()) wardrobeAssets.setupOutfit=normalizeSetupOutfit(validOutfit(outfitDraft,[]));
+    if(!wardrobeSave()) wardrobeAssets.setupOutfit=normalizeSetupOutfit(validOutfit(outfitDraft,[]));
     persistWardrobeAssets();
     renderWardrobe();
     setUploadStatus((removed?.name||"이미지")+" 삭제 완료","ok");
@@ -1712,9 +1733,9 @@
   }
 
   function saveOutfit(){
-    const save=activeSave();
+    const save=wardrobeSave();
     if(!save){
-      if(rememberDeveloperOutfit()) toast("현재 모습을 개발자 기본 설정으로 저장했어요.");
+      if(rememberDeveloperOutfit()) toast(wardrobeFromEditor?"현재 모습을 옷장 초안에 반영했어요.":"현재 모습을 개발자 기본 설정으로 저장했어요.");
       renderWardrobe();
       return;
     }
@@ -1722,7 +1743,7 @@
     save.savedAt=Date.now();
     save.savedLabel=nowLabel();
     if(!persist()){
-      outfitDraft=validOutfit(activeSave()?.outfit,activeSave()?.collection?.items||[]);
+      outfitDraft=validOutfit(wardrobeSave()?.outfit,wardrobeSave()?.collection?.items||[]);
       outfitDraft.layers=[...(outfitDraft.layers||[])];
       renderWardrobe();
       return;
@@ -1869,6 +1890,8 @@
   }
 
   function renderDevSettings(){
+    if(devSection==="wardrobe") mountWardrobeEditor();
+    else if(wardrobeFromEditor) unmountWardrobeEditor();
     $$("[data-dev-section]").forEach(button=>{
       const active=button.dataset.devSection===devSection;
       button.classList.toggle("is-active",active);
@@ -1925,6 +1948,28 @@
       sceneButton.hidden=key!=="chapters"||!selected;
       sceneButton.disabled=key!=="chapters"||!selected;
     }
+  }
+
+  function mountWardrobeEditor(){
+    const mount=$("#dev-wardrobe-mount");
+    const shell=$(".wardrobe-shell");
+    if(!mount||!shell) return;
+    if(!wardrobeFromEditor){
+      wardrobeFromEditor=true;
+      wardrobeAssets=cloneData(editorWardrobeDraft||committedWardrobeAssets);
+      outfitDraft=developerOutfit();
+      outfitDraft.layers=[...(outfitDraft.layers||[])];
+    }
+    if(shell.parentElement!==mount) mount.append(shell);
+    renderWardrobe();
+  }
+
+  function unmountWardrobeEditor(){
+    const shell=$(".wardrobe-shell");
+    const source=$('[data-view="wardrobe"]');
+    if(shell && source && shell.parentElement!==source) source.append(shell);
+    wardrobeFromEditor=false;
+    wardrobeAssets=cloneData(committedWardrobeAssets);
   }
 
   function currentDevStoryChapter(){
@@ -2424,7 +2469,7 @@
       const button=event.target.closest("[data-wardrobe-item]");
       if(!button || button.disabled) return;
       const item=wardrobeOptionById(wardrobeSlot,button.dataset.wardrobeItem);
-      const owned=new Set(activeSave()?.collection?.items||[]);
+      const owned=new Set(wardrobeSave()?.collection?.items||[]);
       if(!item || !wardrobeOptionUnlocked(item,owned)) return;
       const selected=new Set(outfitDraft.layers||[]);
       if(selected.has(item.id)) selected.delete(item.id);
@@ -2434,7 +2479,7 @@
         if(!wardrobeAssets.layerOrder.includes(item.id)) wardrobeAssets.layerOrder.push(item.id);
         wardrobeEditorTarget=item.id;
       }
-      if(!activeSave() && !rememberDeveloperOutfit()){
+      if(!wardrobeSave() && !rememberDeveloperOutfit()){
         outfitDraft=developerOutfit();
         outfitDraft.layers=[...(outfitDraft.layers||[])];
       }
@@ -2627,9 +2672,7 @@
       event.target.value="";
     });
     $("#dev-data-backup")?.addEventListener("click",restoreEditorBackup);
-    $("#dev-open-wardrobe")?.addEventListener("click",()=>{wardrobeFromEditor=true;showView("wardrobe");});
-    $("#wardrobe-back-button")?.addEventListener("click",()=>showView(wardrobeFromEditor?"dev":"home"));
-    $("#wardrobe-return-editor")?.addEventListener("click",()=>showView("dev"));
+    $("#wardrobe-back-button")?.addEventListener("click",()=>showView("home"));
     $("#dev-check-results")?.addEventListener("click",event=>{
       const button=event.target.closest("[data-dev-error]");
       if(!button) return;

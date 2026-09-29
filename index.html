@@ -7,8 +7,8 @@
   <meta name="theme-color" content="#111a3b" />
   <title>PIXELY : LOST SKY</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=43" />
-  <script src="app.js?v=43" defer></script>
+  <link rel="stylesheet" href="style.css?v=44" />
+  <script src="app.js?v=44" defer></script>
 </head>
 <body>
   <div class="game-root">
@@ -338,7 +338,7 @@
       <header class="subpage-topbar">
         <button class="back-button" type="button" id="wardrobe-back-button" aria-label="돌아가기">←</button>
         <div><small>CHARACTER CUSTOMIZE</small><h2>꿈뜰이 옷장</h2></div>
-        <div class="wardrobe-top-actions"><button type="button" id="wardrobe-return-editor" hidden>← DEV EDITOR</button><div class="wardrobe-slot-label" id="wardrobe-slot-label">NO SAVE</div></div>
+        <div class="wardrobe-slot-label" id="wardrobe-slot-label">NO SAVE</div>
       </header>
       <main class="wardrobe-shell">
         <section class="wardrobe-stage game-window">
@@ -520,10 +520,10 @@
             <p id="dev-data-size">데이터 크기 확인 중</p>
             <ul id="dev-check-results" class="dev-check-results" aria-live="polite"></ul>
           </section>
-          <section class="dev-data-tools" id="dev-wardrobe-tools" hidden>
+          <section class="dev-data-tools wardrobe-view" id="dev-wardrobe-tools" hidden>
             <h4>옷장 이미지 편집</h4>
-            <p>기존 옷장 편집기의 베이스·파츠 등록, 복수 레이어, 순서와 좌표 조정을 그대로 사용합니다. 옷장에서 등록한 이미지는 즉시 저장되며 DATA의 JSON 내보내기에 포함됩니다.</p>
-            <button type="button" id="dev-open-wardrobe">옷장 편집 화면 열기 →</button>
+            <p>베이스·파츠 등록, 복수 레이어, 순서와 좌표 조정을 여기에서 편집합니다. 변경 내용은 초안에 남고 상단의 모두 저장으로 적용됩니다.</p>
+            <div id="dev-wardrobe-mount"></div>
           </section>
 
           <div class="dev-settings-toolbar">

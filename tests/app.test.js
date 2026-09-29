@@ -47,7 +47,7 @@ function boot(saved,initialVersion=JSON.parse(fs.readFileSync(path.join(director
     result.dataset.wardrobeSlot=key;
     return result;
   });
-  const devTabs=["chapters","collection","items"].map(key=>{
+  const devTabs=["chapters","collection","items","wardrobe","data"].map(key=>{
     const result=node(`dev-tab:${key}`);
     result.dataset.devSection=key;
     return result;
@@ -257,7 +257,7 @@ test("update prompt compares the loaded version on the first check and on later 
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
   assert.equal(state.requests[0].options.cache,"no-store");
-  state.setVersion("44");
+  state.setVersion("45");
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,false);
@@ -425,6 +425,20 @@ test("JSON import stays in the draft and CHECK blocks missing item rewards",asyn
   state.click("#dev-save-all");
   assert.equal(state.storage.get(devContentKey),undefined);
   assert.match(state.node("#dev-check-results").innerHTML,/missing-item/);
+});
+
+test("wardrobe editor mounts inside DEV EDITOR and commits its draft separately",()=>{
+  const state=boot();
+  state.click("[data-open-dev]");
+  const wardrobeTab=state.node("dev-tab:wardrobe");
+  state.node("#dev-settings-tabs").listeners.click({target:{closest(){return wardrobeTab}}});
+  assert.equal(state.node("#dev-wardrobe-mount").children.includes(state.node(".wardrobe-shell")),true);
+  state.click("#wardrobe-save-button");
+  assert.equal(state.storage.get(wardrobeKey),undefined);
+  assert.equal(state.node("#dev-global-status").textContent,"저장 필요");
+  state.click("#dev-save-all");
+  assert.equal(typeof state.storage.get(wardrobeKey),"string");
+  assert.equal(state.node("#dev-global-status").textContent,"저장됨");
 });
 
 test("a running chapter can enter interaction edit mode from its EDIT button",()=>{

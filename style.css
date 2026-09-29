@@ -2012,8 +2012,8 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
 .wardrobe-top-actions{display:flex;align-items:center;gap:8px}
 .wardrobe-top-actions button{border:1px solid #bfdde4;border-radius:8px;background:#fff;color:#4c8194;padding:9px;font-size:10px;font-weight:800;cursor:pointer}
 .story-room.is-dev-house-outside,.story-room.is-dev-door-closeup,.story-room.is-dev-custom-scene{background-position:center;background-size:cover}
-.story-room.is-dev-house-outside{background-image:url("./assets/story/chapter1/house-wide.webp?v=43")}
-.story-room.is-dev-door-closeup{background-image:url("./assets/story/chapter1/house-door-close.webp?v=43")}
+.story-room.is-dev-house-outside{background-image:url("./assets/story/chapter1/house-wide.webp?v=44")}
+.story-room.is-dev-door-closeup{background-image:url("./assets/story/chapter1/house-door-close.webp?v=44")}
 .story-room.is-dev-house-outside .story-room-art,.story-room.is-dev-door-closeup .story-room-art,.story-room.is-dev-custom-scene .story-room-art{visibility:hidden}
 .story-room.is-dev-house-outside .story-hotspot,.story-room.is-dev-door-closeup .story-hotspot{visibility:hidden}
 .dev-chapter-scenes{padding:16px 20px;border-top:1px solid #dce9ec}
@@ -2025,6 +2025,10 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
 .dev-scene-row input[type=file]{max-width:140px;font-size:9px}
 .dev-scene-row button,.dev-chapter-scenes>button{padding:9px;border:1px solid #bed4de;border-radius:7px;background:white;color:#51788d;cursor:pointer}
 .dev-chapter-scenes p{font-size:11px;color:#728b9a}
+#dev-wardrobe-tools{overflow:hidden;background:linear-gradient(180deg,#d9f2ff,#fff8df)}
+#dev-wardrobe-tools .wardrobe-shell{width:100%;margin:18px 0 4px;gap:14px;grid-template-columns:minmax(260px,.9fr) minmax(340px,1.1fr)}
+#dev-wardrobe-tools .wardrobe-stage{min-height:590px}
+@media(max-width:1100px){#dev-wardrobe-tools .wardrobe-shell{grid-template-columns:1fr}}
 @media(max-width:680px){
   .dev-topbar{height:auto;min-height:110px;padding:10px;grid-template-columns:auto 1fr}
   .dev-top-actions{grid-column:1/-1;justify-content:flex-start}
@@ -4237,10 +4241,10 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
   transform:none;
 }
 .story-intro-overlay.is-exterior .story-intro-backdrop{
-  background-image:url("./assets/story/chapter1/house-wide.webp?v=43");
+  background-image:url("./assets/story/chapter1/house-wide.webp?v=44");
 }
 .story-intro-overlay.is-door .story-intro-backdrop{
-  background-image:url("./assets/story/chapter1/house-door-close.webp?v=43");
+  background-image:url("./assets/story/chapter1/house-door-close.webp?v=44");
 }
 .story-intro-overlay.is-approaching .story-intro-backdrop{
   transform:scale(1.08);
