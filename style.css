@@ -4188,10 +4188,10 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
   transform:none;
 }
 .story-intro-overlay.is-exterior .story-intro-backdrop{
-  background-image:url("./assets/story/chapter1/house-wide.webp?v=40");
+  background-image:url("./assets/story/chapter1/house-wide.webp?v=41");
 }
 .story-intro-overlay.is-door .story-intro-backdrop{
-  background-image:url("./assets/story/chapter1/house-door-close.webp?v=40");
+  background-image:url("./assets/story/chapter1/house-door-close.webp?v=41");
 }
 .story-intro-overlay.is-approaching .story-intro-backdrop{
   transform:scale(1.08);
@@ -4216,9 +4216,13 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
 
 /* The chapter title reveals the existing indoor room beneath it. */
 .story-intro-overlay.is-chapter{background:rgba(7,11,19,.28)}
-.story-intro-overlay.is-chapter .story-intro-backdrop{opacity:0;filter:none;transform:none}
-.story-room:has(.story-intro-overlay:not([hidden])) .story-hud,
-.story-room:has(.story-intro-overlay:not([hidden])) .story-hotspot,
-.story-room:has(.story-intro-overlay:not([hidden])) .story-exit{
+.story-intro-overlay.is-chapter .story-intro-backdrop{opacity:0;filter:none;transform:none;transition:none}
+.story-intro-overlay.is-chapter .intro-ground,
+.story-intro-overlay.is-chapter .intro-cloud,
+.story-intro-overlay.is-chapter .intro-house{display:none !important}
+.story-stage:has(.story-intro-overlay:not([hidden])) .story-hud,
+.story-stage:has(.story-intro-overlay:not([hidden])) .story-hotspot,
+.story-stage:has(.story-intro-overlay:not([hidden])) .story-exit,
+.story-stage:has(.story-intro-overlay:not([hidden])) .story-toolbar{
   visibility:hidden;
 }
