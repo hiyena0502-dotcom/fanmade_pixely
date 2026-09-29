@@ -1974,6 +1974,8 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
   background:rgba(245,250,252,.96);
   border-bottom:1px solid rgba(75,111,129,.15);
 }
+.dev-topbar h2{color:#3c6079}
+.dev-topbar small{color:#7895a4}
 .dev-autosave-label{
   padding:7px 10px;
   border:1px solid rgba(87,126,144,.16);
@@ -2010,8 +2012,8 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
 .wardrobe-top-actions{display:flex;align-items:center;gap:8px}
 .wardrobe-top-actions button{border:1px solid #bfdde4;border-radius:8px;background:#fff;color:#4c8194;padding:9px;font-size:10px;font-weight:800;cursor:pointer}
 .story-room.is-dev-house-outside,.story-room.is-dev-door-closeup,.story-room.is-dev-custom-scene{background-position:center;background-size:cover}
-.story-room.is-dev-house-outside{background-image:url("./assets/story/chapter1/house-wide.webp?v=42")}
-.story-room.is-dev-door-closeup{background-image:url("./assets/story/chapter1/house-door-close.webp?v=42")}
+.story-room.is-dev-house-outside{background-image:url("./assets/story/chapter1/house-wide.webp?v=43")}
+.story-room.is-dev-door-closeup{background-image:url("./assets/story/chapter1/house-door-close.webp?v=43")}
 .story-room.is-dev-house-outside .story-room-art,.story-room.is-dev-door-closeup .story-room-art,.story-room.is-dev-custom-scene .story-room-art{visibility:hidden}
 .story-room.is-dev-house-outside .story-hotspot,.story-room.is-dev-door-closeup .story-hotspot{visibility:hidden}
 .dev-chapter-scenes{padding:16px 20px;border-top:1px solid #dce9ec}
@@ -4235,10 +4237,10 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
   transform:none;
 }
 .story-intro-overlay.is-exterior .story-intro-backdrop{
-  background-image:url("./assets/story/chapter1/house-wide.webp?v=42");
+  background-image:url("./assets/story/chapter1/house-wide.webp?v=43");
 }
 .story-intro-overlay.is-door .story-intro-backdrop{
-  background-image:url("./assets/story/chapter1/house-door-close.webp?v=42");
+  background-image:url("./assets/story/chapter1/house-door-close.webp?v=43");
 }
 .story-intro-overlay.is-approaching .story-intro-backdrop{
   transform:scale(1.08);
