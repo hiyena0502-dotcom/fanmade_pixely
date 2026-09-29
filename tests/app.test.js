@@ -5,6 +5,8 @@ const path=require("node:path");
 const vm=require("node:vm");
 
 const directory=path.join(__dirname,"..");
+const gameConfig=fs.readFileSync(path.join(directory,"data/game-config.js"),"utf8");
+const editorSchema=fs.readFileSync(path.join(directory,"data/editor-schema.js"),"utf8");
 const app=fs.readFileSync(path.join(directory,"app.js"),"utf8");
 const storageKey="pixely-lost-sky-saves-v2";
 const wardrobeKey="pixely-lost-sky-wardrobe-assets-v1";
@@ -95,6 +97,8 @@ function boot(saved,initialVersion=JSON.parse(fs.readFileSync(path.join(director
     },
     setInterval(callback){interval=callback},setTimeout(){return 1},clearTimeout(){}
   };
+  vm.runInNewContext(gameConfig,context);
+  vm.runInNewContext(editorSchema,context);
   vm.runInNewContext(app,context);
   return {
     node,storage,requests,context,tick:()=>interval(),
@@ -276,6 +280,8 @@ test("deployed version and asset cache keys match the script",()=>{
   const version=JSON.parse(fs.readFileSync(path.join(directory,"site-version.json"),"utf8")).version;
   assert.match(app,new RegExp(`SITE_VERSION = "${version}"`));
   assert.match(html,new RegExp(`style\\.css\\?v=${version}`));
+  assert.match(html,new RegExp(`data/game-config\\.js\\?v=${version}`));
+  assert.match(html,new RegExp(`data/editor-schema\\.js\\?v=${version}`));
   assert.match(html,new RegExp(`app\\.js\\?v=${version}`));
 });
 
@@ -487,4 +493,15 @@ test("wardrobe transform controls support direct numeric input",()=>{
   }
   assert.match(app,/data-wardrobe-transform-number/);
   assert.match(app,/wardrobeTransformNumber/);
+});
+
+
+test("static game and editor configuration are split from the runtime",()=>{
+  assert.match(gameConfig,/window\.PixelyGameConfig/);
+  assert.match(editorSchema,/window\.PixelyEditorSchema/);
+  assert.doesNotMatch(app,/const catalogue = \{/);
+  assert.doesNotMatch(app,/const devSchemas=\{/);
+  const html=fs.readFileSync(path.join(directory,"index.html"),"utf8");
+  assert.match(html,/data\/game-config\.js\?v=45/);
+  assert.match(html,/data\/editor-schema\.js\?v=45/);
 });
