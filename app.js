@@ -36,7 +36,7 @@
   }
   const SITE_VERSION = "45";
   const $ = (q, root = document) => root.querySelector(q);
-  const $ = (q, root = document) => [...root.querySelectorAll(q)];
+  const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 
   const gameConfig=window.PixelyGameConfig;
   const editorConfig=window.PixelyEditorSchema;
