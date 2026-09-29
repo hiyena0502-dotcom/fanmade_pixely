@@ -35,7 +35,7 @@
       for(const [key,value] of Object.entries(values)) transaction.objectStore("data").put(value,key);
     });
   }
-  const SITE_VERSION = "58";
+  const SITE_VERSION = "59";
   const $ = (q, root = document) => root.querySelector(q);
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 
@@ -993,8 +993,14 @@
   function chooseStoryIntroEnter(){
     if(!storyIntroActive) return;
     storyIntroDoorExplore=false;
+    hideStoryIntroNotice();
+    hideStoryIntroDoorAction();
+    closeStoryPanels();
     const chapterIndex=storyIntroSteps.findIndex(entry=>entry.kind==="chapter");
-    if(chapterIndex<0) return;
+    if(chapterIndex<0){
+      finishStoryIntro();
+      return;
+    }
     storyIntroIndex=chapterIndex;
     renderStoryIntroStep();
   }

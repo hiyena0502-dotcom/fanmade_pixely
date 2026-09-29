@@ -595,41 +595,38 @@
   transform-origin:50% 67%;
 }
 
-/* USER CLOUD ART · v58 */
+/* USER CLOUD ART · v59 */
 .intro-cloud-art{
   position:absolute;
   z-index:2;
-  inset:-3% -8% auto -8%;
+  top:-1%;
+  left:-10%;
+  width:120%;
   height:58%;
   pointer-events:none;
   display:none;
-  background-image:url("../assets/story/chapter1/cloud-overlay.webp?v=58");
+  background-image:url("../assets/story/chapter1/cloud-overlay.webp?v=59");
   background-repeat:no-repeat;
   background-position:center top;
   background-size:100% auto;
-  opacity:.96;
-  filter:drop-shadow(0 4px 5px rgba(80,96,108,.08));
+  opacity:1;
+  filter:drop-shadow(0 5px 6px rgba(80,96,108,.10));
   will-change:transform;
 }
 .story-intro-overlay.is-exterior .intro-cloud-art{
   display:block;
-  animation:intro-cloud-art-drift 46s ease-in-out infinite alternate;
+  animation:intro-cloud-art-drift 22s linear infinite;
 }
 .story-intro-overlay.is-door .intro-cloud-art{
-  display:block;
-  opacity:.62;
-  transform:scale(1.08);
-  transform-origin:center top;
-  animation:intro-cloud-art-door-drift 58s ease-in-out infinite alternate;
+  display:none !important;
+  animation:none;
 }
 @keyframes intro-cloud-art-drift{
-  0%{transform:translate3d(5vw,-.5vh,0)}
-  48%{transform:translate3d(0,1.1vh,0)}
-  100%{transform:translate3d(-7vw,-.2vh,0)}
-}
-@keyframes intro-cloud-art-door-drift{
-  0%{transform:translate3d(3vw,-1vh,0) scale(1.08)}
-  100%{transform:translate3d(-4vw,.5vh,0) scale(1.08)}
+  0%{transform:translate3d(24vw,0,0)}
+  25%{transform:translate3d(12vw,.7vh,0)}
+  50%{transform:translate3d(0,-.4vh,0)}
+  75%{transform:translate3d(-12vw,.5vh,0)}
+  100%{transform:translate3d(-24vw,0,0)}
 }
 
 .intro-ground{
@@ -1126,11 +1123,11 @@
 }
 
 .story-intro-overlay.is-exterior .story-intro-backdrop{
-  background-image:url("../assets/story/chapter1/house-wide.webp?v=58");
+  background-image:url("../assets/story/chapter1/house-wide.webp?v=59");
 }
 
 .story-intro-overlay.is-door .story-intro-backdrop{
-  background-image:url("../assets/story/chapter1/house-door-close.webp?v=58");
+  background-image:url("../assets/story/chapter1/house-door-close.webp?v=59");
 }
 
 .story-intro-overlay.is-approaching .story-intro-backdrop{
@@ -1484,6 +1481,7 @@
 .story-intro-door-action{
   position:absolute;
   z-index:14;
+  pointer-events:auto;
   left:50%;
   top:66%;
   transform:translate(-50%,-50%);
@@ -1607,8 +1605,7 @@
 }
 
 @media(prefers-reduced-motion:reduce){
-  .story-intro-overlay.is-exterior .intro-cloud-art,
-  .story-intro-overlay.is-door .intro-cloud-art{
+  .story-intro-overlay.is-exterior .intro-cloud-art{
     animation:none;
     transform:none;
   }
