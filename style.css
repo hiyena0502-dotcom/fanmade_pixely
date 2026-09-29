@@ -4226,3 +4226,27 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
     66.6667% 100%,
     100% 100% !important;
 }
+
+
+/* =========================================================
+   CHAPTER 01 EXTERIOR FINAL ART v39
+   단일 원본 이미지 · 비율 유지 · 빈 공간 없이 cover
+   ========================================================= */
+.story-intro-overlay.is-exterior .story-intro-backdrop,
+.story-intro-overlay.is-door .story-intro-backdrop{
+  background-color:#b9dff0 !important;
+  background-image:url("./assets/story/chapter1/house-front-final.webp?v=39") !important;
+  background-repeat:no-repeat !important;
+  background-position:center center !important;
+  background-size:cover !important;
+}
+
+/* 최종 이미지가 배경 전체를 담당하므로 기존 CSS 장식은 숨김 */
+.story-intro-overlay.is-exterior .intro-ground,
+.story-intro-overlay.is-exterior .intro-cloud,
+.story-intro-overlay.is-exterior .intro-house,
+.story-intro-overlay.is-door .intro-ground,
+.story-intro-overlay.is-door .intro-cloud,
+.story-intro-overlay.is-door .intro-house{
+  display:none !important;
+}
