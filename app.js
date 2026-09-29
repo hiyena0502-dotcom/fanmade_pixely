@@ -35,7 +35,7 @@
       for(const [key,value] of Object.entries(values)) transaction.objectStore("data").put(value,key);
     });
   }
-  const SITE_VERSION = "50";
+  const SITE_VERSION = "51";
   const $ = (q, root = document) => root.querySelector(q);
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 
@@ -530,6 +530,8 @@
   let storySelectedItem=null;
   let storyIntroIndex=0;
   let storyIntroActive=false;
+  let storyIntroDoorExplore=false;
+  let storyIntroDoorDialogueSeen=false;
   let saveFallbackWarned=false;
 
   function escapeHTML(value){
@@ -811,25 +813,35 @@
     if(!overlay||!step) return;
 
     const houseStep=step.kind==="house";
+    const choiceStep=step.kind==="choice";
+    if(choiceStep) storyIntroDoorDialogueSeen=true;
     overlay.classList.toggle("is-exterior",step.phase==="exterior");
     overlay.classList.toggle("is-door",step.phase==="door");
     overlay.classList.toggle("is-chapter",step.phase==="chapter");
     overlay.classList.toggle("is-dark",step.phase==="dark");
     overlay.classList.toggle("is-dialogue",step.kind==="dialogue");
     overlay.classList.toggle("is-narration",step.kind==="narration");
+    overlay.classList.toggle("is-choice",choiceStep);
+    overlay.classList.toggle("is-door-explore",storyIntroDoorExplore);
     overlay.classList.toggle("is-house-prompt",houseStep);
 
     const next=$("#story-intro-next");
     const house=$("#story-intro-house");
+    const choices=$("#story-intro-choices");
+    const explore=$("#story-intro-explore");
+    const back=$("#story-intro-back");
     const hint=$("#story-intro-hint-text");
     const copy=$(".story-intro-copy",overlay);
 
-    if(next) next.disabled=houseStep;
+    if(next) next.disabled=houseStep||choiceStep||storyIntroDoorExplore;
     if(house){
       house.hidden=!houseStep;
       house.disabled=!houseStep;
     }
-    if(hint) hint.textContent=houseStep?"문을 클릭하기":"CLICK / SPACE";
+    if(choices) choices.hidden=!choiceStep||storyIntroDoorExplore;
+    if(explore) explore.hidden=!storyIntroDoorExplore;
+    if(back) back.hidden=!storyIntroDoorExplore;
+    if(hint) hint.textContent=storyIntroDoorExplore?"주변을 클릭해 조사하기":houseStep?"문을 클릭하기":choiceStep?"선택지를 골라 주세요":"CLICK / SPACE";
 
     $("#story-intro-kicker").textContent=step.speaker||step.kicker||"";
     $("#story-intro-title").textContent=step.title||"";
@@ -837,13 +849,15 @@
     $("#story-intro-voices").innerHTML="";
 
     if(copy){
-      copy.hidden=houseStep;
+      copy.hidden=houseStep||storyIntroDoorExplore;
       copy.classList.remove("is-reveal");
-      if(!houseStep){
+      if(!houseStep&&!storyIntroDoorExplore){
         void copy.offsetWidth;
         copy.classList.add("is-reveal");
       }
     }
+    const exploreMessage=$("#story-intro-explore-message");
+    if(exploreMessage && !storyIntroDoorExplore) exploreMessage.textContent="주변을 천천히 살펴보자.";
   }
 
   function startStoryIntro(){
@@ -855,8 +869,10 @@
 
     storyIntroIndex=0;
     storyIntroActive=true;
+    storyIntroDoorExplore=false;
+    storyIntroDoorDialogueSeen=false;
     overlay.hidden=false;
-    overlay.classList.remove("is-approaching");
+    overlay.classList.remove("is-approaching","is-door-explore");
 
     const copy=$(".story-intro-copy",overlay);
     if(copy) copy.classList.remove("is-reveal");
@@ -878,16 +894,60 @@
 
     window.setTimeout(()=>{
       if(!storyIntroActive) return;
-      storyIntroIndex+=1;
+      if(storyIntroDoorDialogueSeen){
+        const choiceIndex=storyIntroSteps.findIndex(entry=>entry.kind==="choice"&&entry.phase==="door");
+        storyIntroIndex=choiceIndex>=0?choiceIndex:storyIntroIndex+1;
+      }else{
+        storyIntroIndex+=1;
+      }
       renderStoryIntroStep();
       overlay.classList.remove("is-approaching");
     },950);
+  }
+
+  function chooseStoryIntroEnter(){
+    if(!storyIntroActive) return;
+    storyIntroDoorExplore=false;
+    const chapterIndex=storyIntroSteps.findIndex(entry=>entry.kind==="chapter");
+    if(chapterIndex<0) return;
+    storyIntroIndex=chapterIndex;
+    renderStoryIntroStep();
+  }
+
+  function exploreStoryIntroDoor(){
+    if(!storyIntroActive) return;
+    const step=storyIntroSteps[storyIntroIndex];
+    if(step?.kind!=="choice") return;
+    storyIntroDoorExplore=true;
+    renderStoryIntroStep();
+  }
+
+  function inspectStoryIntroDoorSpot(id){
+    if(!storyIntroActive||!storyIntroDoorExplore) return;
+    const observations={
+      door:"문 너머에서 아까보다 가까운 목소리와 부산한 움직임이 들린다.",
+      left:"집 안쪽에서 뭔가를 옮기는 소리가 계속 난다. 준비가 한창인 모양이다.",
+      right:"바깥은 조용하다. 이상하게 이 집 안만 유난히 분주하다."
+    };
+    const message=$("#story-intro-explore-message");
+    if(message) message.textContent=observations[id]||"딱히 이상한 점은 없어 보인다.";
+  }
+
+  function backStoryIntroExterior(){
+    if(!storyIntroActive||!storyIntroDoorExplore) return;
+    storyIntroDoorExplore=false;
+    const houseIndex=storyIntroSteps.findIndex(entry=>entry.kind==="house"&&entry.phase==="exterior");
+    if(houseIndex<0) return;
+    storyIntroIndex=houseIndex;
+    renderStoryIntroStep();
   }
 
   function finishStoryIntro(){
     const overlay=$("#story-intro");
     storyIntroActive=false;
     storyIntroIndex=0;
+    storyIntroDoorExplore=false;
+    storyIntroDoorDialogueSeen=false;
     if(overlay){
       overlay.hidden=true;
       overlay.classList.remove("is-approaching");
@@ -907,7 +967,7 @@
   function advanceStoryIntro(){
     if(!storyIntroActive) return;
     const step=storyIntroSteps[storyIntroIndex];
-    if(step?.kind==="house") return;
+    if(step?.kind==="house"||step?.kind==="choice"||storyIntroDoorExplore) return;
 
     if(storyIntroIndex<storyIntroSteps.length-1){
       storyIntroIndex+=1;
@@ -1839,6 +1899,14 @@
     $("#story-dialogue-close")?.addEventListener("click",()=>$("#story-dialogue").hidden=true);
     $("#story-intro-next")?.addEventListener("click",advanceStoryIntro);
     $("#story-intro-house")?.addEventListener("click",approachStoryIntroHouse);
+    $("#story-intro-choice-enter")?.addEventListener("click",chooseStoryIntroEnter);
+    $("#story-intro-enter-small")?.addEventListener("click",chooseStoryIntroEnter);
+    $("#story-intro-choice-look")?.addEventListener("click",exploreStoryIntroDoor);
+    $("#story-intro-back")?.addEventListener("click",backStoryIntroExterior);
+    $("#story-intro-explore")?.addEventListener("click",event=>{
+      const spot=event.target.closest("[data-intro-inspect]");
+      if(spot) inspectStoryIntroDoorSpot(spot.dataset.introInspect);
+    });
     $("#story-save-button")?.addEventListener("click",quickStorySave);
     $("#story-quick-inventory")?.addEventListener("click",event=>{
       const button=event.target.closest("[data-story-item-id]");
