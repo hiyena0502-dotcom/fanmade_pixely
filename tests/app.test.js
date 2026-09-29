@@ -10,7 +10,7 @@ const storageKey="pixely-lost-sky-saves-v2";
 const wardrobeKey="pixely-lost-sky-wardrobe-assets-v1";
 const devContentKey="pixely-lost-sky-dev-content-v1";
 
-function boot(saved,initialVersion="15",wardrobeAssets){
+function boot(saved,initialVersion=JSON.parse(fs.readFileSync(path.join(directory,"site-version.json"),"utf8")).version,wardrobeAssets){
   const nodes=new Map();
   const listeners={};
   const requests=[];
@@ -28,6 +28,7 @@ function boot(saved,initialVersion="15",wardrobeAssets){
         classList:{toggle(name,on){if(on) classes.add(name);else classes.delete(name)},add(name){classes.add(name)},remove(name){classes.delete(name)},contains(name){return classes.has(name)}},
         setAttribute(name,value){this[name]=value},
         addEventListener(name,callback){this.listeners[name]=callback},
+        querySelector(selector){return node(selector)},
         querySelectorAll(){return []},
         getBoundingClientRect(){return {left:0,top:0,width:1000,height:600,right:1000,bottom:600}},
         replaceChildren(...children){this.children=children},
@@ -64,6 +65,7 @@ function boot(saved,initialVersion="15",wardrobeAssets){
   const document={
     readyState:"complete",baseURI:"https://example.com/fanmade_pixely/",visibilityState:"visible",
     createElement(tag){return node(`element:${tag}:${++elementCount}`)},
+    getElementById(id){return node(`#${id}`)},
     querySelector(selector){
       const view=selector.match(/^\[data-view=['"]([^'"]+)['"]\]$/);
       return view?views.find(entry=>entry.dataset.view===view[1]):node(selector);
@@ -85,7 +87,7 @@ function boot(saved,initialVersion="15",wardrobeAssets){
   if(wardrobeAssets!==undefined) storage.set(wardrobeKey,JSON.stringify(wardrobeAssets));
   const context={
     document,URL,console,
-    window:{confirm(){return confirmResult},scrollTo(){},location:{reload(){}},addEventListener(name,callback){listeners[name]=callback}},
+    window:{confirm(){return confirmResult},scrollTo(){},setTimeout(){return 1},location:{reload(){}},addEventListener(name,callback){listeners[name]=callback}},
     localStorage:{getItem(key){return storage.get(key)||null},setItem(key,value){if(failStorage) throw new Error("quota");storage.set(key,value)}},
     fetch(url,options){
       requests.push({url:String(url),options});
@@ -145,6 +147,28 @@ test("new game opens the Chapter 1 party room with its first objective",()=>{
   assert.equal(saved.slots[2].completedChapters.length,0);
 });
 
+test("Chapter 1 starts at the wide house and waits for a door click before the close-up",()=>{
+  const state=boot();
+  state.click("#new-game-button");
+  state.slotAction("new-slot",0);
+  for(let index=0;index<5;index++) state.click("#story-intro-next");
+  assert.equal(state.node("#story-intro-kicker").textContent,"꿈뜰이");
+  assert.equal(state.node("#story-intro").classList.contains("is-exterior"),true);
+  state.click("#story-intro-next");
+  state.click("#story-intro-next");
+  assert.equal(state.node("#story-intro-house").hidden,false);
+  assert.equal(state.node("#story-intro-next").disabled,true);
+  state.click("#story-intro-house");
+  assert.equal(state.node("#story-intro").classList.contains("is-approaching"),true);
+  const css=fs.readFileSync(path.join(directory,"style.css"),"utf8");
+  assert.match(css,/is-exterior \.story-intro-backdrop\{\s*background-image:url\("\.\/assets\/story\/chapter1\/house-wide\.webp/);
+  assert.match(css,/is-door \.story-intro-backdrop\{\s*background-image:url\("\.\/assets\/story\/chapter1\/house-door-close\.webp/);
+  assert.match(css,/is-chapter \.story-intro-backdrop\{opacity:0/);
+  for(const name of ["house-door-close.webp","house-wide.webp"]){
+    assert.ok(fs.statSync(path.join(directory,"assets/story/chapter1",name)).size>100000);
+  }
+});
+
 test("existing saves normalize into the current party-room interface",()=>{
   const saved={activeSlot:0,slots:[{
     chapter:"챕터 1 완료",location:"파티",savedAt:1,progress:15,
@@ -194,7 +218,7 @@ test("wardrobe saves earned items as multi-select layers and exposes them for fu
   assert.deepEqual(Array.from(avatar.outfitForActiveSave().layers),[]);
   assert.equal(state.context.window.PixelyInventory.grantItem("plush"),true);
   state.node("#wardrobe-tabs").listeners.click({target:{closest(){return state.node("wardrobe-tab:accessory")}}});
-  const option=id=>state.node("#wardrobe-options").listeners.click({target:{closest(){return {dataset:{wardrobeItem:id},disabled:false}}}});
+  const option=id=>state.node("#wardrobe-options").listeners.click({target:{closest(selector){return selector==="[data-wardrobe-item]"?{dataset:{wardrobeItem:id},disabled:false}:null}}});
   option("plush");
   state.click("#wardrobe-save-button");
   const saved=JSON.parse(state.storage.get(storageKey));
@@ -216,14 +240,14 @@ test("old single-slot save data migrates into layers and still rejects unowned e
   assert.match(state.node("#wardrobe-options").innerHTML,/치명적으로 귀여운 봉제인형/);
 });
 
-test("a storage failure leaves the previous save intact and reports the error",()=>{
+test("a local storage failure keeps the new save playable in the current tab",()=>{
   const state=boot();
   state.setStorageFailure(true);
   state.click("#new-game-button");
   state.slotAction("new-slot",0);
   assert.equal(state.storage.has(storageKey),false);
-  assert.equal(state.node("#current-slot-label").textContent,"NO DATA");
-  assert.match(state.node("#toast").textContent,/저장에 실패/);
+  assert.match(state.node("#current-slot-label").textContent,/SLOT 1/);
+  assert.match(state.node("#toast").textContent,/현재 탭에서만 진행/);
 });
 
 test("update prompt compares the loaded version on the first check and on later checks",async()=>{
@@ -231,7 +255,7 @@ test("update prompt compares the loaded version on the first check and on later 
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
   assert.equal(state.requests[0].options.cache,"no-store");
-  state.setVersion("30");
+  state.setVersion("41");
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,false);
@@ -240,7 +264,7 @@ test("update prompt compares the loaded version on the first check and on later 
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
-  const stale=boot(undefined,"30");
+  const stale=boot(undefined,"39");
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(stale.node("#update-modal").hidden,false);
 });
@@ -287,7 +311,7 @@ test("developer wardrobe setup toggles multiple custom parts without a save slot
   assert.equal(state.node("#wardrobe-slot-label").textContent,"DEV SETUP");
   const faceTab=state.node("wardrobe-tab:face");
   state.node("#wardrobe-tabs").listeners.click({target:{closest(){return faceTab}}});
-  const click=id=>state.node("#wardrobe-options").listeners.click({target:{closest(){return {dataset:{wardrobeItem:id},disabled:false}}}});
+  const click=id=>state.node("#wardrobe-options").listeners.click({target:{closest(selector){return selector==="[data-wardrobe-item]"?{dataset:{wardrobeItem:id},disabled:false}:null}}});
   click("custom-eyes");
   click("custom-mouth");
   const stored=JSON.parse(state.storage.get(wardrobeKey));
@@ -392,7 +416,7 @@ test("desktop wardrobe uses a wide balanced workspace",()=>{
   assert.match(css,/DESKTOP WARDROBE WORKSPACE v29/);
   assert.match(css,/width:min\(1520px,calc\(100vw - 64px\)\)/);
   assert.match(css,/grid-template-columns:minmax\(440px,520px\) minmax\(0,1fr\)/);
-  assert.match(css,/\.wardrobe-dev-panel>[\s\S]*grid-template-columns:minmax\(0,1fr\) minmax\(0,1fr\)/);
+  assert.match(css,/\.wardrobe-dev-panel\{[^}]*grid-template-columns:minmax\(0,1fr\) minmax\(0,1fr\)/);
   assert.match(css,/height:auto !important;[\s\S]*min-height:640px !important/);
 });
 

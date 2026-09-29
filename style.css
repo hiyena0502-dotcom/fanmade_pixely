@@ -4177,18 +4177,26 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
 }
 
 
-/* =========================================================
-   CHAPTER 01 EXTERIOR BACKGROUND v36
-   사용자가 확정한 첫 집 이미지로 교체
-   ========================================================= */
+/* Chapter 1: the garden view leads to the door close-up. */
 .story-intro-overlay.is-exterior .story-intro-backdrop,
 .story-intro-overlay.is-door .story-intro-backdrop{
-  background:
-    url("./assets/story/chapter1/house-front.webp?v=37")
-    center center / cover no-repeat !important;
+  opacity:1;
+  background-color:#b9dff0;
+  background-repeat:no-repeat;
+  background-position:center center;
+  background-size:cover;
+  transform:none;
 }
-
-/* 기존 CSS로 그리던 집/정원 요소는 새 배경 이미지와 겹치지 않게 숨김 */
+.story-intro-overlay.is-exterior .story-intro-backdrop{
+  background-image:url("./assets/story/chapter1/house-wide.webp?v=40");
+}
+.story-intro-overlay.is-door .story-intro-backdrop{
+  background-image:url("./assets/story/chapter1/house-door-close.webp?v=40");
+}
+.story-intro-overlay.is-approaching .story-intro-backdrop{
+  transform:scale(1.08);
+  filter:blur(3px) brightness(1.14);
+}
 .story-intro-overlay.is-exterior .intro-ground,
 .story-intro-overlay.is-exterior .intro-cloud,
 .story-intro-overlay.is-exterior .intro-house,
@@ -4198,55 +4206,19 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
   display:none !important;
 }
 
-
-/* =========================================================
-   CHAPTER 01 EXTERIOR IMAGE FIX v38
-   확정 이미지 타일 조합 — 한 장처럼 표시
-   ========================================================= */
-.story-intro-overlay.is-exterior .story-intro-backdrop,
-.story-intro-overlay.is-door .story-intro-backdrop{
-  background-color:#b9dff0 !important;
-  background-image:
-    url("./assets/story/chapter1/house-tl.avif?v=38"),
-    url("./assets/story/chapter1/house-tr.avif?v=38"),
-    url("./assets/story/chapter1/house-bl.avif?v=38"),
-    url("./assets/story/chapter1/house-br-left.avif?v=38"),
-    url("./assets/story/chapter1/house-br-right.avif?v=38") !important;
-  background-repeat:no-repeat !important;
-  background-size:
-    50% 50%,
-    50% 50%,
-    50% 50%,
-    25% 50%,
-    25% 50% !important;
-  background-position:
-    0 0,
-    100% 0,
-    0 100%,
-    66.6667% 100%,
-    100% 100% !important;
+.story-intro-overlay.is-exterior .intro-house-hit{
+  bottom:28%;
+  width:clamp(90px,9vw,180px);
+  height:22%;
 }
+.story-intro-overlay.is-exterior .intro-house-hit::after{display:none}
+.story-intro-overlay.is-exterior .intro-house-hit span{bottom:-39px;white-space:nowrap}
 
-
-/* =========================================================
-   CHAPTER 01 EXTERIOR FINAL ART v39
-   단일 원본 이미지 · 비율 유지 · 빈 공간 없이 cover
-   ========================================================= */
-.story-intro-overlay.is-exterior .story-intro-backdrop,
-.story-intro-overlay.is-door .story-intro-backdrop{
-  background-color:#b9dff0 !important;
-  background-image:url("./assets/story/chapter1/house-front-final.webp?v=39") !important;
-  background-repeat:no-repeat !important;
-  background-position:center center !important;
-  background-size:cover !important;
-}
-
-/* 최종 이미지가 배경 전체를 담당하므로 기존 CSS 장식은 숨김 */
-.story-intro-overlay.is-exterior .intro-ground,
-.story-intro-overlay.is-exterior .intro-cloud,
-.story-intro-overlay.is-exterior .intro-house,
-.story-intro-overlay.is-door .intro-ground,
-.story-intro-overlay.is-door .intro-cloud,
-.story-intro-overlay.is-door .intro-house{
-  display:none !important;
+/* The chapter title reveals the existing indoor room beneath it. */
+.story-intro-overlay.is-chapter{background:rgba(7,11,19,.28)}
+.story-intro-overlay.is-chapter .story-intro-backdrop{opacity:0;filter:none;transform:none}
+.story-room:has(.story-intro-overlay:not([hidden])) .story-hud,
+.story-room:has(.story-intro-overlay:not([hidden])) .story-hotspot,
+.story-room:has(.story-intro-overlay:not([hidden])) .story-exit{
+  visibility:hidden;
 }
