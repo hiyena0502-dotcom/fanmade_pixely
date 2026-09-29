@@ -49,7 +49,7 @@ const storyIntroSteps=[
 
   {phase:"door",kind:"narration",text:"익숙한 소음과 친근한 목소리다……"},
   {phase:"door",kind:"narration",text:"…잘 찾아온 것 같다."},
-  {phase:"door",kind:"choice",text:"이제 어떻게 할까?"},
+  {phase:"door",kind:"explore"},
 
   {phase:"chapter",kind:"chapter",kicker:"CHAPTER 1",title:"생일 전날",text:"잠뜰님의 생일 파티를 준비하자."}
 ];

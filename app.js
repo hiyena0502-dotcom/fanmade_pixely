@@ -35,7 +35,7 @@
       for(const [key,value] of Object.entries(values)) transaction.objectStore("data").put(value,key);
     });
   }
-  const SITE_VERSION = "52";
+  const SITE_VERSION = "53";
   const $ = (q, root = document) => root.querySelector(q);
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 
@@ -532,6 +532,7 @@
   let storyIntroActive=false;
   let storyIntroDoorExplore=false;
   let storyIntroDoorDialogueSeen=false;
+  let storyIntroNoticeTimer=null;
   let saveFallbackWarned=false;
 
   function escapeHTML(value){
@@ -807,41 +808,113 @@
     return Boolean(save && save.story?.introSeen===false);
   }
 
+  function hideStoryIntroNotice(){
+    if(storyIntroNoticeTimer){
+      clearTimeout(storyIntroNoticeTimer);
+      storyIntroNoticeTimer=null;
+    }
+    const message=$("#story-intro-explore-message");
+    if(message) message.classList.remove("is-visible");
+  }
+
+  function showStoryIntroNotice(text){
+    const message=$("#story-intro-explore-message");
+    if(!message) return;
+    hideStoryIntroNotice();
+    message.textContent=text;
+    void message.offsetWidth;
+    message.classList.add("is-visible");
+    storyIntroNoticeTimer=setTimeout(()=>{
+      message.classList.remove("is-visible");
+      storyIntroNoticeTimer=null;
+    },2200);
+  }
+
+  function hideStoryIntroDoorAction(){
+    const action=$("#story-intro-door-action");
+    if(action) action.hidden=true;
+  }
+
+  function currentStoryIntroStep(){
+    return storyIntroActive?storyIntroSteps[storyIntroIndex]||null:null;
+  }
+
+  function renderStoryMap(){
+    const map=$("#story-map");
+    const title=$("#story-map-title");
+    const description=$("#story-map-description");
+    if(!map||!title||!description) return;
+
+    const step=currentStoryIntroStep();
+    const outside=Boolean(step && (step.phase==="exterior"||step.phase==="door"));
+    if(outside){
+      const atDoor=step.phase==="door";
+      const canApproach=step.phase==="door" || step.kind==="house";
+      title.textContent="집 밖";
+      description.textContent="집 앞과 현관 주변을 살펴보고 있어요.";
+      map.className="story-map story-map--exterior";
+      map.innerHTML=
+        '<button type="button" data-story-map-node="front-yard" class="'+(!atDoor?"is-current":"")+'">집 앞<small>'+(!atDoor?"현재 위치":"돌아가기")+'</small></button>'+
+        '<button type="button" data-story-map-node="front-door" class="'+(atDoor?"is-current":"")+'" '+(!canApproach&&!atDoor?"disabled":"")+'>현관<small>'+(atDoor?"현재 위치":canApproach?"문 앞으로":"조금 뒤에 이동")+'</small></button>'+
+        '<button type="button" disabled>집 안<small>아직 들어가지 않음</small></button>'+
+        '<button type="button" disabled>주변 길<small>아직 잠김</small></button>';
+      return;
+    }
+
+    title.textContent="이동";
+    description.textContent="한 번 가 본 장소는 나중에 빠르게 이동할 수 있게 됩니다.";
+    map.className="story-map";
+    map.innerHTML=
+      '<button type="button" class="is-current" data-story-map-node="party-room">파티방<small>현재 위치</small></button>'+
+      '<button type="button" disabled>복도<small>아직 잠김</small></button>'+
+      '<button type="button" disabled>주방<small>아직 잠김</small></button>'+
+      '<button type="button" disabled>창고<small>아직 잠김</small></button>';
+  }
+
+  function renderStoryIntroHud(step){
+    if(!step || (step.phase!=="exterior"&&step.phase!=="door")) return;
+    $("#story-location-name").textContent=step.phase==="door"?"현관 앞":"집 앞";
+    $("#story-current-objective").textContent=step.phase==="door"
+      ? storyIntroDoorExplore?"주변을 조사하거나 문을 확인하자.":"안에서 들리는 목소리를 들어보자."
+      : "문을 조사해 보자.";
+  }
+
   function renderStoryIntroStep(){
     const overlay=$("#story-intro");
     const step=storyIntroSteps[storyIntroIndex];
     if(!overlay||!step) return;
 
     const houseStep=step.kind==="house";
-    const choiceStep=step.kind==="choice";
-    if(choiceStep) storyIntroDoorDialogueSeen=true;
+    const exploreStep=step.kind==="explore";
+    const enteringExplore=exploreStep&&!storyIntroDoorExplore;
+    if(exploreStep){
+      storyIntroDoorDialogueSeen=true;
+      storyIntroDoorExplore=true;
+    }
     overlay.classList.toggle("is-exterior",step.phase==="exterior");
     overlay.classList.toggle("is-door",step.phase==="door");
     overlay.classList.toggle("is-chapter",step.phase==="chapter");
     overlay.classList.toggle("is-dark",step.phase==="dark");
     overlay.classList.toggle("is-dialogue",step.kind==="dialogue");
     overlay.classList.toggle("is-narration",step.kind==="narration");
-    overlay.classList.toggle("is-choice",choiceStep);
     overlay.classList.toggle("is-door-explore",storyIntroDoorExplore);
     overlay.classList.toggle("is-house-prompt",houseStep);
 
     const next=$("#story-intro-next");
     const house=$("#story-intro-house");
-    const choices=$("#story-intro-choices");
     const explore=$("#story-intro-explore");
     const back=$("#story-intro-back");
     const hint=$("#story-intro-hint-text");
     const copy=$(".story-intro-copy",overlay);
 
-    if(next) next.disabled=houseStep||choiceStep||storyIntroDoorExplore;
+    if(next) next.disabled=houseStep||exploreStep||storyIntroDoorExplore;
     if(house){
       house.hidden=!houseStep;
       house.disabled=!houseStep;
     }
-    if(choices) choices.hidden=!choiceStep||storyIntroDoorExplore;
     if(explore) explore.hidden=!storyIntroDoorExplore;
     if(back) back.hidden=step.phase!=="door";
-    if(hint) hint.textContent=storyIntroDoorExplore?"주변을 클릭해 조사하기":houseStep?"문을 클릭하기":choiceStep?"선택지를 골라 주세요":"CLICK / SPACE";
+    if(hint) hint.textContent=storyIntroDoorExplore?"돋보기를 눌러 조사하기":houseStep?"돋보기를 눌러 문 조사하기":"CLICK / SPACE";
 
     $("#story-intro-kicker").textContent=step.speaker||step.kicker||"";
     $("#story-intro-title").textContent=step.title||"";
@@ -856,8 +929,18 @@
         copy.classList.add("is-reveal");
       }
     }
-    const exploreMessage=$("#story-intro-explore-message");
-    if(exploreMessage && !storyIntroDoorExplore) exploreMessage.textContent="주변을 천천히 살펴보자.";
+
+    renderStoryIntroHud(step);
+    const mapPanel=$("#story-map-panel");
+    if(mapPanel&&!mapPanel.hidden) renderStoryMap();
+
+    if(enteringExplore){
+      hideStoryIntroDoorAction();
+      showStoryIntroNotice("주변을 천천히 살펴보자.");
+    }else if(!storyIntroDoorExplore){
+      hideStoryIntroNotice();
+      hideStoryIntroDoorAction();
+    }
   }
 
   function startStoryIntro(){
@@ -871,6 +954,8 @@
     storyIntroActive=true;
     storyIntroDoorExplore=false;
     storyIntroDoorDialogueSeen=false;
+    hideStoryIntroNotice();
+    hideStoryIntroDoorAction();
     overlay.hidden=false;
     overlay.classList.remove("is-approaching","is-door-explore");
 
@@ -895,8 +980,8 @@
     window.setTimeout(()=>{
       if(!storyIntroActive) return;
       if(storyIntroDoorDialogueSeen){
-        const choiceIndex=storyIntroSteps.findIndex(entry=>entry.kind==="choice"&&entry.phase==="door");
-        storyIntroIndex=choiceIndex>=0?choiceIndex:storyIntroIndex+1;
+        const exploreIndex=storyIntroSteps.findIndex(entry=>entry.kind==="explore"&&entry.phase==="door");
+        storyIntroIndex=exploreIndex>=0?exploreIndex:storyIntroIndex+1;
       }else{
         storyIntroIndex+=1;
       }
@@ -914,23 +999,21 @@
     renderStoryIntroStep();
   }
 
-  function exploreStoryIntroDoor(){
-    if(!storyIntroActive) return;
-    const step=storyIntroSteps[storyIntroIndex];
-    if(step?.kind!=="choice") return;
-    storyIntroDoorExplore=true;
-    renderStoryIntroStep();
-  }
-
   function inspectStoryIntroDoorSpot(id){
     if(!storyIntroActive||!storyIntroDoorExplore) return;
+    const action=$("#story-intro-door-action");
+    if(action) action.hidden=id!=="door";
+
+    if(id==="door"){
+      showStoryIntroNotice("문 너머에서 부산한 움직임이 들린다. 들어가 볼까?");
+      return;
+    }
+
     const observations={
-      door:"문 너머에서 아까보다 가까운 목소리와 부산한 움직임이 들린다.",
       left:"집 안쪽에서 뭔가를 옮기는 소리가 계속 난다. 준비가 한창인 모양이다.",
       right:"바깥은 조용하다. 이상하게 이 집 안만 유난히 분주하다."
     };
-    const message=$("#story-intro-explore-message");
-    if(message) message.textContent=observations[id]||"딱히 이상한 점은 없어 보인다.";
+    showStoryIntroNotice(observations[id]||"딱히 이상한 점은 없어 보인다.");
   }
 
   function backStoryIntroExterior(){
@@ -938,6 +1021,8 @@
     const step=storyIntroSteps[storyIntroIndex];
     if(step?.phase!=="door"&&!storyIntroDoorExplore) return;
     storyIntroDoorExplore=false;
+    hideStoryIntroNotice();
+    hideStoryIntroDoorAction();
     closeStoryPanels();
     const houseIndex=storyIntroSteps.findIndex(entry=>entry.kind==="house"&&entry.phase==="exterior");
     if(houseIndex<0) return;
@@ -951,6 +1036,8 @@
     storyIntroIndex=0;
     storyIntroDoorExplore=false;
     storyIntroDoorDialogueSeen=false;
+    hideStoryIntroNotice();
+    hideStoryIntroDoorAction();
     if(overlay){
       overlay.hidden=true;
       overlay.classList.remove("is-approaching");
@@ -970,7 +1057,7 @@
   function advanceStoryIntro(){
     if(!storyIntroActive) return;
     const step=storyIntroSteps[storyIntroIndex];
-    if(step?.kind==="house"||step?.kind==="choice"||storyIntroDoorExplore) return;
+    if(step?.kind==="house"||step?.kind==="explore"||storyIntroDoorExplore) return;
 
     if(storyIntroIndex<storyIntroSteps.length-1){
       storyIntroIndex+=1;
@@ -1020,6 +1107,7 @@
     if(!panel) return;
     const willOpen=panel.hidden;
     closeStoryPanels();
+    if(type==="map"&&willOpen) renderStoryMap();
     panel.hidden=!willOpen;
   }
 
@@ -1096,6 +1184,9 @@
     missionList.innerHTML=(save?.missions||[]).map(mission=>
       '<li class="'+(mission.done?"is-done":"")+'"><span>'+(mission.done?"✓":"○")+'</span><b>'+escapeHTML(mission.title)+'</b></li>'
     ).join("") || '<li><span>○</span><b>아직 등록된 목표가 없습니다.</b></li>';
+
+    const mapPanel=$("#story-map-panel");
+    if(mapPanel&&!mapPanel.hidden) renderStoryMap();
   }
 
   function collectionOwnedSet(){
@@ -1902,9 +1993,7 @@
     $("#story-dialogue-close")?.addEventListener("click",()=>$("#story-dialogue").hidden=true);
     $("#story-intro-next")?.addEventListener("click",advanceStoryIntro);
     $("#story-intro-house")?.addEventListener("click",approachStoryIntroHouse);
-    $("#story-intro-choice-enter")?.addEventListener("click",chooseStoryIntroEnter);
-    $("#story-intro-enter-small")?.addEventListener("click",chooseStoryIntroEnter);
-    $("#story-intro-choice-look")?.addEventListener("click",exploreStoryIntroDoor);
+    $("#story-intro-door-action")?.addEventListener("click",chooseStoryIntroEnter);
     $("#story-intro-back")?.addEventListener("click",backStoryIntroExterior);
     $("#story-intro-explore")?.addEventListener("click",event=>{
       const spot=event.target.closest("[data-intro-inspect]");
@@ -1919,9 +2008,31 @@
       const button=event.target.closest("[data-story-item-id]");
       if(button) selectStoryItem(button.dataset.storyItemId);
     });
-    $("[data-story-map-node='party-room']")?.addEventListener("click",()=>{
-      closeStoryPanels();
-      toast("현재 파티방에 있어요.");
+    $("#story-map")?.addEventListener("click",event=>{
+      const button=event.target.closest("[data-story-map-node]");
+      if(!button||button.disabled) return;
+      const nodeId=button.dataset.storyMapNode;
+      if(nodeId==="front-yard"){
+        closeStoryPanels();
+        const houseIndex=storyIntroSteps.findIndex(entry=>entry.kind==="house"&&entry.phase==="exterior");
+        if(storyIntroActive&&houseIndex>=0){
+          storyIntroDoorExplore=false;
+          hideStoryIntroNotice();
+          hideStoryIntroDoorAction();
+          storyIntroIndex=houseIndex;
+          renderStoryIntroStep();
+        }
+        return;
+      }
+      if(nodeId==="front-door"){
+        closeStoryPanels();
+        if(currentStoryIntroStep()?.kind==="house") approachStoryIntroHouse();
+        return;
+      }
+      if(nodeId==="party-room"){
+        closeStoryPanels();
+        toast("현재 파티방에 있어요.");
+      }
     });
 
     $(".diary-tabs")?.addEventListener("click",event=>{

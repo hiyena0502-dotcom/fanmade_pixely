@@ -7,10 +7,10 @@
   <meta name="theme-color" content="#111a3b" />
   <title>PIXELY : LOST SKY</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=52" />
-  <script src="data/game-config.js?v=52" defer></script>
-  <script src="data/editor-schema.js?v=52" defer></script>
-  <script src="app.js?v=52" defer></script>
+  <link rel="stylesheet" href="style.css?v=53" />
+  <script src="data/game-config.js?v=53" defer></script>
+  <script src="data/editor-schema.js?v=53" defer></script>
+  <script src="app.js?v=53" defer></script>
 </head>
 <body>
   <div class="game-root">
@@ -165,9 +165,9 @@
           </aside>
 
           <aside class="story-side-panel story-map-panel" id="story-map-panel" hidden>
-            <header><div><small>MAP</small><h3>이동</h3></div><button type="button" data-story-close-panel>×</button></header>
-            <p>한 번 가 본 장소는 나중에 빠르게 이동할 수 있게 됩니다.</p>
-            <div class="story-map">
+            <header><div><small>MAP</small><h3 id="story-map-title">이동</h3></div><button type="button" data-story-close-panel>×</button></header>
+            <p id="story-map-description">한 번 가 본 장소는 나중에 빠르게 이동할 수 있게 됩니다.</p>
+            <div class="story-map" id="story-map">
               <button type="button" class="is-current" data-story-map-node="party-room">파티방<small>현재 위치</small></button>
               <button type="button" disabled>복도<small>아직 잠김</small></button>
               <button type="button" disabled>주방<small>아직 잠김</small></button>
@@ -198,8 +198,8 @@
             </div>
           </div>
 
-          <button class="intro-house-hit" id="story-intro-house" type="button" hidden aria-label="문 클릭하기">
-            <span>문 클릭하기</span>
+          <button class="intro-house-hit" id="story-intro-house" type="button" hidden aria-label="문 조사하기">
+            <span aria-hidden="true">⌕</span>
           </button>
 
           <button class="story-intro-next" id="story-intro-next" type="button" aria-label="인트로 다음 장면">
@@ -212,22 +212,14 @@
             <span class="story-intro-hint"><i></i><span id="story-intro-hint-text">CLICK / SPACE</span></span>
           </button>
 
-          <div class="story-intro-choices" id="story-intro-choices" hidden>
-            <p>이제 어떻게 할까?</p>
-            <div>
-              <button type="button" id="story-intro-choice-enter"><span>→</span><b>집 안으로 들어갈까?</b></button>
-              <button type="button" id="story-intro-choice-look"><span>⌕</span><b>주변을 더 둘러볼까?</b></button>
-            </div>
-          </div>
-
           <button class="story-intro-back" id="story-intro-back" type="button" hidden aria-label="집 앞 전경으로 돌아가기"><span aria-hidden="true">←</span><b>집 앞</b></button>
 
           <div class="story-intro-explore" id="story-intro-explore" hidden>
             <button type="button" class="intro-inspect intro-inspect--left" data-intro-inspect="left" aria-label="왼쪽 주변 조사"><span>⌕</span></button>
             <button type="button" class="intro-inspect intro-inspect--door" data-intro-inspect="door" aria-label="문 주변 조사"><span>⌕</span></button>
             <button type="button" class="intro-inspect intro-inspect--right" data-intro-inspect="right" aria-label="오른쪽 주변 조사"><span>⌕</span></button>
-            <div class="story-intro-explore-message" id="story-intro-explore-message">주변을 천천히 살펴보자.</div>
-            <button type="button" class="story-intro-enter-small" id="story-intro-enter-small">집 안으로 들어가기 →</button>
+            <div class="story-intro-explore-message" id="story-intro-explore-message" aria-live="polite"></div>
+            <button type="button" class="story-intro-door-action" id="story-intro-door-action" hidden><span>→</span><b>집 안으로 들어가기</b></button>
           </div>
         </section>
 
