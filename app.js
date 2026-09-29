@@ -4,9 +4,10 @@
   const STORAGE_KEY = "pixely-lost-sky-saves-v2";
   const SESSION_SAVE_KEY = STORAGE_KEY+"-session-fallback";
   const WARDROBE_ASSET_KEY = "pixely-lost-sky-wardrobe-assets-v1";
-  const DEV_CONTENT_KEY = "pixely-lost-sky-dev-content-v1";
-  const DEV_BACKUP_KEY = "pixely-lost-sky-dev-backup-v1";
+  const DEV_CONTENT_KEY = "pixely-lost-sky-dev-content-v2";
+  const DEV_BACKUP_KEY = "pixely-lost-sky-dev-backup-v2";
   const DEV_DB_NAME = "pixely-dev-data-v1";
+  const COLLECTION_BASELINE_VERSION = "v49-empty";
   function openDevDatabase(){
     if(typeof indexedDB==="undefined") return Promise.resolve(null);
     return new Promise(resolve=>{
@@ -34,7 +35,7 @@
       for(const [key,value] of Object.entries(values)) transaction.objectStore("data").put(value,key);
     });
   }
-  const SITE_VERSION = "48";
+  const SITE_VERSION = "49";
   const $ = (q, root = document) => root.querySelector(q);
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 
@@ -268,8 +269,19 @@
     try{
       const hadUnsavedDraft=editorDirty();
       const startingWardrobeRevision=wardrobeRevision;
-      const [storedContent,storedWardrobe]=await Promise.all([readDevDatabase(db,"content"),readDevDatabase(db,"wardrobe")]);
-      if(storedContent){
+      const [storedContent,storedWardrobe,storedBaseline]=await Promise.all([
+        readDevDatabase(db,"content"),
+        readDevDatabase(db,"wardrobe"),
+        readDevDatabase(db,"collectionBaseline")
+      ]);
+      if(storedBaseline!==COLLECTION_BASELINE_VERSION){
+        devContent=cloneData(BASE_DEV_CONTENT);
+        editorDraft=cloneData(BASE_DEV_CONTENT);
+        editorHistory=[cloneData(editorDraft)];
+        editorHistoryIndex=0;
+        applyDevContent();
+        await writeDevDatabase(db,{content:devContent,collectionBaseline:COLLECTION_BASELINE_VERSION});
+      }else if(storedContent){
         devContent={
           cards:normalizeDevArray(storedContent.cards,BASE_DEV_CONTENT.cards),
           items:normalizeDevArray(storedContent.items,BASE_DEV_CONTENT.items),
@@ -282,14 +294,19 @@
         }
         applyDevContent();
       }else{
-        await writeDevDatabase(db,{content:devContent});
+        await writeDevDatabase(db,{content:devContent,collectionBaseline:COLLECTION_BASELINE_VERSION});
       }
       if(wardrobeRevision===startingWardrobeRevision){
         if(storedWardrobe) wardrobeAssets=storedWardrobe;
         else await writeDevDatabase(db,{wardrobe:wardrobeAssets});
         committedWardrobeAssets=cloneData(wardrobeAssets);
       }
-      try{localStorage.removeItem(DEV_CONTENT_KEY);localStorage.removeItem(WARDROBE_ASSET_KEY)}catch{}
+      try{
+        localStorage.removeItem(DEV_CONTENT_KEY);
+        localStorage.removeItem("pixely-lost-sky-dev-content-v1");
+        localStorage.removeItem("pixely-lost-sky-dev-backup-v1");
+        localStorage.removeItem(WARDROBE_ASSET_KEY);
+      }catch{}
       renderHome();
       if(!$('[data-view="dev"]').hidden) renderDevSettings();
       if(!$('[data-view="wardrobe"]').hidden) renderWardrobe();
@@ -376,7 +393,7 @@
 
   async function saveEditorDraftIndexedDB(db,backup){
     try{
-      await writeDevDatabase(db,{backup,content:cloneData(editorDraft)});
+      await writeDevDatabase(db,{backup,content:cloneData(editorDraft),collectionBaseline:COLLECTION_BASELINE_VERSION});
       finishEditorSave();
     }catch{
       editorStatus("failed");
@@ -457,7 +474,7 @@
           ? strings(save.collection.cards)
           : Array.isArray(save.collection?.characters)
             ? strings(save.collection.characters)
-            : ["dreamer"],
+            : [],
         items:strings(save.collection?.items),
         postcards:strings(save.collection?.postcards)
       },
@@ -582,7 +599,7 @@
       completedChapters:[],
       missions:[{id:"explore-party-room",title:"파티방을 둘러보자",done:false}],
       story:{scene:"party-room",inspected:[],introSeen:false},
-      collection:{cards:["dreamer"],items:[],postcards:[]},
+      collection:{cards:[],items:[],postcards:[]},
       outfit:{layers:[]}
     };
   }
@@ -668,7 +685,7 @@
   }
 
   function currentViewName(){
-    return $("[data-view]").find(view=>!view.hidden)?.dataset.view||"home";
+    return $$("[data-view]").find(view=>!view.hidden)?.dataset.view||"home";
   }
 
   function openCollection(){
