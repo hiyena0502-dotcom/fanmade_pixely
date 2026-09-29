@@ -257,7 +257,7 @@ test("update prompt compares the loaded version on the first check and on later 
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
   assert.equal(state.requests[0].options.cache,"no-store");
-  state.setVersion("43");
+  state.setVersion("44");
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,false);
