@@ -4175,3 +4175,25 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
     width:58px;
   }
 }
+
+
+/* =========================================================
+   CHAPTER 01 EXTERIOR BACKGROUND v36
+   사용자가 확정한 첫 집 이미지로 교체
+   ========================================================= */
+.story-intro-overlay.is-exterior .story-intro-backdrop,
+.story-intro-overlay.is-door .story-intro-backdrop{
+  background:
+    url("./assets/story/chapter1/house-front.webp")
+    center center / cover no-repeat !important;
+}
+
+/* 기존 CSS로 그리던 집/정원 요소는 새 배경 이미지와 겹치지 않게 숨김 */
+.story-intro-overlay.is-exterior .intro-ground,
+.story-intro-overlay.is-exterior .intro-cloud,
+.story-intro-overlay.is-exterior .intro-house,
+.story-intro-overlay.is-door .intro-ground,
+.story-intro-overlay.is-door .intro-cloud,
+.story-intro-overlay.is-door .intro-house{
+  display:none !important;
+}
