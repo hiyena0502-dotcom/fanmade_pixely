@@ -1983,6 +1983,53 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
   font-weight:1000;
   letter-spacing:.1em;
 }
+.dev-top-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.dev-top-actions button,.dev-data-actions button,.dev-data-tools>button{
+  border:1px solid rgba(80,125,150,.3);border-radius:8px;background:#fff;color:#416b83;
+  padding:9px 11px;font-size:11px;font-weight:800;cursor:pointer
+}
+.dev-top-actions button:disabled{opacity:.45;cursor:default}
+.dev-top-actions .dev-save-all{background:#4e92ae;color:white;border-color:#4e92ae}
+.dev-autosave-label[data-state="dirty"]{color:#ad783a;background:#fff4dc}
+.dev-autosave-label[data-state="saving"]{color:#477aa0;background:#eaf6ff}
+.dev-autosave-label[data-state="failed"]{color:#ad3f3f;background:#ffeaea}
+.dev-data-tools{padding:22px;margin:16px;border:1px solid #d8e5e9;border-radius:12px;background:#f7fbfc}
+.dev-data-tools[hidden],.dev-settings-workspace[hidden],.dev-settings-toolbar[hidden]{display:none!important}
+.dev-data-tools h4{margin:0 0 8px;font-size:18px;color:#365e76}
+.dev-data-tools p{font-size:12px;line-height:1.7;color:#648191}
+.dev-data-actions{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+.dev-check-results{list-style:none;margin:12px 0;padding:0;display:grid;gap:7px}
+.dev-check-results button{width:100%;text-align:left;border:1px solid #e7c4ac;border-radius:7px;padding:9px;background:#fff9f3;color:#8a4e37;cursor:pointer}
+.dev-check-results .is-clear{padding:9px;color:#3a8271}
+.story-dev-scene-label{display:flex;align-items:center;gap:5px;color:#cdebf5;font-size:10px}
+.story-dev-scene-label select{padding:7px;border-radius:7px;background:#173947;color:white;border:1px solid #82c8df}
+.story-dev-save-state{color:#96d7b9;font-size:9px;font-weight:800;white-space:nowrap}
+.story-dev-save-state[data-state="dirty"]{color:#ffd88a}
+.story-dev-save-state[data-state="failed"]{color:#ffaaaa}
+.story-dev-toolbar-actions{flex-wrap:wrap;justify-content:flex-end}
+.wardrobe-top-actions{display:flex;align-items:center;gap:8px}
+.wardrobe-top-actions button{border:1px solid #bfdde4;border-radius:8px;background:#fff;color:#4c8194;padding:9px;font-size:10px;font-weight:800;cursor:pointer}
+.story-room.is-dev-house-outside,.story-room.is-dev-door-closeup,.story-room.is-dev-custom-scene{background-position:center;background-size:cover}
+.story-room.is-dev-house-outside{background-image:url("./assets/story/chapter1/house-wide.webp?v=42")}
+.story-room.is-dev-door-closeup{background-image:url("./assets/story/chapter1/house-door-close.webp?v=42")}
+.story-room.is-dev-house-outside .story-room-art,.story-room.is-dev-door-closeup .story-room-art,.story-room.is-dev-custom-scene .story-room-art{visibility:hidden}
+.story-room.is-dev-house-outside .story-hotspot,.story-room.is-dev-door-closeup .story-hotspot{visibility:hidden}
+.dev-chapter-scenes{padding:16px 20px;border-top:1px solid #dce9ec}
+.dev-chapter-scenes[hidden]{display:none}
+.dev-chapter-scenes h4{margin:0 0 12px;color:#456b82}
+.dev-scene-row{display:flex;gap:8px;align-items:end;flex-wrap:wrap;padding:9px 0;border-bottom:1px solid #e2ebee}
+.dev-scene-row label{display:grid;gap:4px;font-size:10px;color:#6d8490}
+.dev-scene-row input{max-width:150px;padding:8px;border:1px solid #c8dbe3;border-radius:7px}
+.dev-scene-row input[type=file]{max-width:140px;font-size:9px}
+.dev-scene-row button,.dev-chapter-scenes>button{padding:9px;border:1px solid #bed4de;border-radius:7px;background:white;color:#51788d;cursor:pointer}
+.dev-chapter-scenes p{font-size:11px;color:#728b9a}
+@media(max-width:680px){
+  .dev-topbar{height:auto;min-height:110px;padding:10px;grid-template-columns:auto 1fr}
+  .dev-top-actions{grid-column:1/-1;justify-content:flex-start}
+  .dev-top-actions button{padding:7px;font-size:9px}
+  .dev-settings-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .story-dev-scene-label{width:100%;justify-content:center}
+}
 .dev-settings-shell{
   position:relative;
   z-index:1;
@@ -4188,10 +4235,10 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
   transform:none;
 }
 .story-intro-overlay.is-exterior .story-intro-backdrop{
-  background-image:url("./assets/story/chapter1/house-wide.webp?v=41");
+  background-image:url("./assets/story/chapter1/house-wide.webp?v=42");
 }
 .story-intro-overlay.is-door .story-intro-backdrop{
-  background-image:url("./assets/story/chapter1/house-door-close.webp?v=41");
+  background-image:url("./assets/story/chapter1/house-door-close.webp?v=42");
 }
 .story-intro-overlay.is-approaching .story-intro-backdrop{
   transform:scale(1.08);

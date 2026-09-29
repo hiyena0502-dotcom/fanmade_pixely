@@ -257,7 +257,7 @@ test("update prompt compares the loaded version on the first check and on later 
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
   assert.equal(state.requests[0].options.cache,"no-store");
-  state.setVersion("42");
+  state.setVersion("43");
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,false);
@@ -334,11 +334,11 @@ test("simplified wardrobe editor keeps all four multi-select categories",()=>{
 });
 
 
-test("developer settings screen exposes only chapters collection and items",()=>{
+test("developer settings screen unifies content, wardrobe and data tools",()=>{
   const html=fs.readFileSync(path.join(directory,"index.html"),"utf8");
   assert.match(html,/data-open-dev/);
   assert.match(html,/data-view="dev"/);
-  for(const section of ["chapters","collection","items"]){
+  for(const section of ["chapters","collection","items","wardrobe","data"]){
     assert.match(html,new RegExp('data-dev-section="'+section+'"'));
   }
   assert.doesNotMatch(html,/data-dev-section="dialogues"/);
@@ -346,7 +346,9 @@ test("developer settings screen exposes only chapters collection and items",()=>
   assert.match(html,/id="dev-entry-list"/);
   assert.match(html,/id="dev-editor-fields"/);
   assert.match(app,/DEV_CONTENT_KEY/);
-  assert.match(app,/persistDevContent/);
+  assert.match(app,/saveEditorDraft/);
+  assert.match(html,/id="dev-global-status"/);
+  assert.match(html,/id="dev-data-export"/);
 });
 
 test("developer settings can create an item entry without touching source code",()=>{
@@ -355,6 +357,9 @@ test("developer settings can create an item entry without touching source code",
   const itemTab=state.node("dev-tab:items");
   state.node("#dev-settings-tabs").listeners.click({target:{closest(){return itemTab}}});
   state.click("#dev-new-entry");
+  assert.equal(state.storage.get(devContentKey),undefined);
+  assert.equal(state.node("#dev-global-status").textContent,"저장 필요");
+  state.click("#dev-save-all");
   const stored=JSON.parse(state.storage.get(devContentKey));
   assert.equal(Array.isArray(stored.items),true);
   assert.equal(stored.items.some(item=>item.name==="새 아이템"),true);
@@ -386,12 +391,40 @@ test("developer can enter a chapter and place an interaction by clicking the act
     clientX:500,clientY:300,
     target:{closest(){return null}}
   });
+  assert.equal(state.storage.get(devContentKey),undefined);
+  state.click("#dev-save-all");
   const stored=JSON.parse(state.storage.get(devContentKey));
   assert.equal(Array.isArray(stored.chapters[0].interactions),true);
   assert.equal(stored.chapters[0].interactions.length,1);
   assert.equal(stored.chapters[0].interactions[0].type,"inspect");
   assert.equal(stored.chapters[0].interactions[0].x,44);
   assert.equal(stored.chapters[0].interactions[0].y,44);
+  assert.equal(stored.chapters[0].interactions[0].scene,"house-outside");
+});
+
+test("undo removes an unsaved entry before saving",()=>{
+  const state=boot();
+  state.click("[data-open-dev]");
+  const itemTab=state.node("dev-tab:items");
+  state.node("#dev-settings-tabs").listeners.click({target:{closest(){return itemTab}}});
+  state.click("#dev-new-entry");
+  state.click("#dev-undo");
+  assert.equal(state.node("#dev-entry-count").textContent,"9개");
+  assert.equal(state.storage.get(devContentKey),undefined);
+});
+
+test("JSON import stays in the draft and CHECK blocks missing item rewards",async()=>{
+  const state=boot();
+  const content=state.context.window.PixelyDevContent.all();
+  content.chapters[0].interactions.push({id:"bad-reward",scene:"party-room",x:20,y:20,width:10,height:10,rewardItem:"missing-item"});
+  state.click("[data-open-dev]");
+  const file={size:100,text:async()=>JSON.stringify({format:"pixely-dev-data",version:1,content})};
+  await state.node("#dev-data-import-file").listeners.change({target:{files:[file],value:""}});
+  const errors=state.context.window.PixelyDevContent.validateDraft();
+  assert.equal(errors.some(issue=>issue.message.includes("missing-item")),true);
+  state.click("#dev-save-all");
+  assert.equal(state.storage.get(devContentKey),undefined);
+  assert.match(state.node("#dev-check-results").innerHTML,/missing-item/);
 });
 
 test("a running chapter can enter interaction edit mode from its EDIT button",()=>{
