@@ -241,7 +241,7 @@ test("update prompt compares the loaded version on the first check and on later 
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
   assert.equal(state.requests[0].options.cache,"no-store");
-  state.setVersion("53");
+  state.setVersion("54");
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,false);
@@ -340,7 +340,7 @@ test("developer editor is collection-only",()=>{
 });
 
 test("collection editor can create and save a card",()=>{
-  const state=boot(undefined,"53");
+  const state=boot(undefined,"54");
   state.click("[data-open-dev]");
   state.click("#dev-new-entry");
   assert.equal(state.storage.get(devContentKey),undefined);
@@ -399,15 +399,15 @@ test("static game and editor configuration are split from the runtime",()=>{
   assert.doesNotMatch(app,/const catalogue = \{/);
   assert.doesNotMatch(app,/const devSchemas=\{/);
   const html=fs.readFileSync(path.join(directory,"index.html"),"utf8");
-  assert.match(html,/data\/game-config\.js\?v=53/);
-  assert.match(html,/data\/editor-schema\.js\?v=53/);
+  assert.match(html,/data\/game-config\.js\?v=54/);
+  assert.match(html,/data\/editor-schema\.js\?v=54/);
 });
 
 
 test("feature CSS is split into maintainable modules without legacy patch stacks",()=>{
   const entry=fs.readFileSync(path.join(directory,"style.css"),"utf8");
   for(const file of ["core","home","chapters","collection","story","wardrobe","editor"]){
-    assert.match(entry,new RegExp('styles/'+file+'\\.css\\?v=53'));
+    assert.match(entry,new RegExp('styles/'+file+'\\.css\\?v=54'));
     assert.ok(fs.statSync(path.join(directory,"styles",file+".css")).size>100);
   }
   assert.doesNotMatch(allCss,/VISUAL PATCH v|WARDROBE PATCH v|WARDROBE IMAGE EDITOR v|WARDROBE PREVIEW \+ DEV EDITOR v|WARDROBE ALL-MULTI|SIMPLE WARDROBE DEV EDITOR|CHAPTER INTERACTION EDITOR v|DESKTOP WARDROBE WORKSPACE v|WARDROBE RE-EDIT v|WARDROBE TRANSFORM NUMBER INPUTS v/);
@@ -415,7 +415,7 @@ test("feature CSS is split into maintainable modules without legacy patch stacks
 
 
 test("collection editor starts with zero default items",()=>{
-  const state=boot(undefined,"53");
+  const state=boot(undefined,"54");
   state.click("[data-open-dev]");
   const itemTab=state.node("dev-collection:items");
   state.node("#dev-collection-types").listeners.click({target:{closest(){return itemTab}}});
@@ -426,8 +426,8 @@ test("collection editor starts with zero default items",()=>{
 
 test("story intro image paths are relative to the modular story stylesheet",()=>{
   const css=fs.readFileSync(path.join(directory,"styles/story.css"),"utf8");
-  assert.match(css,/url\("\.\.\/assets\/story\/chapter1\/house-wide\.webp\?v=53"\)/);
-  assert.match(css,/url\("\.\.\/assets\/story\/chapter1\/house-door-close\.webp\?v=53"\)/);
+  assert.match(css,/url\("\.\.\/assets\/story\/chapter1\/house-wide\.webp\?v=54"\)/);
+  assert.match(css,/url\("\.\.\/assets\/story\/chapter1\/house-door-close\.webp\?v=54"\)/);
   assert.doesNotMatch(css,/url\("\.\/assets\/story/);
 });
 
@@ -530,4 +530,14 @@ test("door back control is prominent and returns to the wide house step",()=>{
   assert.match(css,/\.story-intro-back\{[\s\S]*min-width:112px[\s\S]*border:2px solid/);
   assert.match(app,/if\(back\) back\.hidden=step\.phase!=="door"/);
   assert.match(app,/const houseIndex=storyIntroSteps\.findIndex\(entry=>entry\.kind==="house"&&entry\.phase==="exterior"\)/);
+});
+
+
+test("home shortcut is available before entering the house",()=>{
+  const html=fs.readFileSync(path.join(directory,"index.html"),"utf8");
+  const css=fs.readFileSync(path.join(directory,"styles/story.css"),"utf8");
+  assert.match(html,/class="story-intro-home"[^>]*data-go-home/);
+  assert.match(html,/story-intro-home[\s\S]*?<b>홈<\/b>/);
+  assert.match(css,/\.story-intro-overlay\.is-exterior \.story-intro-home,[\s\S]*\.story-intro-overlay\.is-door \.story-intro-home\{[\s\S]*display:flex/);
+  assert.match(app,/\$\$\("\[data-go-home\]"\)\.forEach/);
 });
