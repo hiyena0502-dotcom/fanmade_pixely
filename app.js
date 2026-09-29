@@ -685,7 +685,7 @@
   }
 
   function currentViewName(){
-    return $("[data-view]").find(view=>!view.hidden)?.dataset.view||"home";
+    return $$("[data-view]").find(view=>!view.hidden)?.dataset.view||"home";
   }
 
   function openCollection(){
