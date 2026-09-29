@@ -90,9 +90,9 @@
 .story-room.is-dev-door-closeup,
 .story-room.is-dev-custom-scene{background-position:center;background-size:cover}
 
-.story-room.is-dev-house-outside{background-image:url("./assets/story/chapter1/house-wide.webp?v=44")}
+.story-room.is-dev-house-outside{background-image:url("../assets/story/chapter1/house-wide.webp?v=48")}
 
-.story-room.is-dev-door-closeup{background-image:url("./assets/story/chapter1/house-door-close.webp?v=44")}
+.story-room.is-dev-door-closeup{background-image:url("../assets/story/chapter1/house-door-close.webp?v=48")}
 
 .story-room.is-dev-house-outside .story-room-art,
 .story-room.is-dev-door-closeup .story-room-art,
