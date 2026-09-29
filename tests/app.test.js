@@ -161,8 +161,8 @@ test("Chapter 1 starts at the wide house and waits for a door click before the c
   state.click("#story-intro-house");
   assert.equal(state.node("#story-intro").classList.contains("is-approaching"),true);
   const css=allCss;
-  assert.match(css,/is-exterior \.story-intro-backdrop\{\s*background-image:url\("\.\/assets\/story\/chapter1\/house-wide\.webp/);
-  assert.match(css,/is-door \.story-intro-backdrop\{\s*background-image:url\("\.\/assets\/story\/chapter1\/house-door-close\.webp/);
+  assert.match(css,/is-exterior \.story-intro-backdrop\{\s*background-image:url\("\.\.\/assets\/story\/chapter1\/house-wide\.webp/);
+  assert.match(css,/is-door \.story-intro-backdrop\{\s*background-image:url\("\.\.\/assets\/story\/chapter1\/house-door-close\.webp/);
   assert.match(css,/is-chapter \.story-intro-backdrop\{opacity:0/);
   assert.match(css,/is-chapter \.intro-house\{display:none !important\}/);
   assert.match(css,/\.story-stage:has\(\.story-intro-overlay:not\(\[hidden\]\)\) \.story-hud/);
@@ -175,12 +175,12 @@ test("existing saves normalize into the current party-room interface",()=>{
   const saved={activeSlot:0,slots:[{
     chapter:"챕터 1 완료",location:"파티",savedAt:1,progress:15,
     story:{phase:"done",found:["ribbon"],delivered:["ribbon"]},
-    completedChapters:["night"],collection:{cards:["dreamer"],items:["ribbon","plush"],postcards:[]}
+    completedChapters:["night"],collection:{cards:[],items:[],postcards:[]}
   },null,null]};
   const state=boot(saved);
   state.click("#continue-button");
   assert.equal(state.node("view:story").hidden,false);
-  assert.match(state.node("#story-inventory-list").innerHTML,/치명적으로 귀여운 봉제인형/);
+  assert.match(state.node("#story-inventory-list").innerHTML,/가방이 비어 있어요/);
   const normalized=JSON.parse(state.storage.get(storageKey)).slots[0];
   assert.equal(normalized.story.scene,"party-room");
   assert.deepEqual(normalized.story.inspected,[]);
@@ -193,53 +193,37 @@ test("collection tabs switch without losing the selected state",()=>{
   state.node(".diary-tabs").listeners.click({target:{closest(){return button}}});
   assert.equal(button["aria-selected"],"true");
   assert.equal(state.node("tab:cards")["aria-selected"],"false");
-  assert.equal(state.node("#collection-total").textContent,4);
+  assert.equal(state.node("#collection-total").textContent,0);
   assert.match(state.node("#collection-grid").className,/postcards/);
 });
 
-test("collection filters separate existing characters and show an empty story group",()=>{
-  const state=boot({activeSlot:0,slots:[{collection:{cards:["dreamer","philip"],items:[]}},null,null]});
+test("collection starts with zero cards items and postcards",()=>{
+  const state=boot();
   state.click("[data-open-collection]");
-  const filters=state.node("#collection-filters");
-  const choose=id=>filters.listeners.click({target:{closest(){return {dataset:{collectionFilter:id}}}}});
-  choose("fairy");
-  assert.equal(state.node("#collection-total").textContent,9);
-  assert.match(state.node("#collection-grid").innerHTML,/필립/);
-  assert.doesNotMatch(state.node("#collection-grid").innerHTML,/수상한 비둘기/);
-  choose("roleplay");
   assert.equal(state.node("#collection-total").textContent,0);
   assert.match(state.node("#collection-grid").innerHTML,/아직 이 페이지는 비어 있어요/);
+  for(const key of ["items","postcards"]){
+    const button=state.node("tab:"+key);
+    state.node(".diary-tabs").listeners.click({target:{closest(){return button}}});
+    assert.equal(state.node("#collection-total").textContent,0);
+    assert.match(state.node("#collection-grid").innerHTML,/아직 이 페이지는 비어 있어요/);
+  }
 });
 
-test("wardrobe saves earned items as multi-select layers and exposes them for future scenes",()=>{
+test("empty default item catalogue does not invent removed wardrobe items",()=>{
   const state=boot();
   state.click("#new-game-button");
   state.slotAction("new-slot",0);
   state.click("[data-open-wardrobe]");
-  const avatar=state.context.window.PixelyAvatar;
-  assert.deepEqual(Array.from(avatar.outfitForActiveSave().layers),[]);
-  assert.equal(state.context.window.PixelyInventory.grantItem("plush"),true);
-  state.node("#wardrobe-tabs").listeners.click({target:{closest(){return state.node("wardrobe-tab:accessory")}}});
-  const option=id=>state.node("#wardrobe-options").listeners.click({target:{closest(selector){return selector==="[data-wardrobe-item]"?{dataset:{wardrobeItem:id},disabled:false}:null}}});
-  option("plush");
-  state.click("#wardrobe-save-button");
-  const saved=JSON.parse(state.storage.get(storageKey));
-  assert.deepEqual(saved.slots[0].outfit.layers,["plush"]);
-  assert.deepEqual(saved.slots[0].collection.items,["plush"]);
-  assert.deepEqual(Array.from(avatar.outfitForActiveSave().layers),["plush"]);
-  const restored=boot(saved);
-  assert.deepEqual(Array.from(restored.context.window.PixelyAvatar.outfitForActiveSave().layers),["plush"]);
-  assert.equal(restored.context.window.PixelyInventory.grantItem("not-a-real-item"),false);
+  assert.deepEqual(Array.from(state.context.window.PixelyAvatar.outfitForActiveSave().layers),[]);
+  assert.equal(state.context.window.PixelyInventory.grantItem("plush"),false);
+  assert.doesNotMatch(state.node("#wardrobe-options").innerHTML,/치명적으로 귀여운 봉제인형/);
 });
 
-test("old single-slot save data migrates into layers and still rejects unowned equipment",()=>{
-  const state=boot({activeSlot:0,slots:[{collection:{cards:["dreamer"],items:[]},outfit:{accessory:"plush"}},null,null]});
+test("legacy equipment ids are rejected when the default collection is empty",()=>{
+  const state=boot({activeSlot:0,slots:[{collection:{cards:[],items:[]},outfit:{accessory:"plush"}},null,null]});
   assert.deepEqual(Array.from(state.context.window.PixelyAvatar.outfitForActiveSave().layers),[]);
-  state.click("[data-open-wardrobe]");
-  state.node("#wardrobe-tabs").listeners.click({target:{closest(){return state.node("wardrobe-tab:accessory")}}});
-  assert.match(state.node("#wardrobe-options").innerHTML,/여행 중 발견/);
-  assert.equal(state.context.window.PixelyInventory.grantItem("plush"),true);
-  assert.match(state.node("#wardrobe-options").innerHTML,/치명적으로 귀여운 봉제인형/);
+  assert.equal(state.context.window.PixelyInventory.grantItem("plush"),false);
 });
 
 test("a local storage failure keeps the new save playable in the current tab",()=>{
@@ -257,7 +241,7 @@ test("update prompt compares the loaded version on the first check and on later 
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
   assert.equal(state.requests[0].options.cache,"no-store");
-  state.setVersion("48");
+  state.setVersion("49");
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,false);
@@ -356,7 +340,7 @@ test("developer editor is collection-only",()=>{
 });
 
 test("collection editor can create and save a card",()=>{
-  const state=boot(undefined,"48");
+  const state=boot(undefined,"49");
   state.click("[data-open-dev]");
   state.click("#dev-new-entry");
   assert.equal(state.storage.get(devContentKey),undefined);
@@ -415,34 +399,35 @@ test("static game and editor configuration are split from the runtime",()=>{
   assert.doesNotMatch(app,/const catalogue = \{/);
   assert.doesNotMatch(app,/const devSchemas=\{/);
   const html=fs.readFileSync(path.join(directory,"index.html"),"utf8");
-  assert.match(html,/data\/game-config\.js\?v=48/);
-  assert.match(html,/data\/editor-schema\.js\?v=48/);
+  assert.match(html,/data\/game-config\.js\?v=49/);
+  assert.match(html,/data\/editor-schema\.js\?v=49/);
 });
 
 
 test("feature CSS is split into maintainable modules without legacy patch stacks",()=>{
   const entry=fs.readFileSync(path.join(directory,"style.css"),"utf8");
   for(const file of ["core","home","chapters","collection","story","wardrobe","editor"]){
-    assert.match(entry,new RegExp('styles/'+file+'\\.css\\?v=48'));
+    assert.match(entry,new RegExp('styles/'+file+'\\.css\\?v=49'));
     assert.ok(fs.statSync(path.join(directory,"styles",file+".css")).size>100);
   }
   assert.doesNotMatch(allCss,/VISUAL PATCH v|WARDROBE PATCH v|WARDROBE IMAGE EDITOR v|WARDROBE PREVIEW \+ DEV EDITOR v|WARDROBE ALL-MULTI|SIMPLE WARDROBE DEV EDITOR|CHAPTER INTERACTION EDITOR v|DESKTOP WARDROBE WORKSPACE v|WARDROBE RE-EDIT v|WARDROBE TRANSFORM NUMBER INPUTS v/);
 });
 
 
-test("collection editor exposes existing items without adding defaults",()=>{
-  const state=boot(undefined,"48");
+test("collection editor starts with zero default items",()=>{
+  const state=boot(undefined,"49");
   state.click("[data-open-dev]");
   const itemTab=state.node("dev-collection:items");
   state.node("#dev-collection-types").listeners.click({target:{closest(){return itemTab}}});
   assert.equal(state.node("#dev-current-section").textContent,"컬렉션 아이템");
+  assert.equal(state.node("#dev-entry-count").textContent,"0개");
   assert.equal(state.storage.get(devContentKey),undefined);
 });
 
 test("story intro image paths are relative to the modular story stylesheet",()=>{
   const css=fs.readFileSync(path.join(directory,"styles/story.css"),"utf8");
-  assert.match(css,/url\("\.\.\/assets\/story\/chapter1\/house-wide\.webp\?v=48"\)/);
-  assert.match(css,/url\("\.\.\/assets\/story\/chapter1\/house-door-close\.webp\?v=48"\)/);
+  assert.match(css,/url\("\.\.\/assets\/story\/chapter1\/house-wide\.webp\?v=49"\)/);
+  assert.match(css,/url\("\.\.\/assets\/story\/chapter1\/house-door-close\.webp\?v=49"\)/);
   assert.doesNotMatch(css,/url\("\.\/assets\/story/);
 });
 
@@ -450,6 +435,16 @@ test("travel diary back button is a dedicated return control",()=>{
   const html=fs.readFileSync(path.join(directory,"index.html"),"utf8");
   assert.match(html,/id="collection-back-button"/);
   assert.match(app,/function openCollection\(\)/);
+  assert.match(app,/return \$\$\("\[data-view\]"\)\.find\(view=>!view\.hidden\)\?\.dataset\.view\|\|"home"/);
   assert.match(app,/collectionReturnView=from==="story"\?"story":"home"/);
   assert.match(app,/function closeCollection\(\)/);
+});
+
+
+test("built-in collection catalogue is completely empty",()=>{
+  const context={window:{}};
+  vm.runInNewContext(gameConfig,context);
+  assert.equal(context.window.PixelyGameConfig.catalogue.cards.length,0);
+  assert.equal(context.window.PixelyGameConfig.catalogue.items.length,0);
+  assert.equal(context.window.PixelyGameConfig.catalogue.postcards.length,0);
 });
