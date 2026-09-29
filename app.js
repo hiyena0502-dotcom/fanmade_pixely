@@ -35,7 +35,7 @@
       for(const [key,value] of Object.entries(values)) transaction.objectStore("data").put(value,key);
     });
   }
-  const SITE_VERSION = "49";
+  const SITE_VERSION = "50";
   const $ = (q, root = document) => root.querySelector(q);
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 
@@ -512,6 +512,7 @@
   let collectionTab="cards";
   let collectionFilter="all";
   let collectionReturnView="home";
+  let wardrobeReturnView="home";
   let wardrobeSlot="outfit";
   let wardrobeEditorTarget="base";
   let pendingWardrobeFile=null;
@@ -696,6 +697,16 @@
 
   function closeCollection(){
     showView(collectionReturnView==="story"&&activeSave()?"story":"home");
+  }
+
+  function openWardrobe(){
+    const from=currentViewName();
+    wardrobeReturnView=from==="story"?"story":"home";
+    showView("wardrobe");
+  }
+
+  function closeWardrobe(){
+    showView(wardrobeReturnView==="story"&&activeSave()?"story":"home");
   }
 
   function openSaveModal(mode="manage"){
@@ -1802,7 +1813,8 @@
 
     Array.from(document.querySelectorAll("[data-open-collection]")).forEach(b=>b.addEventListener("click",openCollection));
     $("#collection-back-button")?.addEventListener("click",closeCollection);
-    Array.from(document.querySelectorAll("[data-open-wardrobe]")).forEach(b=>b.addEventListener("click",()=>showView("wardrobe")));
+    Array.from(document.querySelectorAll("[data-open-wardrobe]")).forEach(b=>b.addEventListener("click",openWardrobe));
+    $("#wardrobe-back-button")?.addEventListener("click",closeWardrobe);
     Array.from(document.querySelectorAll("[data-open-chapters]")).forEach(b=>b.addEventListener("click",()=>showView("chapters")));
     Array.from(document.querySelectorAll("[data-open-dev]")).forEach(b=>b.addEventListener("click",()=>showView("dev")));
     $$("[data-go-home]").forEach(b=>b.addEventListener("click",()=>showView("home")));
@@ -2017,7 +2029,8 @@
       else if(!$("#story-inventory-panel")?.hidden || !$("#story-missions-panel")?.hidden || !$("#story-map-panel")?.hidden){closeStoryPanels();}
       else if(!$("#story-dialogue")?.hidden){$("#story-dialogue").hidden=true;}
       else if(!$("[data-view='collection']").hidden){closeCollection();}
-      else if(!$("[data-view='chapters']").hidden || !$("[data-view='story']").hidden || !$("[data-view='wardrobe']").hidden || !$("[data-view='dev']").hidden) showView("home");
+      else if(!$("[data-view='wardrobe']").hidden){closeWardrobe();}
+      else if(!$("[data-view='chapters']").hidden || !$("[data-view='story']").hidden || !$("[data-view='dev']").hidden) showView("home");
     });
   }
 
