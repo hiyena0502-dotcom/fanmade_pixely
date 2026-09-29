@@ -241,7 +241,7 @@ test("update prompt compares the loaded version on the first check and on later 
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
   assert.equal(state.requests[0].options.cache,"no-store");
-  state.setVersion("51");
+  state.setVersion("52");
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,false);
@@ -340,7 +340,7 @@ test("developer editor is collection-only",()=>{
 });
 
 test("collection editor can create and save a card",()=>{
-  const state=boot(undefined,"51");
+  const state=boot(undefined,"52");
   state.click("[data-open-dev]");
   state.click("#dev-new-entry");
   assert.equal(state.storage.get(devContentKey),undefined);
@@ -399,15 +399,15 @@ test("static game and editor configuration are split from the runtime",()=>{
   assert.doesNotMatch(app,/const catalogue = \{/);
   assert.doesNotMatch(app,/const devSchemas=\{/);
   const html=fs.readFileSync(path.join(directory,"index.html"),"utf8");
-  assert.match(html,/data\/game-config\.js\?v=51/);
-  assert.match(html,/data\/editor-schema\.js\?v=51/);
+  assert.match(html,/data\/game-config\.js\?v=52/);
+  assert.match(html,/data\/editor-schema\.js\?v=52/);
 });
 
 
 test("feature CSS is split into maintainable modules without legacy patch stacks",()=>{
   const entry=fs.readFileSync(path.join(directory,"style.css"),"utf8");
   for(const file of ["core","home","chapters","collection","story","wardrobe","editor"]){
-    assert.match(entry,new RegExp('styles/'+file+'\\.css\\?v=51'));
+    assert.match(entry,new RegExp('styles/'+file+'\\.css\\?v=52'));
     assert.ok(fs.statSync(path.join(directory,"styles",file+".css")).size>100);
   }
   assert.doesNotMatch(allCss,/VISUAL PATCH v|WARDROBE PATCH v|WARDROBE IMAGE EDITOR v|WARDROBE PREVIEW \+ DEV EDITOR v|WARDROBE ALL-MULTI|SIMPLE WARDROBE DEV EDITOR|CHAPTER INTERACTION EDITOR v|DESKTOP WARDROBE WORKSPACE v|WARDROBE RE-EDIT v|WARDROBE TRANSFORM NUMBER INPUTS v/);
@@ -415,7 +415,7 @@ test("feature CSS is split into maintainable modules without legacy patch stacks
 
 
 test("collection editor starts with zero default items",()=>{
-  const state=boot(undefined,"51");
+  const state=boot(undefined,"52");
   state.click("[data-open-dev]");
   const itemTab=state.node("dev-collection:items");
   state.node("#dev-collection-types").listeners.click({target:{closest(){return itemTab}}});
@@ -426,8 +426,8 @@ test("collection editor starts with zero default items",()=>{
 
 test("story intro image paths are relative to the modular story stylesheet",()=>{
   const css=fs.readFileSync(path.join(directory,"styles/story.css"),"utf8");
-  assert.match(css,/url\("\.\.\/assets\/story\/chapter1\/house-wide\.webp\?v=51"\)/);
-  assert.match(css,/url\("\.\.\/assets\/story\/chapter1\/house-door-close\.webp\?v=51"\)/);
+  assert.match(css,/url\("\.\.\/assets\/story\/chapter1\/house-wide\.webp\?v=52"\)/);
+  assert.match(css,/url\("\.\.\/assets\/story\/chapter1\/house-door-close\.webp\?v=52"\)/);
   assert.doesNotMatch(css,/url\("\.\/assets\/story/);
 });
 
@@ -493,4 +493,22 @@ test("door dialogue sequence ends at a choice before the chapter title",()=>{
   assert.equal(chapterIndex,choiceIndex+1);
   assert.match(app,/if\(storyIntroDoorDialogueSeen\)/);
   assert.match(app,/step\?\.kind==="house"\|\|step\?\.kind==="choice"\|\|storyIntroDoorExplore/);
+});
+
+
+test("exterior and door scenes expose the game toolbar",()=>{
+  const css=fs.readFileSync(path.join(directory,"styles/story.css"),"utf8");
+  assert.match(css,/story-intro-overlay\.is-exterior:not\(\[hidden\]\)\) \.story-toolbar/);
+  assert.match(css,/story-intro-overlay\.is-door:not\(\[hidden\]\)\) \.story-toolbar/);
+  assert.match(css,/\.story-intro-overlay\.is-exterior,\s*\.story-intro-overlay\.is-door\{\s*bottom:112px/);
+  assert.match(css,/\.story-side-panel\{?[^}]*z-index:110|story-intro-overlay\.is-door:not\(\[hidden\]\)\) \.story-side-panel/);
+});
+
+test("door back control is prominent and returns to the wide house step",()=>{
+  const html=fs.readFileSync(path.join(directory,"index.html"),"utf8");
+  const css=fs.readFileSync(path.join(directory,"styles/story.css"),"utf8");
+  assert.match(html,/id="story-intro-back"[^>]*><span[^>]*>←<\/span><b>집 앞<\/b>/);
+  assert.match(css,/\.story-intro-back\{[\s\S]*min-width:112px[\s\S]*border:2px solid/);
+  assert.match(app,/if\(back\) back\.hidden=step\.phase!=="door"/);
+  assert.match(app,/const houseIndex=storyIntroSteps\.findIndex\(entry=>entry\.kind==="house"&&entry\.phase==="exterior"\)/);
 });

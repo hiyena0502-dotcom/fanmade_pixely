@@ -35,7 +35,7 @@
       for(const [key,value] of Object.entries(values)) transaction.objectStore("data").put(value,key);
     });
   }
-  const SITE_VERSION = "51";
+  const SITE_VERSION = "52";
   const $ = (q, root = document) => root.querySelector(q);
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 
@@ -840,7 +840,7 @@
     }
     if(choices) choices.hidden=!choiceStep||storyIntroDoorExplore;
     if(explore) explore.hidden=!storyIntroDoorExplore;
-    if(back) back.hidden=!storyIntroDoorExplore;
+    if(back) back.hidden=step.phase!=="door";
     if(hint) hint.textContent=storyIntroDoorExplore?"주변을 클릭해 조사하기":houseStep?"문을 클릭하기":choiceStep?"선택지를 골라 주세요":"CLICK / SPACE";
 
     $("#story-intro-kicker").textContent=step.speaker||step.kicker||"";
@@ -934,8 +934,11 @@
   }
 
   function backStoryIntroExterior(){
-    if(!storyIntroActive||!storyIntroDoorExplore) return;
+    if(!storyIntroActive) return;
+    const step=storyIntroSteps[storyIntroIndex];
+    if(step?.phase!=="door"&&!storyIntroDoorExplore) return;
     storyIntroDoorExplore=false;
+    closeStoryPanels();
     const houseIndex=storyIntroSteps.findIndex(entry=>entry.kind==="house"&&entry.phase==="exterior");
     if(houseIndex<0) return;
     storyIntroIndex=houseIndex;
