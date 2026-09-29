@@ -7,8 +7,8 @@
   <meta name="theme-color" content="#111a3b" />
   <title>PIXELY : LOST SKY</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=33" />
-  <script src="app.js?v=33" defer></script>
+  <link rel="stylesheet" href="style.css?v=34" />
+  <script src="app.js?v=34" defer></script>
 </head>
 <body>
   <div class="game-root">
@@ -369,7 +369,7 @@
 
           <section class="wardrobe-dev-section">
             <header class="wardrobe-dev-section-title">
-              <div><span>02</span><b>새 파츠 등록</b></div>
+              <div><span>02</span><b id="wardrobe-upload-heading">새 파츠 등록</b></div>
               <small id="wardrobe-storage-meter">저장 공간 계산 중</small>
             </header>
             <div class="wardrobe-dev-form">
@@ -378,11 +378,11 @@
               <label class="wardrobe-dev-name"><span>이름</span><input type="text" id="wardrobe-image-name" maxlength="40" placeholder="예: 웃는 입"></label>
               <label class="wardrobe-dev-file">
                 <span>이미지</span>
-                <b>파일 선택</b>
+                <b id="wardrobe-file-action-label">파일 선택</b>
                 <input type="file" id="wardrobe-image-file" accept="image/png,image/webp,image/jpeg">
               </label>
               <div class="wardrobe-file-name" id="wardrobe-file-name">선택된 파일 없음</div>
-              <button type="button" class="wardrobe-add-part-button" id="wardrobe-add-part-button" disabled>등록하고 켜기</button>
+              <div class="wardrobe-part-submit-row"><button type="button" class="wardrobe-add-part-button" id="wardrobe-add-part-button" disabled>등록하고 켜기</button><button type="button" class="wardrobe-cancel-edit-button" id="wardrobe-cancel-edit-button" hidden>수정 취소</button></div>
             </div>
             <p class="wardrobe-upload-status" id="wardrobe-upload-status" data-state="idle">파일을 고른 뒤 <b>등록하고 켜기</b>를 누르세요.</p>
             <div class="wardrobe-base-row">
