@@ -1089,11 +1089,11 @@
 }
 
 .story-intro-overlay.is-exterior .story-intro-backdrop{
-  background-image:url("../assets/story/chapter1/house-wide.webp?v=56");
+  background-image:url("../assets/story/chapter1/house-wide.webp?v=57");
 }
 
 .story-intro-overlay.is-door .story-intro-backdrop{
-  background-image:url("../assets/story/chapter1/house-door-close.webp?v=56");
+  background-image:url("../assets/story/chapter1/house-door-close.webp?v=57");
 }
 
 .story-intro-overlay.is-approaching .story-intro-backdrop{
@@ -1215,22 +1215,22 @@
 
 @keyframes pixely-leaf-fly{
   0%{
-    transform:translate3d(-14vw,0,0) rotate(0deg) scale(var(--leaf-scale,1)) scaleX(1);
-    opacity:.25;
+    transform:translate3d(116vw,-9vh,0) rotate(0deg) scale(var(--leaf-scale,1)) scaleX(1);
+    opacity:.24;
   }
   7%{opacity:.94}
   22%{
-    transform:translate3d(18vw,var(--leaf-wave-a,24px),0) rotate(150deg) scale(var(--leaf-scale,1)) scaleX(.48);
+    transform:translate3d(82vw,calc(var(--leaf-wave-a,24px) - 4vh),0) rotate(-150deg) scale(var(--leaf-scale,1)) scaleX(.48);
   }
   46%{
-    transform:translate3d(48vw,var(--leaf-wave-b,-20px),0) rotate(340deg) scale(var(--leaf-scale,1)) scaleX(-.76);
+    transform:translate3d(52vw,calc(var(--leaf-wave-b,-20px) + 1vh),0) rotate(-340deg) scale(var(--leaf-scale,1)) scaleX(-.76);
   }
   69%{
-    transform:translate3d(76vw,var(--leaf-wave-c,32px),0) rotate(535deg) scale(var(--leaf-scale,1)) scaleX(.62);
+    transform:translate3d(24vw,calc(var(--leaf-wave-c,32px) + 6vh),0) rotate(-535deg) scale(var(--leaf-scale,1)) scaleX(.62);
   }
   88%{opacity:.92}
   100%{
-    transform:translate3d(116vw,12px,0) rotate(760deg) scale(var(--leaf-scale,1)) scaleX(-.9);
+    transform:translate3d(-16vw,12vh,0) rotate(-760deg) scale(var(--leaf-scale,1)) scaleX(-.9);
     opacity:.2;
   }
 }
