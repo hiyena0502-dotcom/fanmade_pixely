@@ -1160,38 +1160,72 @@
   pointer-events:none;
   display:none;
 }
-.story-intro-overlay.is-exterior .intro-leaves{display:block}
+
+.story-intro-overlay.is-exterior .intro-leaves,
+.story-intro-overlay.is-door .intro-leaves{
+  display:block;
+}
+
 .intro-leaves i{
   position:absolute;
-  left:-8%;
+  left:var(--leaf-x,-10%);
   top:var(--leaf-y,30%);
-  width:13px;
-  height:8px;
-  border-radius:80% 0 80% 0;
+  width:var(--leaf-w,13px);
+  height:var(--leaf-h,8px);
+  border-radius:82% 8% 78% 12%;
   background:var(--leaf-color,#8b9b58);
-  opacity:.82;
-  transform:rotate(25deg);
-  filter:drop-shadow(0 2px 2px rgba(67,73,42,.12));
-  animation:intro-leaf-drift var(--leaf-time,8s) linear infinite;
-  animation-delay:var(--leaf-delay,0s);
+  opacity:0;
+  transform-origin:46% 52%;
+  translate:0 0;
+  rotate:var(--leaf-angle,24deg);
+  scale:var(--leaf-scale,1) 1;
+  filter:drop-shadow(0 2px 2px rgba(58,66,39,.16));
+  will-change:translate,rotate,scale,opacity;
+  animation:
+    intro-leaf-drift var(--leaf-time,9s) linear infinite,
+    intro-leaf-flutter var(--flutter-time,1.15s) ease-in-out infinite alternate;
+  animation-delay:var(--leaf-delay,0s),var(--flutter-delay,-.4s);
 }
-.intro-leaves i:nth-child(1){--leaf-y:15%;--leaf-time:8.2s;--leaf-delay:-1s;--leaf-color:#899a59}
-.intro-leaves i:nth-child(2){--leaf-y:27%;--leaf-time:10.8s;--leaf-delay:-6.1s;--leaf-color:#b29b58;transform:scale(.78) rotate(70deg)}
-.intro-leaves i:nth-child(3){--leaf-y:42%;--leaf-time:7.4s;--leaf-delay:-3.4s;--leaf-color:#728d55;transform:scale(.66) rotate(-30deg)}
-.intro-leaves i:nth-child(4){--leaf-y:59%;--leaf-time:11.5s;--leaf-delay:-8.2s;--leaf-color:#a1784f;transform:scale(.9) rotate(105deg)}
-.intro-leaves i:nth-child(5){--leaf-y:20%;--leaf-time:9.6s;--leaf-delay:-7.3s;--leaf-color:#78925a}
-.intro-leaves i:nth-child(6){--leaf-y:67%;--leaf-time:8.8s;--leaf-delay:-2.5s;--leaf-color:#b68a57;transform:scale(.7) rotate(45deg)}
-.intro-leaves i:nth-child(7){--leaf-y:34%;--leaf-time:12.3s;--leaf-delay:-9.6s;--leaf-color:#687f50;transform:scale(.62) rotate(-60deg)}
-.intro-leaves i:nth-child(8){--leaf-y:74%;--leaf-time:9.2s;--leaf-delay:-5.2s;--leaf-color:#927d4d}
-.intro-leaves i:nth-child(9){--leaf-y:49%;--leaf-time:10.2s;--leaf-delay:-1.8s;--leaf-color:#7f9656;transform:scale(.82) rotate(90deg)}
-.intro-leaves i:nth-child(10){--leaf-y:11%;--leaf-time:13.1s;--leaf-delay:-11s;--leaf-color:#b18a52;transform:scale(.58) rotate(15deg)}
+
+.intro-leaves i:nth-child(1){--leaf-y:12%;--leaf-time:8.4s;--leaf-delay:-1.2s;--flutter-time:.92s;--leaf-color:#859851;--leaf-scale:.86;--leaf-angle:18deg;--leaf-spin:760deg}
+.intro-leaves i:nth-child(2){--leaf-y:24%;--leaf-time:11.2s;--leaf-delay:-7.1s;--flutter-time:1.28s;--leaf-color:#b49550;--leaf-scale:.72;--leaf-angle:72deg;--leaf-spin:610deg}
+.intro-leaves i:nth-child(3){--leaf-y:39%;--leaf-time:7.8s;--leaf-delay:-3.9s;--flutter-time:.84s;--leaf-color:#70894f;--leaf-scale:.62;--leaf-angle:-28deg;--leaf-spin:880deg}
+.intro-leaves i:nth-child(4){--leaf-y:55%;--leaf-time:12.1s;--leaf-delay:-9.2s;--flutter-time:1.42s;--leaf-color:#9e7447;--leaf-scale:.94;--leaf-angle:104deg;--leaf-spin:540deg}
+.intro-leaves i:nth-child(5){--leaf-y:18%;--leaf-time:9.9s;--leaf-delay:-7.9s;--flutter-time:1.08s;--leaf-color:#749051;--leaf-scale:.8;--leaf-angle:38deg;--leaf-spin:720deg}
+.intro-leaves i:nth-child(6){--leaf-y:66%;--leaf-time:9.1s;--leaf-delay:-2.8s;--flutter-time:.96s;--leaf-color:#b38451;--leaf-scale:.68;--leaf-angle:48deg;--leaf-spin:840deg}
+.intro-leaves i:nth-child(7){--leaf-y:31%;--leaf-time:12.8s;--leaf-delay:-10.1s;--flutter-time:1.52s;--leaf-color:#667d49;--leaf-scale:.58;--leaf-angle:-64deg;--leaf-spin:500deg}
+.intro-leaves i:nth-child(8){--leaf-y:74%;--leaf-time:9.5s;--leaf-delay:-5.7s;--flutter-time:1.04s;--leaf-color:#8e7948;--leaf-scale:.84;--leaf-angle:12deg;--leaf-spin:790deg}
+.intro-leaves i:nth-child(9){--leaf-y:46%;--leaf-time:10.6s;--leaf-delay:-2.1s;--flutter-time:1.22s;--leaf-color:#7b9250;--leaf-scale:.78;--leaf-angle:88deg;--leaf-spin:680deg}
+.intro-leaves i:nth-child(10){--leaf-y:8%;--leaf-time:13.4s;--leaf-delay:-11.7s;--flutter-time:1.36s;--leaf-color:#ae854d;--leaf-scale:.54;--leaf-angle:16deg;--leaf-spin:460deg}
+.intro-leaves i:nth-child(11){--leaf-y:84%;--leaf-time:8.7s;--leaf-delay:-6.4s;--flutter-time:.88s;--leaf-color:#72874d;--leaf-scale:.74;--leaf-angle:-42deg;--leaf-spin:820deg}
+.intro-leaves i:nth-child(12){--leaf-y:29%;--leaf-time:14.2s;--leaf-delay:-4.5s;--flutter-time:1.62s;--leaf-color:#a58d52;--leaf-scale:.5;--leaf-angle:132deg;--leaf-spin:430deg}
+.intro-leaves i:nth-child(13){--leaf-y:62%;--leaf-time:10.1s;--leaf-delay:-8.6s;--flutter-time:1.18s;--leaf-color:#6c864e;--leaf-scale:.9;--leaf-angle:58deg;--leaf-spin:710deg}
+.intro-leaves i:nth-child(14){--leaf-y:36%;--leaf-time:8.1s;--leaf-delay:-.8s;--flutter-time:.82s;--leaf-color:#b08a51;--leaf-scale:.64;--leaf-angle:-18deg;--leaf-spin:920deg}
+.intro-leaves i:nth-child(15){--leaf-y:70%;--leaf-time:13.1s;--leaf-delay:-12.2s;--flutter-time:1.46s;--leaf-color:#7e914f;--leaf-scale:.56;--leaf-angle:96deg;--leaf-spin:520deg}
+.intro-leaves i:nth-child(16){--leaf-y:51%;--leaf-time:9.3s;--leaf-delay:-6.9s;--flutter-time:1.02s;--leaf-color:#9b7049;--leaf-scale:.7;--leaf-angle:28deg;--leaf-spin:770deg}
 
 @keyframes intro-leaf-drift{
-  0%{translate:0 -10px;rotate:0deg}
-  24%{translate:28vw 18px;rotate:140deg}
-  52%{translate:58vw -8px;rotate:310deg}
-  77%{translate:84vw 26px;rotate:510deg}
-  100%{translate:116vw 8px;rotate:720deg}
+  0%{
+    translate:-12vw -1.5vh;
+    rotate:var(--leaf-angle,24deg);
+    opacity:0;
+  }
+  7%{opacity:.76}
+  21%{translate:22vw 2.4vh}
+  43%{translate:49vw -2.2vh}
+  64%{translate:74vw 3.6vh}
+  84%{translate:98vw -.8vh;opacity:.78}
+  100%{
+    translate:120vw 2vh;
+    rotate:calc(var(--leaf-angle,24deg) + var(--leaf-spin,720deg));
+    opacity:0;
+  }
+}
+
+@keyframes intro-leaf-flutter{
+  0%{scale:var(--leaf-scale,1) .7;filter:drop-shadow(0 2px 2px rgba(58,66,39,.12)) brightness(.96)}
+  45%{scale:var(--leaf-scale,1) 1.08}
+  100%{scale:var(--leaf-scale,1) .82;filter:drop-shadow(0 4px 3px rgba(58,66,39,.18)) brightness(1.06)}
 }
 
 .story-intro-back{
