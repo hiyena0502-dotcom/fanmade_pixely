@@ -7,8 +7,8 @@
   <meta name="theme-color" content="#111a3b" />
   <title>PIXELY : LOST SKY</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=34" />
-  <script src="app.js?v=34" defer></script>
+  <link rel="stylesheet" href="style.css?v=35" />
+  <script src="app.js?v=35" defer></script>
 </head>
 <body>
   <div class="game-root">
@@ -401,10 +401,34 @@
               <select id="wardrobe-layer-select"><option value="base">베이스 이미지</option></select>
             </label>
             <div class="wardrobe-sliders wardrobe-dev-sliders">
-              <label><span>좌우 <output data-wardrobe-transform-value="x">0</output></span><input type="range" min="-100" max="100" step="1" value="0" data-wardrobe-transform="x"></label>
-              <label><span>위아래 <output data-wardrobe-transform-value="y">0</output></span><input type="range" min="-100" max="100" step="1" value="0" data-wardrobe-transform="y"></label>
-              <label><span>크기 <output data-wardrobe-transform-value="scale">100%</output></span><input type="range" min="20" max="300" step="1" value="100" data-wardrobe-transform="scale"></label>
-              <label><span>회전 <output data-wardrobe-transform-value="rotation">0°</output></span><input type="range" min="-180" max="180" step="1" value="0" data-wardrobe-transform="rotation"></label>
+              <label>
+                <span>좌우 <output data-wardrobe-transform-value="x">0</output></span>
+                <div class="wardrobe-transform-control">
+                  <input type="range" min="-100" max="100" step="1" value="0" data-wardrobe-transform="x">
+                  <input type="number" min="-100" max="100" step="1" value="0" data-wardrobe-transform-number="x" aria-label="좌우 위치 숫자 입력">
+                </div>
+              </label>
+              <label>
+                <span>위아래 <output data-wardrobe-transform-value="y">0</output></span>
+                <div class="wardrobe-transform-control">
+                  <input type="range" min="-100" max="100" step="1" value="0" data-wardrobe-transform="y">
+                  <input type="number" min="-100" max="100" step="1" value="0" data-wardrobe-transform-number="y" aria-label="위아래 위치 숫자 입력">
+                </div>
+              </label>
+              <label>
+                <span>크기 <output data-wardrobe-transform-value="scale">100%</output></span>
+                <div class="wardrobe-transform-control">
+                  <input type="range" min="20" max="300" step="1" value="100" data-wardrobe-transform="scale">
+                  <input type="number" min="20" max="300" step="1" value="100" data-wardrobe-transform-number="scale" aria-label="크기 퍼센트 숫자 입력">
+                </div>
+              </label>
+              <label>
+                <span>회전 <output data-wardrobe-transform-value="rotation">0°</output></span>
+                <div class="wardrobe-transform-control">
+                  <input type="range" min="-180" max="180" step="1" value="0" data-wardrobe-transform="rotation">
+                  <input type="number" min="-180" max="180" step="1" value="0" data-wardrobe-transform-number="rotation" aria-label="회전 각도 숫자 입력">
+                </div>
+              </label>
             </div>
             <div class="wardrobe-layer-order-actions wardrobe-dev-order-actions">
               <button type="button" data-layer-move="bottom">맨 아래</button>
