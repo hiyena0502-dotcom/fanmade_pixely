@@ -426,8 +426,16 @@ test("collection editor starts with zero default items",()=>{
 
 test("story intro image paths are relative to the modular story stylesheet",()=>{
   const css=fs.readFileSync(path.join(directory,"styles/story.css"),"utf8");
-  assert.match(css,/url\("\.\.\/assets\/story\/chapter1\/house-wide\.webp\?v=54"\)/);
-  assert.match(css,/url\("\.\.\/assets\/story\/chapter1\/house-door-close\.webp\?v=54"\)/);
+  const version=JSON.parse(fs.readFileSync(path.join(directory,"site-version.json"),"utf8")).version;
+  assert.ok(css.includes(`../assets/story/chapter1/house-wide.webp?v=${version}`));
+  assert.ok(css.includes(`../assets/story/chapter1/house-door-close.webp?v=${version}`));
+  assert.ok(css.includes(`../assets/story/chapter1/clouds-original.png?v=${version}`));
+  const cloud=fs.readFileSync(path.join(directory,"assets/story/chapter1/clouds-original.png"));
+  assert.equal(cloud.subarray(0,8).toString("hex"),"89504e470d0a1a0a");
+  assert.equal(cloud.readUInt32BE(16),2048);
+  assert.equal(cloud.readUInt32BE(20),1152);
+  assert.match(css,/\.story-intro-overlay\.is-exterior \.story-sky-clouds\{\s*display:block/);
+  assert.match(css,/\.story-intro-overlay\.is-door \.story-sky-clouds/);
   assert.doesNotMatch(css,/url\("\.\/assets\/story/);
 });
 
