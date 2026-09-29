@@ -595,7 +595,7 @@
   transform-origin:50% 67%;
 }
 
-/* USER CLOUD ART · v63 — lowered so clouds stay clearly visible */
+/* USER CLOUD ART · v64 — valid cloud asset, lowered and visible */
 .story-sky-clouds{
   position:absolute;
   z-index:2;
@@ -1159,11 +1159,11 @@
 }
 
 .story-intro-overlay.is-exterior .story-intro-backdrop{
-  background-image:url("../assets/story/chapter1/house-wide.webp?v=63");
+  background-image:url("../assets/story/chapter1/house-wide.webp?v=64");
 }
 
 .story-intro-overlay.is-door .story-intro-backdrop{
-  background-image:url("../assets/story/chapter1/house-door-close.webp?v=63");
+  background-image:url("../assets/story/chapter1/house-door-close.webp?v=64");
 }
 
 .story-intro-overlay.is-approaching .story-intro-backdrop{
