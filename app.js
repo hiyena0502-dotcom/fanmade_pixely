@@ -642,7 +642,7 @@
   }
 
   function showView(name){
-    $("[data-view]").forEach(view=>{
+    $$("[data-view]").forEach(view=>{
       const active=view.dataset.view===name;
       view.hidden=!active;
       view.classList.toggle("is-active",active);
