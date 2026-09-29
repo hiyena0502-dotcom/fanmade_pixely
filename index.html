@@ -7,10 +7,10 @@
   <meta name="theme-color" content="#111a3b" />
   <title>PIXELY : LOST SKY</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=47" />
-  <script src="data/game-config.js?v=47" defer></script>
-  <script src="data/editor-schema.js?v=47" defer></script>
-  <script src="app.js?v=47" defer></script>
+  <link rel="stylesheet" href="style.css?v=48" />
+  <script src="data/game-config.js?v=48" defer></script>
+  <script src="data/editor-schema.js?v=48" defer></script>
+  <script src="app.js?v=48" defer></script>
 </head>
 <body>
   <div class="game-root">
@@ -253,7 +253,7 @@
     <section class="view collection-view" data-view="collection" hidden>
       <div class="diary-desk" aria-hidden="true"></div>
       <header class="subpage-topbar collection-topbar">
-        <button class="back-button" type="button" data-go-home>←</button>
+        <button class="back-button" type="button" id="collection-back-button" aria-label="이전 화면으로">←</button>
         <div><small>COLLECTION</small><h2>여행 다이어리</h2></div>
         <div class="collection-count"><small>DISCOVERED</small><b><span id="collection-owned">0</span> / <span id="collection-total">0</span></b><em>TRAVEL RECORD</em></div>
       </header>
@@ -451,12 +451,13 @@
 
           <div class="dev-subtabs" id="dev-collection-types">
             <button type="button" class="is-active" data-dev-collection-type="cards">카드</button>
+            <button type="button" data-dev-collection-type="items">아이템</button>
             <button type="button" data-dev-collection-type="postcards">엽서</button>
           </div>
 
           <div class="dev-settings-toolbar">
             <button type="button" id="dev-new-entry">＋ 새 항목</button>
-            <p>컬렉션에 표시할 카드와 엽서만 추가·수정합니다.</p>
+            <p>현재 등록된 카드·아이템·엽서를 수정합니다.</p>
           </div>
 
           <div class="dev-settings-workspace">
@@ -481,7 +482,7 @@
 
           <footer class="dev-settings-note">
             <b>COLLECTION ONLY</b>
-            <span>이 에디터에서는 컬렉션 카드와 엽서만 수정합니다. 챕터·상호작용·아이템·옷장은 게임 코드와 각 화면에서 관리합니다.</span>
+            <span>이 에디터에서는 컬렉션 카드·아이템·엽서만 수정합니다. 챕터·상호작용·옷장 설정은 포함하지 않습니다.</span>
           </footer>
         </section>
       </main>
