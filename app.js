@@ -34,7 +34,7 @@
       for(const [key,value] of Object.entries(values)) transaction.objectStore("data").put(value,key);
     });
   }
-  const SITE_VERSION = "47";
+  const SITE_VERSION = "48";
   const $ = (q, root = document) => root.querySelector(q);
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 
@@ -232,6 +232,7 @@
 
   const BASE_DEV_CONTENT={
     cards:cloneData(catalogue.cards),
+    items:cloneData(catalogue.items),
     postcards:cloneData(catalogue.postcards)
   };
 
@@ -247,6 +248,7 @@
       if(!raw||typeof raw!=="object") return cloneData(BASE_DEV_CONTENT);
       return {
         cards:normalizeDevArray(raw.cards,BASE_DEV_CONTENT.cards),
+        items:normalizeDevArray(raw.items,BASE_DEV_CONTENT.items),
         postcards:normalizeDevArray(raw.postcards,BASE_DEV_CONTENT.postcards)
       };
     }catch{
@@ -270,6 +272,7 @@
       if(storedContent){
         devContent={
           cards:normalizeDevArray(storedContent.cards,BASE_DEV_CONTENT.cards),
+          items:normalizeDevArray(storedContent.items,BASE_DEV_CONTENT.items),
           postcards:normalizeDevArray(storedContent.postcards,BASE_DEV_CONTENT.postcards)
         };
         if(!hadUnsavedDraft){
@@ -339,6 +342,7 @@
 
   function applyDevContent(){
     catalogue.cards.splice(0,catalogue.cards.length,...cloneData(devContent.cards));
+    catalogue.items.splice(0,catalogue.items.length,...cloneData(devContent.items));
     catalogue.postcards.splice(0,catalogue.postcards.length,...cloneData(devContent.postcards));
   }
 
@@ -349,7 +353,7 @@
 
   function checkEditorData(data=editorDraft){
     const errors=[];
-    for(const key of ["cards","postcards"]){
+    for(const key of ["cards","items","postcards"]){
       const seen=new Set();
       (data[key]||[]).forEach((entry,index)=>{
         const id=String(entry.id||"").trim();
@@ -490,6 +494,7 @@
   let lastSavedRoot=JSON.stringify(root);
   let collectionTab="cards";
   let collectionFilter="all";
+  let collectionReturnView="home";
   let wardrobeSlot="outfit";
   let wardrobeEditorTarget="base";
   let pendingWardrobeFile=null;
@@ -660,6 +665,20 @@
       renderWardrobe();
     }
     window.scrollTo(0,0);
+  }
+
+  function currentViewName(){
+    return $("[data-view]").find(view=>!view.hidden)?.dataset.view||"home";
+  }
+
+  function openCollection(){
+    const from=currentViewName();
+    collectionReturnView=from==="story"?"story":"home";
+    showView("collection");
+  }
+
+  function closeCollection(){
+    showView(collectionReturnView==="story"&&activeSave()?"story":"home");
   }
 
   function openSaveModal(mode="manage"){
@@ -1606,6 +1625,7 @@
 
   function devNewTemplate(key){
     const id=key.replace(/s$/,"")+"-"+Date.now().toString(36);
+    if(key==="items") return {id,name:"새 아이템",type:"MEMENTO",symbol:"✦",color:"#7894a5",desc:"",wardrobeSlot:"",wardrobeGroup:""};
     return key==="postcards"
       ? {id,name:"새 엽서",type:"STORY POSTCARD",symbol:"✦",color:"#7894a5",desc:"",caption:""}
       : {id,name:"새 카드",type:"PERSON",symbol:"?",color:"#7894a5",world:"",desc:"",memo:""};
@@ -1638,7 +1658,7 @@
       devSelectedId=entries[0]?.id||null;
     }
     const selected=entries.find(entry=>String(entry.id)===String(devSelectedId))||null;
-    const label=key==="cards"?"컬렉션 카드":"컬렉션 엽서";
+    const label=key==="cards"?"컬렉션 카드":key==="items"?"컬렉션 아이템":"컬렉션 엽서";
 
     $("#dev-current-section").textContent=label;
     $("#dev-context-label").textContent=selected?label+" · "+devEntryTitle(selected):"컬렉션 편집";
@@ -1666,7 +1686,7 @@
     devSelectedId=entry.id;
     if(markEditorDraft()){
       renderDevSettings();
-      toast(key==="postcards"?"새 엽서를 만들었습니다.":"새 카드를 만들었습니다.");
+      toast(key==="postcards"?"새 엽서를 만들었습니다.":key==="items"?"새 아이템을 만들었습니다.":"새 카드를 만들었습니다.");
     }
   }
 
@@ -1763,7 +1783,8 @@
     });
     $("#save-manager-button").addEventListener("click",()=>openSaveModal("manage"));
 
-    Array.from(document.querySelectorAll("[data-open-collection]")).forEach(b=>b.addEventListener("click",()=>showView("collection")));
+    Array.from(document.querySelectorAll("[data-open-collection]")).forEach(b=>b.addEventListener("click",openCollection));
+    $("#collection-back-button")?.addEventListener("click",closeCollection);
     Array.from(document.querySelectorAll("[data-open-wardrobe]")).forEach(b=>b.addEventListener("click",()=>showView("wardrobe")));
     Array.from(document.querySelectorAll("[data-open-chapters]")).forEach(b=>b.addEventListener("click",()=>showView("chapters")));
     Array.from(document.querySelectorAll("[data-open-dev]")).forEach(b=>b.addEventListener("click",()=>showView("dev")));
@@ -1978,7 +1999,8 @@
       if(!$("#save-modal").hidden) closeSaveModal();
       else if(!$("#story-inventory-panel")?.hidden || !$("#story-missions-panel")?.hidden || !$("#story-map-panel")?.hidden){closeStoryPanels();}
       else if(!$("#story-dialogue")?.hidden){$("#story-dialogue").hidden=true;}
-      else if(!$("[data-view='collection']").hidden || !$("[data-view='chapters']").hidden || !$("[data-view='story']").hidden || !$("[data-view='wardrobe']").hidden || !$("[data-view='dev']").hidden) showView("home");
+      else if(!$("[data-view='collection']").hidden){closeCollection();}
+      else if(!$("[data-view='chapters']").hidden || !$("[data-view='story']").hidden || !$("[data-view='wardrobe']").hidden || !$("[data-view='dev']").hidden) showView("home");
     });
   }
 

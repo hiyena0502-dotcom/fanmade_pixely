@@ -51,7 +51,7 @@ function boot(saved,initialVersion=JSON.parse(fs.readFileSync(path.join(director
     result.dataset.wardrobeSlot=key;
     return result;
   });
-  const devCollectionTabs=["cards","postcards"].map(key=>{
+  const devCollectionTabs=["cards","items","postcards"].map(key=>{
     const result=node(`dev-collection:${key}`);
     result.dataset.devCollectionType=key;
     return result;
@@ -257,7 +257,7 @@ test("update prompt compares the loaded version on the first check and on later 
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
   assert.equal(state.requests[0].options.cache,"no-store");
-  state.setVersion("47");
+  state.setVersion("48");
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,false);
@@ -342,6 +342,7 @@ test("developer editor is collection-only",()=>{
   assert.match(html,/data-view="dev"/);
   assert.match(html,/id="dev-collection-types"/);
   assert.match(html,/data-dev-collection-type="cards"/);
+  assert.match(html,/data-dev-collection-type="items"/);
   assert.match(html,/data-dev-collection-type="postcards"/);
   for(const removed of ["chapters","items","wardrobe","data"]){
     assert.doesNotMatch(html,new RegExp('data-dev-section="'+removed+'"'));
@@ -355,7 +356,7 @@ test("developer editor is collection-only",()=>{
 });
 
 test("collection editor can create and save a card",()=>{
-  const state=boot(undefined,"47");
+  const state=boot(undefined,"48");
   state.click("[data-open-dev]");
   state.click("#dev-new-entry");
   assert.equal(state.storage.get(devContentKey),undefined);
@@ -364,7 +365,7 @@ test("collection editor can create and save a card",()=>{
   const stored=JSON.parse(state.storage.get(devContentKey));
   assert.equal(Array.isArray(stored.cards),true);
   assert.equal(stored.cards.some(item=>item.name==="새 카드"),true);
-  assert.deepEqual(Object.keys(stored).sort(),["cards","postcards"]);
+  assert.deepEqual(Object.keys(stored).sort(),["cards","items","postcards"]);
 });
 
 test("collection editor switches between cards and postcards and supports undo",()=>{
@@ -414,16 +415,41 @@ test("static game and editor configuration are split from the runtime",()=>{
   assert.doesNotMatch(app,/const catalogue = \{/);
   assert.doesNotMatch(app,/const devSchemas=\{/);
   const html=fs.readFileSync(path.join(directory,"index.html"),"utf8");
-  assert.match(html,/data\/game-config\.js\?v=47/);
-  assert.match(html,/data\/editor-schema\.js\?v=47/);
+  assert.match(html,/data\/game-config\.js\?v=48/);
+  assert.match(html,/data\/editor-schema\.js\?v=48/);
 });
 
 
 test("feature CSS is split into maintainable modules without legacy patch stacks",()=>{
   const entry=fs.readFileSync(path.join(directory,"style.css"),"utf8");
   for(const file of ["core","home","chapters","collection","story","wardrobe","editor"]){
-    assert.match(entry,new RegExp('styles/'+file+'\\.css\\?v=47'));
+    assert.match(entry,new RegExp('styles/'+file+'\\.css\\?v=48'));
     assert.ok(fs.statSync(path.join(directory,"styles",file+".css")).size>100);
   }
   assert.doesNotMatch(allCss,/VISUAL PATCH v|WARDROBE PATCH v|WARDROBE IMAGE EDITOR v|WARDROBE PREVIEW \+ DEV EDITOR v|WARDROBE ALL-MULTI|SIMPLE WARDROBE DEV EDITOR|CHAPTER INTERACTION EDITOR v|DESKTOP WARDROBE WORKSPACE v|WARDROBE RE-EDIT v|WARDROBE TRANSFORM NUMBER INPUTS v/);
+});
+
+
+test("collection editor exposes existing items without adding defaults",()=>{
+  const state=boot(undefined,"48");
+  state.click("[data-open-dev]");
+  const itemTab=state.node("dev-collection:items");
+  state.node("#dev-collection-types").listeners.click({target:{closest(){return itemTab}}});
+  assert.equal(state.node("#dev-current-section").textContent,"컬렉션 아이템");
+  assert.equal(state.storage.get(devContentKey),undefined);
+});
+
+test("story intro image paths are relative to the modular story stylesheet",()=>{
+  const css=fs.readFileSync(path.join(directory,"styles/story.css"),"utf8");
+  assert.match(css,/url\("\.\.\/assets\/story\/chapter1\/house-wide\.webp\?v=48"\)/);
+  assert.match(css,/url\("\.\.\/assets\/story\/chapter1\/house-door-close\.webp\?v=48"\)/);
+  assert.doesNotMatch(css,/url\("\.\/assets\/story/);
+});
+
+test("travel diary back button is a dedicated return control",()=>{
+  const html=fs.readFileSync(path.join(directory,"index.html"),"utf8");
+  assert.match(html,/id="collection-back-button"/);
+  assert.match(app,/function openCollection\(\)/);
+  assert.match(app,/collectionReturnView=from==="story"\?"story":"home"/);
+  assert.match(app,/function closeCollection\(\)/);
 });
