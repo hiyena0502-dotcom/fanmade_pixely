@@ -7,10 +7,10 @@
   <meta name="theme-color" content="#111a3b" />
   <title>PIXELY : LOST SKY</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=50" />
-  <script src="data/game-config.js?v=50" defer></script>
-  <script src="data/editor-schema.js?v=50" defer></script>
-  <script src="app.js?v=50" defer></script>
+  <link rel="stylesheet" href="style.css?v=51" />
+  <script src="data/game-config.js?v=51" defer></script>
+  <script src="data/editor-schema.js?v=51" defer></script>
+  <script src="app.js?v=51" defer></script>
 </head>
 <body>
   <div class="game-root">
@@ -193,6 +193,9 @@
               <div class="intro-house-path"></div>
             </div>
             <div class="intro-ground"></div>
+            <div class="intro-leaves" aria-hidden="true">
+              <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+            </div>
           </div>
 
           <button class="intro-house-hit" id="story-intro-house" type="button" hidden aria-label="문 클릭하기">
@@ -208,6 +211,24 @@
             </div>
             <span class="story-intro-hint"><i></i><span id="story-intro-hint-text">CLICK / SPACE</span></span>
           </button>
+
+          <div class="story-intro-choices" id="story-intro-choices" hidden>
+            <p>이제 어떻게 할까?</p>
+            <div>
+              <button type="button" id="story-intro-choice-enter"><span>→</span><b>집 안으로 들어갈까?</b></button>
+              <button type="button" id="story-intro-choice-look"><span>⌕</span><b>주변을 더 둘러볼까?</b></button>
+            </div>
+          </div>
+
+          <button class="story-intro-back" id="story-intro-back" type="button" hidden aria-label="집 앞 전경으로 돌아가기">←</button>
+
+          <div class="story-intro-explore" id="story-intro-explore" hidden>
+            <button type="button" class="intro-inspect intro-inspect--left" data-intro-inspect="left" aria-label="왼쪽 주변 조사"><span>⌕</span></button>
+            <button type="button" class="intro-inspect intro-inspect--door" data-intro-inspect="door" aria-label="문 주변 조사"><span>⌕</span></button>
+            <button type="button" class="intro-inspect intro-inspect--right" data-intro-inspect="right" aria-label="오른쪽 주변 조사"><span>⌕</span></button>
+            <div class="story-intro-explore-message" id="story-intro-explore-message">주변을 천천히 살펴보자.</div>
+            <button type="button" class="story-intro-enter-small" id="story-intro-enter-small">집 안으로 들어가기 →</button>
+          </div>
         </section>
 
         <footer class="story-toolbar">
