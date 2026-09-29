@@ -241,7 +241,7 @@ test("update prompt compares the loaded version on the first check and on later 
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
   assert.equal(state.requests[0].options.cache,"no-store");
-  state.setVersion("50");
+  state.setVersion("51");
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,false);
@@ -340,7 +340,7 @@ test("developer editor is collection-only",()=>{
 });
 
 test("collection editor can create and save a card",()=>{
-  const state=boot(undefined,"50");
+  const state=boot(undefined,"51");
   state.click("[data-open-dev]");
   state.click("#dev-new-entry");
   assert.equal(state.storage.get(devContentKey),undefined);
@@ -399,15 +399,15 @@ test("static game and editor configuration are split from the runtime",()=>{
   assert.doesNotMatch(app,/const catalogue = \{/);
   assert.doesNotMatch(app,/const devSchemas=\{/);
   const html=fs.readFileSync(path.join(directory,"index.html"),"utf8");
-  assert.match(html,/data\/game-config\.js\?v=50/);
-  assert.match(html,/data\/editor-schema\.js\?v=50/);
+  assert.match(html,/data\/game-config\.js\?v=51/);
+  assert.match(html,/data\/editor-schema\.js\?v=51/);
 });
 
 
 test("feature CSS is split into maintainable modules without legacy patch stacks",()=>{
   const entry=fs.readFileSync(path.join(directory,"style.css"),"utf8");
   for(const file of ["core","home","chapters","collection","story","wardrobe","editor"]){
-    assert.match(entry,new RegExp('styles/'+file+'\\.css\\?v=50'));
+    assert.match(entry,new RegExp('styles/'+file+'\\.css\\?v=51'));
     assert.ok(fs.statSync(path.join(directory,"styles",file+".css")).size>100);
   }
   assert.doesNotMatch(allCss,/VISUAL PATCH v|WARDROBE PATCH v|WARDROBE IMAGE EDITOR v|WARDROBE PREVIEW \+ DEV EDITOR v|WARDROBE ALL-MULTI|SIMPLE WARDROBE DEV EDITOR|CHAPTER INTERACTION EDITOR v|DESKTOP WARDROBE WORKSPACE v|WARDROBE RE-EDIT v|WARDROBE TRANSFORM NUMBER INPUTS v/);
@@ -415,7 +415,7 @@ test("feature CSS is split into maintainable modules without legacy patch stacks
 
 
 test("collection editor starts with zero default items",()=>{
-  const state=boot(undefined,"50");
+  const state=boot(undefined,"51");
   state.click("[data-open-dev]");
   const itemTab=state.node("dev-collection:items");
   state.node("#dev-collection-types").listeners.click({target:{closest(){return itemTab}}});
@@ -426,8 +426,8 @@ test("collection editor starts with zero default items",()=>{
 
 test("story intro image paths are relative to the modular story stylesheet",()=>{
   const css=fs.readFileSync(path.join(directory,"styles/story.css"),"utf8");
-  assert.match(css,/url\("\.\.\/assets\/story\/chapter1\/house-wide\.webp\?v=50"\)/);
-  assert.match(css,/url\("\.\.\/assets\/story\/chapter1\/house-door-close\.webp\?v=50"\)/);
+  assert.match(css,/url\("\.\.\/assets\/story\/chapter1\/house-wide\.webp\?v=51"\)/);
+  assert.match(css,/url\("\.\.\/assets\/story\/chapter1\/house-door-close\.webp\?v=51"\)/);
   assert.doesNotMatch(css,/url\("\.\/assets\/story/);
 });
 
@@ -463,4 +463,34 @@ test("wardrobe back button returns to the screen it was opened from",()=>{
   state.click("#wardrobe-back-button");
   assert.equal(state.node("view:home").hidden,false);
   assert.equal(state.node("view:wardrobe").hidden,true);
+});
+
+
+test("front yard leaves and door exploration choices are present",()=>{
+  const html=fs.readFileSync(path.join(directory,"index.html"),"utf8");
+  const css=fs.readFileSync(path.join(directory,"styles/story.css"),"utf8");
+  assert.match(html,/class="intro-leaves"/);
+  assert.match(css,/@keyframes intro-leaf-drift/);
+  assert.match(css,/story-intro-overlay\.is-exterior \.intro-leaves\{display:block\}/);
+  assert.match(html,/id="story-intro-choice-enter"/);
+  assert.match(html,/id="story-intro-choice-look"/);
+  assert.match(html,/id="story-intro-back"/);
+  assert.match(html,/data-intro-inspect="door"/);
+  assert.match(app,/function exploreStoryIntroDoor\(\)/);
+  assert.match(app,/function backStoryIntroExterior\(\)/);
+});
+
+test("door dialogue sequence ends at a choice before the chapter title",()=>{
+  const context={window:{}};
+  vm.runInNewContext(gameConfig,context);
+  const steps=context.window.PixelyGameConfig.storyIntroSteps;
+  const houseIndex=steps.findIndex(step=>step.kind==="house");
+  const choiceIndex=steps.findIndex(step=>step.kind==="choice"&&step.phase==="door");
+  const chapterIndex=steps.findIndex(step=>step.kind==="chapter");
+  assert.ok(houseIndex>=0);
+  assert.ok(choiceIndex>houseIndex);
+  assert.equal(steps.slice(houseIndex+1,choiceIndex).filter(step=>step.phase==="door").length,6);
+  assert.equal(chapterIndex,choiceIndex+1);
+  assert.match(app,/if\(storyIntroDoorDialogueSeen\)/);
+  assert.match(app,/step\?\.kind==="house"\|\|step\?\.kind==="choice"\|\|storyIntroDoorExplore/);
 });
