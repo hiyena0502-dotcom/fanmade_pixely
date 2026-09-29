@@ -595,55 +595,66 @@
   transform-origin:50% 67%;
 }
 
-/* USER CLOUD ART · v61 — five independent moving cloud sprites */
-.moving-clouds{
+/* USER CLOUD ART · v62 — full transparent sheet, always visible on exterior */
+.story-sky-clouds{
   position:absolute;
-  z-index:8;
+  z-index:5;
   inset:0;
   overflow:hidden;
   pointer-events:none;
   display:none;
-}
-.story-intro-overlay.is-exterior .moving-clouds{display:block}
-.story-intro-overlay.is-door .moving-clouds,
-.story-intro-overlay.is-chapter .moving-clouds,
-.story-intro-overlay.is-dark .moving-clouds{display:none !important}
-
-.moving-cloud{
-  position:absolute;
-  left:0;
-  top:var(--cloud-top,8%);
-  width:var(--cloud-width,220px);
-  height:auto;
-  overflow:visible;
   opacity:1;
-  filter:
-    drop-shadow(0 4px 1px rgba(91,117,130,.34))
-    drop-shadow(0 10px 12px rgba(74,101,114,.18));
-  will-change:transform;
-  animation:pixely-cloud-sweep var(--cloud-duration,20s) linear infinite;
-  animation-delay:var(--cloud-delay,0s);
+  visibility:visible;
 }
-.moving-cloud image{pointer-events:none}
+.story-intro-overlay.is-exterior .story-sky-clouds{
+  display:block !important;
+}
+.story-intro-overlay.is-door .story-sky-clouds,
+.story-intro-overlay.is-chapter .story-sky-clouds,
+.story-intro-overlay.is-dark .story-sky-clouds{
+  display:none !important;
+}
 
-.moving-cloud--1{--cloud-top:2%;--cloud-width:300px;--cloud-duration:19s;--cloud-delay:-4s;--cloud-drift:7px}
-.moving-cloud--2{--cloud-top:15%;--cloud-width:145px;--cloud-duration:25s;--cloud-delay:-14s;--cloud-drift:-5px}
-.moving-cloud--3{--cloud-top:5%;--cloud-width:275px;--cloud-duration:22s;--cloud-delay:-10s;--cloud-drift:4px}
-.moving-cloud--4{--cloud-top:23%;--cloud-width:175px;--cloud-duration:28s;--cloud-delay:-20s;--cloud-drift:8px}
-.moving-cloud--5{--cloud-top:11%;--cloud-width:220px;--cloud-duration:24s;--cloud-delay:-17s;--cloud-drift:-6px}
+.story-sky-clouds__sheet{
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  max-width:none;
+  height:auto;
+  display:block;
+  opacity:1 !important;
+  visibility:visible !important;
+  pointer-events:none;
+  user-select:none;
+  will-change:transform;
+  filter:drop-shadow(0 3px 4px rgba(78,105,118,.10));
+}
+.story-sky-clouds__sheet--a{
+  animation:pixely-cloud-sheet-a 30s linear infinite;
+}
+.story-sky-clouds__sheet--b{
+  animation:pixely-cloud-sheet-b 30s linear infinite;
+}
 
-@keyframes pixely-cloud-sweep{
-  0%{transform:translate3d(108vw,0,0)}
-  50%{transform:translate3d(40vw,var(--cloud-drift,6px),0)}
-  100%{transform:translate3d(-32vw,0,0)}
+@keyframes pixely-cloud-sheet-a{
+  from{transform:translate3d(0,0,0)}
+  to{transform:translate3d(-100%,0,0)}
+}
+@keyframes pixely-cloud-sheet-b{
+  from{transform:translate3d(100%,0,0)}
+  to{transform:translate3d(0,0,0)}
 }
 
 @media(max-width:680px){
-  .moving-cloud--1{--cloud-width:220px}
-  .moving-cloud--2{--cloud-width:105px}
-  .moving-cloud--3{--cloud-width:200px}
-  .moving-cloud--4{--cloud-width:125px}
-  .moving-cloud--5{--cloud-width:155px}
+  .story-sky-clouds__sheet{
+    width:135%;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .story-sky-clouds__sheet--a{animation-duration:60s}
+  .story-sky-clouds__sheet--b{animation-duration:60s}
 }
 
 .intro-ground{
@@ -1140,11 +1151,11 @@
 }
 
 .story-intro-overlay.is-exterior .story-intro-backdrop{
-  background-image:url("../assets/story/chapter1/house-wide.webp?v=61");
+  background-image:url("../assets/story/chapter1/house-wide.webp?v=62");
 }
 
 .story-intro-overlay.is-door .story-intro-backdrop{
-  background-image:url("../assets/story/chapter1/house-door-close.webp?v=61");
+  background-image:url("../assets/story/chapter1/house-door-close.webp?v=62");
 }
 
 .story-intro-overlay.is-approaching .story-intro-backdrop{
