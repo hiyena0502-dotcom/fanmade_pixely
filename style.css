@@ -4184,7 +4184,7 @@ button:focus-visible{outline:2px solid #e7f8ff;outline-offset:3px}
 .story-intro-overlay.is-exterior .story-intro-backdrop,
 .story-intro-overlay.is-door .story-intro-backdrop{
   background:
-    url("./assets/story/chapter1/house-front.webp")
+    url("./assets/story/chapter1/house-front.webp?v=37")
     center center / cover no-repeat !important;
 }
 
