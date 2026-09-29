@@ -12,7 +12,7 @@ const styleFiles=["style.css","styles/core.css","styles/home.css","styles/chapte
 const allCss=styleFiles.map(file=>fs.readFileSync(path.join(directory,file),"utf8")).join("\n");
 const storageKey="pixely-lost-sky-saves-v2";
 const wardrobeKey="pixely-lost-sky-wardrobe-assets-v1";
-const devContentKey="pixely-lost-sky-dev-content-v1";
+const devContentKey="pixely-lost-sky-dev-content-v2";
 
 function boot(saved,initialVersion=JSON.parse(fs.readFileSync(path.join(directory,"site-version.json"),"utf8")).version,wardrobeAssets){
   const nodes=new Map();
