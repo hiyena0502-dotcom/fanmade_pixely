@@ -34,7 +34,7 @@
       for(const [key,value] of Object.entries(values)) transaction.objectStore("data").put(value,key);
     });
   }
-  const SITE_VERSION = "46";
+  const SITE_VERSION = "47";
   const $ = (q, root = document) => root.querySelector(q);
   const $$ = (q, root = document) => [...root.querySelectorAll(q)];
 
@@ -51,7 +51,6 @@
   const storyIntroSteps=gameConfig.storyIntroSteps;
   const storyHotspots=gameConfig.storyHotspots;
   const devSchemas=editorConfig.devSchemas;
-  const interactionSchema=editorConfig.interactionSchema;
 
 
 
@@ -153,7 +152,7 @@
     const rank=new Map(wardrobeAssets.layerOrder.map((id,index)=>[id,index]));
     return [...ids].sort((a,b)=>(rank.get(a)??999999)-(rank.get(b)??999999));
   }
-  function wardrobeSave(){return wardrobeFromEditor?null:activeSave();}
+  function wardrobeSave(){return activeSave();}
   function developerOutfit(){
     return validOutfit(wardrobeAssets.setupOutfit,[]);
   }
@@ -178,12 +177,6 @@
     meter.dataset.state=bytes>4.2*1024*1024?"warn":"ok";
   }
   function persistWardrobeAssets(previous){
-    if(wardrobeFromEditor){
-      editorWardrobeDraft=cloneData(wardrobeAssets);
-      rememberEditorDraft();
-      updateWardrobeStorageMeter();
-      return true;
-    }
     wardrobeRevision++;
     if(typeof indexedDB!=="undefined"){
       const snapshot=JSON.parse(JSON.stringify(wardrobeAssets));
@@ -238,18 +231,8 @@
   }
 
   const BASE_DEV_CONTENT={
-    chapters:cloneData(chapters).map(chapter=>({
-      ...chapter,
-      scenes:chapter.id==="night"?[
-        {id:"house-outside",title:"집 밖",image:"assets/story/chapter1/house-wide.webp"},
-        {id:"door-closeup",title:"문 앞",image:"assets/story/chapter1/house-door-close.webp"},
-        {id:"party-room",title:"집 안",image:""}
-      ]:[{id:"party-room",title:"기본 장면",image:""}],
-      interactions:Array.isArray(chapter.interactions)?chapter.interactions:[]
-    })),
     cards:cloneData(catalogue.cards),
-    postcards:cloneData(catalogue.postcards),
-    items:cloneData(catalogue.items)
+    postcards:cloneData(catalogue.postcards)
   };
 
   function normalizeDevArray(value,fallback){
@@ -258,44 +241,13 @@
       : cloneData(fallback);
   }
 
-  function normalizeChapterInteractions(value){
-    return Array.isArray(value)
-      ? value.filter(entry=>entry&&typeof entry==="object"&&!Array.isArray(entry)).map(entry=>({
-          id:typeof entry.id==="string"&&entry.id.trim()?entry.id.trim():"interaction-"+Date.now().toString(36),
-          type:typeof entry.type==="string"?entry.type:"inspect",
-          label:typeof entry.label==="string"?entry.label:"",
-          target:typeof entry.target==="string"?entry.target:"",
-          scene:typeof entry.scene==="string"?entry.scene:"",
-          x:Number.isFinite(Number(entry.x))?Number(entry.x):50,
-          y:Number.isFinite(Number(entry.y))?Number(entry.y):50,
-          width:Number.isFinite(Number(entry.width))?Number(entry.width):12,
-          height:Number.isFinite(Number(entry.height))?Number(entry.height):12,
-          text:typeof entry.text==="string"?entry.text:"",
-          condition:typeof entry.condition==="string"?entry.condition:"",
-          rewardItem:typeof entry.rewardItem==="string"?entry.rewardItem:"",
-          next:typeof entry.next==="string"?entry.next:"",
-          note:typeof entry.note==="string"?entry.note:""
-        }))
-      : [];
-  }
-
-  function normalizeDevChapters(value,fallback){
-    return normalizeDevArray(value,fallback).map(chapter=>({
-      ...chapter,
-      scenes:Array.isArray(chapter.scenes)&&chapter.scenes.length?chapter.scenes.filter(scene=>scene&&typeof scene.id==="string").map(scene=>({id:scene.id,title:String(scene.title||scene.id),image:typeof scene.image==="string"?scene.image:""})):cloneData(BASE_DEV_CONTENT.chapters.find(entry=>entry.id===chapter.id)?.scenes||[{id:"party-room",title:"기본 장면",image:""}]),
-      interactions:normalizeChapterInteractions(chapter.interactions)
-    }));
-  }
-
   function readDevContent(){
     try{
       const raw=JSON.parse(localStorage.getItem(DEV_CONTENT_KEY)||"null");
       if(!raw||typeof raw!=="object") return cloneData(BASE_DEV_CONTENT);
       return {
-        chapters:normalizeDevChapters(raw.chapters,BASE_DEV_CONTENT.chapters),
         cards:normalizeDevArray(raw.cards,BASE_DEV_CONTENT.cards),
-        postcards:normalizeDevArray(raw.postcards,BASE_DEV_CONTENT.postcards),
-        items:normalizeDevArray(raw.items,BASE_DEV_CONTENT.items)
+        postcards:normalizeDevArray(raw.postcards,BASE_DEV_CONTENT.postcards)
       };
     }catch{
       return cloneData(BASE_DEV_CONTENT);
@@ -304,8 +256,7 @@
 
   let devContent=readDevContent();
   let editorDraft=cloneData(devContent);
-  let editorWardrobeDraft=null;
-  let editorHistory=[{content:cloneData(editorDraft),wardrobe:null}];
+  let editorHistory=[cloneData(editorDraft)];
   let editorHistoryIndex=0;
   let editorSaveState="saved";
 
@@ -317,10 +268,14 @@
       const startingWardrobeRevision=wardrobeRevision;
       const [storedContent,storedWardrobe]=await Promise.all([readDevDatabase(db,"content"),readDevDatabase(db,"wardrobe")]);
       if(storedContent){
-        devContent={chapters:normalizeDevChapters(storedContent.chapters,BASE_DEV_CONTENT.chapters),cards:normalizeDevArray(storedContent.cards,BASE_DEV_CONTENT.cards),postcards:normalizeDevArray(storedContent.postcards,BASE_DEV_CONTENT.postcards),items:normalizeDevArray(storedContent.items,BASE_DEV_CONTENT.items)};
+        devContent={
+          cards:normalizeDevArray(storedContent.cards,BASE_DEV_CONTENT.cards),
+          postcards:normalizeDevArray(storedContent.postcards,BASE_DEV_CONTENT.postcards)
+        };
         if(!hadUnsavedDraft){
           editorDraft=cloneData(devContent);
-          editorHistory=[{content:cloneData(editorDraft),wardrobe:null}];editorHistoryIndex=0;
+          editorHistory=[cloneData(editorDraft)];
+          editorHistoryIndex=0;
         }
         applyDevContent();
       }else{
@@ -343,59 +298,48 @@
   }
 
   function editorDirty(){
-    return JSON.stringify(editorDraft)!==JSON.stringify(devContent) || Boolean(editorWardrobeDraft);
+    return JSON.stringify(editorDraft)!==JSON.stringify(devContent);
   }
+
   function editorStatus(state){
     editorSaveState=state;
     const label=$("#dev-global-status");
-    if(label){label.dataset.state=state;label.textContent={saved:"저장됨",saving:"저장 중…",failed:"저장 실패",dirty:"저장 필요"}[state]||state;}
-    const sceneLabel=$("#story-dev-save-state");
-    if(sceneLabel){sceneLabel.dataset.state=state;sceneLabel.textContent={saved:"저장됨",saving:"저장 중…",failed:"저장 실패",dirty:"저장 필요"}[state]||state;}
+    if(label){
+      label.dataset.state=state;
+      label.textContent={saved:"저장됨",saving:"저장 중…",failed:"저장 실패",dirty:"저장 필요"}[state]||state;
+    }
     const save=$("#dev-save-all");
     if(save) save.disabled=state==="saving" || !editorDirty();
-    const sceneSave=$("#story-dev-save-all");
-    if(sceneSave) sceneSave.disabled=state==="saving" || !editorDirty();
   }
+
   function rememberEditorDraft(){
     editorHistory=editorHistory.slice(0,editorHistoryIndex+1);
-    editorHistory.push({content:cloneData(editorDraft),wardrobe:editorWardrobeDraft?cloneData(editorWardrobeDraft):null});
-    const imageSize=JSON.stringify(editorWardrobeDraft||{}).length;
-    const historyLimit=imageSize>8000000?3:imageSize>2000000?8:60;
-    if(editorHistory.length>historyLimit) editorHistory.shift();
+    editorHistory.push(cloneData(editorDraft));
+    if(editorHistory.length>60) editorHistory.shift();
     editorHistoryIndex=editorHistory.length-1;
     editorStatus("dirty");
     updateEditorHistoryButtons();
   }
+
   function updateEditorHistoryButtons(){
-    const undo=$("#dev-undo"), redo=$("#dev-redo");
+    const undo=$("#dev-undo"),redo=$("#dev-redo");
     if(undo) undo.disabled=editorHistoryIndex===0;
     if(redo) redo.disabled=editorHistoryIndex>=editorHistory.length-1;
-    const sceneUndo=$("#story-dev-undo"),sceneRedo=$("#story-dev-redo");
-    if(sceneUndo) sceneUndo.disabled=editorHistoryIndex===0;
-    if(sceneRedo) sceneRedo.disabled=editorHistoryIndex>=editorHistory.length-1;
   }
+
   function stepEditorHistory(direction){
     const next=editorHistoryIndex+direction;
     if(next<0||next>=editorHistory.length) return;
     editorHistoryIndex=next;
-    editorDraft=cloneData(editorHistory[next].content);
-    editorWardrobeDraft=editorHistory[next].wardrobe?cloneData(editorHistory[next].wardrobe):null;
-    if(wardrobeFromEditor){
-      wardrobeAssets=cloneData(editorWardrobeDraft||committedWardrobeAssets);
-      outfitDraft=developerOutfit();
-      renderWardrobe();
-    }
+    editorDraft=cloneData(editorHistory[next]);
     editorStatus(editorDirty()?"dirty":"saved");
     updateEditorHistoryButtons();
     renderDevSettings();
-    if(devStoryChapterId) renderStoryDevEditor();
   }
 
   function applyDevContent(){
-    chapters.splice(0,chapters.length,...cloneData(devContent.chapters));
     catalogue.cards.splice(0,catalogue.cards.length,...cloneData(devContent.cards));
     catalogue.postcards.splice(0,catalogue.postcards.length,...cloneData(devContent.postcards));
-    catalogue.items.splice(0,catalogue.items.length,...cloneData(devContent.items));
   }
 
   function markEditorDraft(){
@@ -405,66 +349,34 @@
 
   function checkEditorData(data=editorDraft){
     const errors=[];
-    const checkIds=(entries,kind)=>{
+    for(const key of ["cards","postcards"]){
       const seen=new Set();
-      entries.forEach((entry,index)=>{
+      (data[key]||[]).forEach((entry,index)=>{
         const id=String(entry.id||"").trim();
-        if(!id) errors.push({section:kind,id:entry.id||"",message:`${kind} ${index+1}: ID가 비어 있습니다.`});
-        else if(seen.has(id)) errors.push({section:kind,id,message:`${kind}: ID ${id}가 중복됩니다.`});
+        if(!id) errors.push({section:key,id:"",message:`${key} ${index+1}: ID가 비어 있습니다.`});
+        else if(seen.has(id)) errors.push({section:key,id,message:`${key}: ID ${id}가 중복됩니다.`});
         seen.add(id);
       });
-    };
-    ["chapters","cards","postcards","items"].forEach(key=>checkIds(data[key]||[],key));
-    const items=new Set((data.items||[]).map(entry=>entry.id));
-    (data.chapters||[]).forEach(chapter=>{
-      const interactions=chapter.interactions||[];
-      const scenes=new Set((chapter.scenes||[]).map(scene=>scene.id));
-      if(scenes.size!==(chapter.scenes||[]).length) errors.push({section:"chapters",id:chapter.id,message:`${chapter.title||chapter.id}: 장면 ID가 중복됩니다.`});
-      const ids=new Set();
-      interactions.forEach((entry,index)=>{
-        const id=String(entry.id||"").trim();
-        const issue=message=>errors.push({section:"chapters",id:chapter.id,interaction:id,message:`${chapter.title||chapter.id} · ${message}`});
-        if(!id||ids.has(id)) issue(`상호작용 ${index+1}의 ID가 비었거나 중복됩니다.`);
-        ids.add(id);
-        if(entry.rewardItem&&!items.has(entry.rewardItem)) issue(`${id}: 보상 아이템 ${entry.rewardItem}이 없습니다.`);
-        if(entry.scene&&!scenes.has(entry.scene)) issue(`${id}: 장면 ${entry.scene}이 없습니다.`);
-        if(entry.next&&!scenes.has(entry.next)&&!interactions.some(other=>other.id===entry.next)) issue(`${id}: 다음 장면·상호작용 ${entry.next}이 없습니다.`);
-        const {x,y,width,height}=entry;
-        if([x,y,width,height].some(value=>!Number.isFinite(Number(value)))||Number(x)<0||Number(y)<0||Number(width)<=0||Number(height)<=0||Number(x)+Number(width)>100||Number(y)+Number(height)>100) issue(`${id}: 클릭 영역이 화면 밖입니다.`);
-      });
-    });
-    return errors;
-  }
-
-  function renderEditorCheck(){
-    const errors=checkEditorData();
-    const list=$("#dev-check-results");
-    if(list) list.innerHTML=errors.length?errors.map((error,index)=>`<li><button type="button" data-dev-error="${index}">${escapeHTML(error.message)}</button></li>`).join(""):'<li class="is-clear">✓ 오류가 없습니다. 저장할 수 있습니다.</li>';
-    const size=$("#dev-data-size");
-    if(size) size.textContent="개발 초안 "+formatStorageSize(JSON.stringify(editorDraft).length*2)+" · 옷장 "+formatStorageSize(wardrobeStorageBytes());
+    }
     return errors;
   }
 
   function finishEditorSave(){
     devContent=cloneData(editorDraft);
-    if(editorWardrobeDraft) committedWardrobeAssets=cloneData(editorWardrobeDraft);
-    editorWardrobeDraft=null;
     applyDevContent();
     editorStatus("saved");
-    renderHome();renderDevSettings();
-    toast("개발 데이터를 저장했습니다.");
+    renderHome();
+    renderDevSettings();
+    toast("컬렉션 데이터를 저장했습니다.");
   }
 
   async function saveEditorDraftIndexedDB(db,backup){
     try{
-      const values={backup,content:cloneData(editorDraft)};
-      if(editorWardrobeDraft) values.wardrobe=cloneData(editorWardrobeDraft);
-      await writeDevDatabase(db,values);
-      if(editorWardrobeDraft) wardrobeAssets=cloneData(editorWardrobeDraft);
+      await writeDevDatabase(db,{backup,content:cloneData(editorDraft)});
       finishEditorSave();
     }catch{
       editorStatus("failed");
-      toast("저장 실패: JSON으로 내보낸 뒤 저장 공간을 확인해 주세요.");
+      toast("컬렉션 저장에 실패했습니다. 브라우저 저장 공간을 확인해 주세요.");
     }
   }
 
@@ -472,74 +384,39 @@
     try{
       localStorage.setItem(DEV_BACKUP_KEY,JSON.stringify(backup));
       localStorage.setItem(DEV_CONTENT_KEY,JSON.stringify(editorDraft));
-      if(editorWardrobeDraft){localStorage.setItem(WARDROBE_ASSET_KEY,JSON.stringify(editorWardrobeDraft));wardrobeAssets=cloneData(editorWardrobeDraft);}
       finishEditorSave();
       return true;
     }catch{
       editorStatus("failed");
-      toast("저장 실패: 저장 공간을 확인하거나 JSON으로 내보내세요.");
+      toast("컬렉션 저장에 실패했습니다. 브라우저 저장 공간을 확인해 주세요.");
       return false;
     }
   }
 
   function saveEditorDraft(){
-    const errors=renderEditorCheck();
-    if(errors.length){devSection="data";showView("dev");toast(`${errors.length}개의 오류를 먼저 고쳐 주세요.`);return false;}
+    const errors=checkEditorData();
+    if(errors.length){
+      toast(errors[0].message);
+      return false;
+    }
     editorStatus("saving");
-    const backup={format:"pixely-dev-data",version:1,content:cloneData(devContent),wardrobe:cloneData(wardrobeAssets)};
+    const backup={format:"pixely-collection-data",version:1,content:cloneData(devContent)};
     if(typeof indexedDB!=="undefined"){
       Promise.resolve(devStorageReady||devDatabase).then(db=>{
         return db?saveEditorDraftIndexedDB(db,backup):saveEditorDraftLocal(backup);
-      }).catch(()=>{editorStatus("failed");toast("저장 실패: JSON으로 내보낸 뒤 브라우저 저장소를 확인해 주세요.");});
+      }).catch(()=>{
+        editorStatus("failed");
+        toast("컬렉션 저장에 실패했습니다.");
+      });
       return true;
     }
     return saveEditorDraftLocal(backup);
-  }
-
-  function exportEditorData(){
-    const payload={format:"pixely-dev-data",version:1,content:editorDraft,wardrobe:editorWardrobeDraft||wardrobeAssets};
-    const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
-    const url=URL.createObjectURL(blob);
-    const link=document.createElement("a");
-    link.href=url;link.download="pixely-dev-data-"+new Date().toISOString().slice(0,10)+".json";
-    link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
-  }
-
-  async function importEditorData(file){
-    if(!file) return;
-    try{
-      if(file.size>64*1024*1024) throw Error("64MB 이하 JSON만 가져올 수 있습니다.");
-      const raw=JSON.parse(await file.text());
-      if(raw.format!=="pixely-dev-data"||raw.version!==1||!raw.content||!["chapters","cards","postcards","items"].every(key=>Array.isArray(raw.content[key]))) throw Error("지원하지 않는 데이터 형식입니다.");
-      if(raw.wardrobe && (!Array.isArray(raw.wardrobe.custom)||!raw.wardrobe.base)) throw Error("옷장 데이터 형식이 올바르지 않습니다.");
-      if(!window.confirm("가져온 내용을 편집 초안으로 불러올까요? 현재 저장 전 변경 내용은 덮어씁니다.")) return;
-      editorDraft={chapters:normalizeDevChapters(raw.content.chapters,[]),cards:normalizeDevArray(raw.content.cards,[]),postcards:normalizeDevArray(raw.content.postcards,[]),items:normalizeDevArray(raw.content.items,[])};
-      editorWardrobeDraft=raw.wardrobe?cloneData(raw.wardrobe):null;
-      rememberEditorDraft();
-      devSection="data";
-      renderDevSettings();renderEditorCheck();
-      toast("JSON을 초안으로 불러왔습니다. 검사 후 모두 저장해 주세요.");
-    }catch(error){toast("가져오기 실패: "+error.message);}
-  }
-
-  async function restoreEditorBackup(){
-    try{
-      const db=await (devStorageReady||devDatabase);
-      const raw=db?await readDevDatabase(db,"backup"):JSON.parse(localStorage.getItem(DEV_BACKUP_KEY)||"null");
-      if(raw?.format!=="pixely-dev-data"||!raw.content) throw Error("복구할 백업이 없습니다.");
-      if(!window.confirm("직전 저장 전 데이터를 편집 초안으로 복구할까요?")) return;
-      editorDraft=cloneData(raw.content);
-      editorWardrobeDraft=raw.wardrobe?cloneData(raw.wardrobe):null;
-      rememberEditorDraft();devSection="data";renderDevSettings();renderEditorCheck();
-      toast("백업을 초안으로 불러왔습니다.");
-    }catch(error){toast(error.message);}
   }
 
   applyDevContent();
 
   window.PixelyDevContent={
     all:()=>cloneData(devContent),
-    interactionsForChapter:chapterId=>cloneData(devContent.chapters.find(chapter=>chapter.id===chapterId)?.interactions||[]),
     validateDraft:()=>cloneData(checkEditorData())
   };
 
@@ -621,15 +498,8 @@
   let wardrobeEditingOrderSnapshot=null;
   let wardrobeEditingWasSelected=false;
   let outfitDraft={layers:[]};
-  let devSection="chapters";
   let devCollectionType="cards";
   let devSelectedId=null;
-  let devSelectedInteractionId=null;
-  let devStoryChapterId=null;
-  let devStoryPointer=null;
-  let devStoryPlacing=false;
-  let devStorySceneId="party-room";
-  let wardrobeFromEditor=false;
   let saveMode="manage";
   let toastTimer=null;
   let dismissedUpdate=null;
@@ -772,18 +642,11 @@
   }
 
   function showView(name){
-    if(name!=="dev" && wardrobeFromEditor) unmountWardrobeEditor();
     $$("[data-view]").forEach(view=>{
       const active=view.dataset.view===name;
       view.hidden=!active;
       view.classList.toggle("is-active",active);
     });
-    if(name!=="story"&&name!=="dev"&&devStoryChapterId){
-      devStoryChapterId=null;
-      devSelectedInteractionId=null;
-      devStoryPointer=null;
-      devStoryPlacing=false;
-    }
     if(name==="collection") renderCollection();
     if(name==="chapters") renderChapters();
     if(name==="dev") renderDevSettings();
@@ -892,7 +755,7 @@
 
 
   function shouldPlayStoryIntro(save){
-    return Boolean(save && save.story?.introSeen===false && !currentDevStoryChapter());
+    return Boolean(save && save.story?.introSeen===false);
   }
 
   function renderStoryIntroStep(){
@@ -1092,12 +955,11 @@
 
   function renderGameUI(){
     const save=activeSave();
-    const devChapter=currentDevStoryChapter();
-    if(!save&&!devChapter) return;
+    if(!save) return;
 
-    $("#story-chapter-name").textContent=devChapter?.title||"생일 전날";
-    $("#story-location-name").textContent=devChapter?"장면 편집":"파티방";
-    $("#story-current-objective").textContent=devChapter?"상호작용을 실제 화면에서 배치하세요.":currentStoryObjective(save);
+    $("#story-chapter-name").textContent="생일 전날";
+    $("#story-location-name").textContent="파티방";
+    $("#story-current-objective").textContent=currentStoryObjective(save);
 
     const inventoryIds=Array.isArray(save?.collection?.items)?save.collection.items:[];
     $("#story-inventory-count").textContent=inventoryIds.length;
@@ -1124,7 +986,6 @@
     missionList.innerHTML=(save?.missions||[]).map(mission=>
       '<li class="'+(mission.done?"is-done":"")+'"><span>'+(mission.done?"✓":"○")+'</span><b>'+escapeHTML(mission.title)+'</b></li>'
     ).join("") || '<li><span>○</span><b>아직 등록된 목표가 없습니다.</b></li>';
-    renderStoryDevEditor();
   }
 
   function collectionOwnedSet(){
@@ -1454,12 +1315,10 @@
     if(selectedCount) selectedCount.textContent=selected.length+"개 적용 중";
     updateWardrobeStorageMeter();
     $("#wardrobe-save-button").disabled=false;
-    $("#wardrobe-save-button").textContent=save?"이 모습 저장하기 ✦":wardrobeFromEditor?"옷장 초안에 반영":"개발자 기본 모습 저장";
-    $("#wardrobe-status").textContent=wardrobeFromEditor
-      ? "개발자 옷장 초안입니다. 파츠 위치와 선택을 조정한 뒤 상단의 모두 저장으로 적용하세요."
-      : save
+    $("#wardrobe-save-button").textContent=save?"이 모습 저장하기 ✦":"개발자 기본 모습 저장";
+    $("#wardrobe-status").textContent=save
       ? "모든 분류에서 여러 파츠를 동시에 선택할 수 있어요. 저장하면 이 슬롯의 모습으로 기록됩니다."
-      : "개발자 설정 모드예요. 세이브 없이 파츠를 등록·겹치기·순서 변경할 수 있고 선택은 자동 저장됩니다.";
+      : "세이브 없이 파츠를 등록·겹치기·순서 변경할 수 있고 선택은 자동 저장됩니다.";
     const uploadSlot=$("#wardrobe-upload-slot");
     if(uploadSlot) uploadSlot.value=wardrobeSlot;
     renderUploadGroupOptions();
@@ -1671,7 +1530,7 @@
   function saveOutfit(){
     const save=wardrobeSave();
     if(!save){
-      if(rememberDeveloperOutfit()) toast(wardrobeFromEditor?"현재 모습을 옷장 초안에 반영했어요.":"현재 모습을 개발자 기본 설정으로 저장했어요.");
+      if(rememberDeveloperOutfit()) toast("현재 모습을 개발자 기본 설정으로 저장했어요.");
       renderWardrobe();
       return;
     }
@@ -1734,28 +1593,22 @@
 
 
   function currentDevKey(){
-    return devSection==="collection"?devCollectionType:devSection;
+    return devCollectionType;
   }
 
   function currentDevEntries(){
-    const key=currentDevKey();
-    return editorDraft[key]||[];
+    return editorDraft[currentDevKey()]||[];
   }
 
-  function devEntryTitle(entry,key=currentDevKey()){
-    if(key==="chapters") return entry.title||entry.id||"이름 없는 챕터";
+  function devEntryTitle(entry){
     return entry.name||entry.id||"이름 없는 항목";
   }
 
   function devNewTemplate(key){
     const id=key.replace(/s$/,"")+"-"+Date.now().toString(36);
-    const templates={
-      chapters:{id,no:String((editorDraft.chapters.length+1)).padStart(2,"0"),label:"CHAPTER",title:"새 챕터",desc:"",scenes:[{id:"party-room",title:"기본 장면",image:""}],interactions:[]},
-      cards:{id,name:"새 카드",type:"PERSON",symbol:"?",color:"#7894a5",world:"",desc:"",memo:""},
-      postcards:{id,name:"새 엽서",type:"STORY POSTCARD",symbol:"✦",color:"#7894a5",desc:"",caption:""},
-      items:{id,name:"새 아이템",type:"MEMENTO",symbol:"✦",color:"#7894a5",desc:"",wardrobeSlot:"",wardrobeGroup:""}
-    };
-    return templates[key]||{id};
+    return key==="postcards"
+      ? {id,name:"새 엽서",type:"STORY POSTCARD",symbol:"✦",color:"#7894a5",desc:"",caption:""}
+      : {id,name:"새 카드",type:"PERSON",symbol:"?",color:"#7894a5",world:"",desc:"",memo:""};
   }
 
   function devFieldMarkup(field,value){
@@ -1767,31 +1620,12 @@
       const options=(field.options||[]).map(([id,label])=>'<option value="'+escapeHTML(id)+'" '+(safe===id?"selected":"")+'>'+escapeHTML(label)+'</option>').join("");
       return '<label class="dev-field"><span>'+escapeHTML(field.label)+'</span><select data-dev-field="'+escapeHTML(field.key)+'">'+options+'</select></label>';
     }
-    const type=field.type==="color"?"color":field.type==="number"?"number":"text";
+    const type=field.type==="color"?"color":"text";
     const fallback=type==="color" && !/^#[0-9a-f]{6}$/i.test(safe)?"#7894a5":safe;
-    const numeric=type==="number"?' min="'+escapeHTML(field.min??"")+'" max="'+escapeHTML(field.max??"")+'" step="'+escapeHTML(field.step??1)+'"':"";
-    return '<label class="dev-field"><span>'+escapeHTML(field.label)+'</span><input type="'+type+'" data-dev-field="'+escapeHTML(field.key)+'" value="'+escapeHTML(fallback)+'" placeholder="'+escapeHTML(field.placeholder||"")+'"'+numeric+'></label>';
+    return '<label class="dev-field"><span>'+escapeHTML(field.label)+'</span><input type="'+type+'" data-dev-field="'+escapeHTML(field.key)+'" value="'+escapeHTML(fallback)+'" placeholder="'+escapeHTML(field.placeholder||"")+'"></label>';
   }
 
   function renderDevSettings(){
-    if(devSection==="wardrobe") mountWardrobeEditor();
-    else if(wardrobeFromEditor) unmountWardrobeEditor();
-    $$("[data-dev-section]").forEach(button=>{
-      const active=button.dataset.devSection===devSection;
-      button.classList.toggle("is-active",active);
-      button.setAttribute("aria-pressed",active?"true":"false");
-    });
-    const collectionTypes=$("#dev-collection-types");
-    collectionTypes.hidden=devSection!=="collection";
-    const dataTools=$("#dev-data-tools");
-    if(dataTools) dataTools.hidden=devSection!=="data";
-    const wardrobeTools=$("#dev-wardrobe-tools");
-    if(wardrobeTools) wardrobeTools.hidden=devSection!=="wardrobe";
-    const workspace=$(".dev-settings-workspace");
-    if(workspace) workspace.hidden=devSection==="data"||devSection==="wardrobe";
-    const toolbar=$(".dev-settings-toolbar");
-    if(toolbar) toolbar.hidden=devSection==="data"||devSection==="wardrobe";
-    if(devSection==="data") renderEditorCheck();
     $$("[data-dev-collection-type]").forEach(button=>{
       const active=button.dataset.devCollectionType===devCollectionType;
       button.classList.toggle("is-active",active);
@@ -1804,356 +1638,25 @@
       devSelectedId=entries[0]?.id||null;
     }
     const selected=entries.find(entry=>String(entry.id)===String(devSelectedId))||null;
-    const sectionNames={chapters:"챕터",cards:"컬렉션 카드",postcards:"컬렉션 엽서",items:"아이템",data:"데이터 관리",wardrobe:"옷장"};
-    $("#dev-current-section").textContent=sectionNames[key]||key;
-    $("#dev-context-label").textContent=selected?sectionNames[key]+" · "+devEntryTitle(selected,key):sectionNames[key]||"게임 데이터 편집";
+    const label=key==="cards"?"컬렉션 카드":"컬렉션 엽서";
+
+    $("#dev-current-section").textContent=label;
+    $("#dev-context-label").textContent=selected?label+" · "+devEntryTitle(selected):"컬렉션 편집";
     $("#dev-entry-count").textContent=entries.length+"개";
     $("#dev-entry-list").innerHTML=entries.length
-      ? entries.map(entry=>'<button type="button" data-dev-entry="'+escapeHTML(entry.id||"")+'" class="'+(String(entry.id)===String(devSelectedId)?"is-active":"")+'"><b>'+escapeHTML(devEntryTitle(entry,key))+'</b><small>'+escapeHTML(entry.id||"NO ID")+'</small></button>').join("")
+      ? entries.map(entry=>'<button type="button" data-dev-entry="'+escapeHTML(entry.id||"")+'" class="'+(String(entry.id)===String(devSelectedId)?"is-active":"")+'"><b>'+escapeHTML(devEntryTitle(entry))+'</b><small>'+escapeHTML(entry.id||"NO ID")+'</small></button>').join("")
       : '<p class="dev-empty">아직 등록된 항목이 없습니다.</p>';
 
     const schema=devSchemas[key]||[];
-    $("#dev-editor-title").textContent=selected?"수정 · "+devEntryTitle(selected,key):"항목을 선택하세요";
+    $("#dev-editor-title").textContent=selected?"수정 · "+devEntryTitle(selected):"항목을 선택하세요";
     $("#dev-editor-fields").innerHTML=selected
       ? schema.map(field=>devFieldMarkup(field,selected[field.key])).join("")
       : '<div class="dev-editor-empty">왼쪽에서 항목을 선택하거나 + 새 항목을 눌러 주세요.</div>';
-    const scenesPane=$("#dev-chapter-scenes");
-    if(scenesPane){
-      scenesPane.hidden=key!=="chapters"||!selected;
-      if(!scenesPane.hidden) scenesPane.innerHTML='<h4>장면 · 배경</h4>'+(selected.scenes||[]).map((scene,index)=>`<div class="dev-scene-row" data-scene-index="${index}"><label>장면 ID<input data-scene-field="id" value="${escapeHTML(scene.id)}"></label><label>이름<input data-scene-field="title" value="${escapeHTML(scene.title)}"></label><button type="button" data-dev-open-scene="${index}">장면 열기</button><label class="dev-scene-file">배경 이미지<input type="file" data-scene-upload="${index}" accept="image/png,image/webp,image/jpeg"></label><button type="button" data-scene-delete="${index}" aria-label="장면 삭제">×</button></div>`).join("")+'<button type="button" id="dev-add-scene">＋ 장면 추가</button><p>배경을 등록하지 않은 집 안 장면은 현재 파티방 디자인을 사용합니다.</p>';
-    }
     $("#dev-save-entry").disabled=!selected;
     $("#dev-delete-entry").disabled=!selected;
-    $("#dev-save-status").textContent=editorDirty()?"초안 수정됨 · 모두 저장 필요":"개발 데이터 · "+entries.length+"개";
+    $("#dev-save-status").textContent=editorDirty()?"초안 수정됨 · 저장 필요":"컬렉션 데이터 · "+entries.length+"개";
     editorStatus(editorSaveState==="failed"?"failed":editorDirty()?"dirty":"saved");
     updateEditorHistoryButtons();
-    const sceneButton=$("#dev-open-chapter-scene");
-    if(sceneButton){
-      sceneButton.hidden=key!=="chapters"||!selected;
-      sceneButton.disabled=key!=="chapters"||!selected;
-    }
-  }
-
-  function mountWardrobeEditor(){
-    const mount=$("#dev-wardrobe-mount");
-    const shell=$(".wardrobe-shell");
-    if(!mount||!shell) return;
-    if(!wardrobeFromEditor){
-      wardrobeFromEditor=true;
-      wardrobeAssets=cloneData(editorWardrobeDraft||committedWardrobeAssets);
-      outfitDraft=developerOutfit();
-      outfitDraft.layers=[...(outfitDraft.layers||[])];
-    }
-    if(shell.parentElement!==mount) mount.append(shell);
-    renderWardrobe();
-  }
-
-  function unmountWardrobeEditor(){
-    const shell=$(".wardrobe-shell");
-    const source=$('[data-view="wardrobe"]');
-    if(shell && source && shell.parentElement!==source) source.append(shell);
-    wardrobeFromEditor=false;
-    wardrobeAssets=cloneData(committedWardrobeAssets);
-  }
-
-  function currentDevStoryChapter(){
-    return editorDraft.chapters.find(chapter=>String(chapter.id)===String(devStoryChapterId))||null;
-  }
-
-  function currentDevStoryInteraction(){
-    const chapter=currentDevStoryChapter();
-    return chapter?.interactions?.find(interaction=>String(interaction.id)===String(devSelectedInteractionId))||null;
-  }
-
-  function normalizeVisualInteraction(interaction){
-    const width=clampNumber(interaction.width,3,80,12);
-    const height=clampNumber(interaction.height,3,80,12);
-    return {
-      ...interaction,
-      x:clampNumber(interaction.x,0,100-width,44),
-      y:clampNumber(interaction.y,0,100-height,42),
-      width,
-      height
-    };
-  }
-
-  function newChapterInteractionAt(x=44,y=42){
-    return normalizeVisualInteraction({
-      id:"interaction-"+Date.now().toString(36),
-      type:"inspect",
-      label:"새 상호작용",
-      target:"",
-      scene:devStorySceneId,
-      x,y,width:12,height:12,
-      text:"",
-      condition:"",
-      rewardItem:"",
-      next:"",
-      note:""
-    });
-  }
-
-  function storyInteractionFieldMarkup(field,value){
-    const safe=value==null?"":String(value);
-    if(field.type==="textarea"){
-      return '<label class="story-dev-field story-dev-field--wide"><span>'+escapeHTML(field.label)+'</span><textarea data-story-dev-field="'+escapeHTML(field.key)+'" placeholder="'+escapeHTML(field.placeholder||"")+'">'+escapeHTML(safe)+'</textarea></label>';
-    }
-    if(field.type==="select"){
-      const options=(field.options||[]).map(([id,label])=>'<option value="'+escapeHTML(id)+'" '+(safe===id?"selected":"")+'>'+escapeHTML(label)+'</option>').join("");
-      return '<label class="story-dev-field"><span>'+escapeHTML(field.label)+'</span><select data-story-dev-field="'+escapeHTML(field.key)+'">'+options+'</select></label>';
-    }
-    const type=field.type==="number"?"number":"text";
-    const numeric=type==="number"?' min="'+escapeHTML(field.min??"")+'" max="'+escapeHTML(field.max??"")+'" step="'+escapeHTML(field.step??1)+'"':"";
-    return '<label class="story-dev-field"><span>'+escapeHTML(field.label)+'</span><input type="'+type+'" data-story-dev-field="'+escapeHTML(field.key)+'" value="'+escapeHTML(safe)+'" placeholder="'+escapeHTML(field.placeholder||"")+'"'+numeric+'></label>';
-  }
-
-  function setStoryDevStatus(message){
-    const node=$("#story-dev-status");
-    if(node) node.textContent=message;
-  }
-
-  function syncStoryDevSelection(){
-    const layer=$("#story-dev-layer");
-    if(!layer) return;
-    $$("[data-story-dev-interaction]",layer).forEach(box=>{
-      box.classList.toggle("is-selected",box.dataset.storyDevInteraction===String(devSelectedInteractionId));
-    });
-  }
-
-  function renderStoryDevInspector(){
-    const inspector=$("#story-dev-inspector");
-    if(!inspector) return;
-    const interaction=currentDevStoryInteraction();
-    inspector.hidden=!devStoryChapterId;
-    $("#story-dev-save-interaction").disabled=!interaction;
-    $("#story-dev-delete-interaction").disabled=!interaction;
-    $("#story-dev-interaction-title").textContent=interaction?(interaction.label||interaction.id):"상호작용을 선택하세요";
-    const fields=$("#story-dev-fields");
-    if(!interaction){
-      fields.innerHTML='<div class="story-dev-empty">왼쪽 화면의 상호작용 박스를 선택하거나 + 상호작용 추가를 눌러 주세요.</div>';
-      $("#story-dev-position").textContent="선택 없음";
-      return;
-    }
-    const normalized=normalizeVisualInteraction(interaction);
-    Object.assign(interaction,normalized);
-    $("#story-dev-position").textContent="X "+Math.round(interaction.x)+" · Y "+Math.round(interaction.y)+" · W "+Math.round(interaction.width)+" · H "+Math.round(interaction.height);
-    fields.innerHTML=interactionSchema.map(field=>storyInteractionFieldMarkup(field,interaction[field.key])).join("");
-  }
-
-  function renderStoryDevLayer(){
-    const layer=$("#story-dev-layer");
-    const chapter=currentDevStoryChapter();
-    if(!layer) return;
-    layer.hidden=!chapter;
-    if(!chapter) return;
-    chapter.interactions=normalizeChapterInteractions(chapter.interactions).map(normalizeVisualInteraction);
-    layer.classList.toggle("is-placing",devStoryPlacing);
-    layer.innerHTML=chapter.interactions.filter(interaction=>(interaction.scene||"party-room")===devStorySceneId).map((interaction,index)=>{
-      const selected=String(interaction.id)===String(devSelectedInteractionId);
-      const style="left:"+interaction.x+"%;top:"+interaction.y+"%;width:"+interaction.width+"%;height:"+interaction.height+"%;";
-      return '<button type="button" class="story-dev-hotspot '+(selected?"is-selected":"")+'" data-story-dev-interaction="'+escapeHTML(interaction.id)+'" style="'+style+'"><span><em>'+(index+1)+'</em>'+escapeHTML(interaction.label||interaction.id)+'</span><i data-story-dev-resize aria-hidden="true"></i></button>';
-    }).join("");
-  }
-
-  function renderStoryDevEditor(){
-    const chapter=currentDevStoryChapter();
-    const active=Boolean(chapter);
-    const room=$("#story-room");
-    const stage=$(".story-stage");
-    room?.classList.toggle("is-dev-editing",active);
-    stage?.classList.toggle("is-dev-editing",active);
-    const toolbar=$("#story-dev-toolbar");
-    if(toolbar) toolbar.hidden=!active;
-    const sceneSave=$("#story-dev-save-all");
-    if(sceneSave) sceneSave.disabled=!editorDirty()||editorSaveState==="saving";
-    const inspector=$("#story-dev-inspector");
-    if(inspector) inspector.hidden=!active;
-    if(!active){
-      const layer=$("#story-dev-layer");
-      if(layer) layer.hidden=true;
-      room?.classList.remove("is-dev-house-outside","is-dev-door-closeup","is-dev-custom-scene");
-      if(room) room.style.backgroundImage="";
-      return;
-    }
-    const scene=chapter.scenes?.find(entry=>entry.id===devStorySceneId);
-    room?.classList.toggle("is-dev-house-outside",devStorySceneId==="house-outside");
-    room?.classList.toggle("is-dev-door-closeup",devStorySceneId==="door-closeup");
-    room?.classList.toggle("is-dev-custom-scene",Boolean(scene?.image));
-    if(room) room.style.backgroundImage=scene?.image?`url(${JSON.stringify(scene.image)})`:"";
-    const sceneSelect=$("#story-dev-scene");
-    if(sceneSelect){
-      sceneSelect.innerHTML=(chapter.scenes||[]).map(scene=>`<option value="${escapeHTML(scene.id)}">${escapeHTML(scene.title)}</option>`).join("");
-      sceneSelect.value=devStorySceneId;
-    }
-    chapter.interactions=normalizeChapterInteractions(chapter.interactions);
-    if(devSelectedInteractionId && !chapter.interactions.some(item=>String(item.id)===String(devSelectedInteractionId))){
-      devSelectedInteractionId=null;
-    }
-    $("#story-dev-chapter-title").textContent=(chapter.label||"CHAPTER")+" · "+(chapter.title||chapter.id);
-    setStoryDevStatus(devStoryPlacing?"화면에서 상호작용을 설치할 위치를 클릭하세요.":"박스를 드래그해서 위치를 옮기고 ● 핸들로 크기를 바꿔요.");
-    renderStoryDevLayer();
-    renderStoryDevInspector();
-  }
-
-  function openChapterSceneEditor(){
-    if(currentDevKey()!=="chapters") return;
-    const chapter=editorDraft.chapters.find(entry=>String(entry.id)===String(devSelectedId));
-    if(!chapter) return;
-    chapter.interactions=normalizeChapterInteractions(chapter.interactions);
-    devStoryChapterId=chapter.id;
-    devStorySceneId=chapter.scenes?.[0]?.id||"party-room";
-    devSelectedInteractionId=chapter.interactions[0]?.id||null;
-    devStoryPlacing=false;
-    closeStoryPanels();
-    showView("story");
-    renderGameUI();
-  }
-
-  function closeChapterSceneEditor(){
-    devStoryChapterId=null;
-    devSelectedInteractionId=null;
-    devStoryPointer=null;
-    devStoryPlacing=false;
-    showView("dev");
-  }
-
-  function enterCurrentStorySceneEditor(){
-    if(devStoryChapterId){
-      renderStoryDevEditor();
-      return;
-    }
-    const save=activeSave();
-    const preferredId=save?.story?.scene==="party-room"?"night":devSelectedId;
-    const chapter=editorDraft.chapters.find(entry=>String(entry.id)===String(preferredId))||editorDraft.chapters[0];
-    if(!chapter) return;
-    chapter.interactions=normalizeChapterInteractions(chapter.interactions);
-    devStoryChapterId=chapter.id;
-    devStorySceneId=save?.story?.scene||"party-room";
-    devSelectedId=chapter.id;
-    devSelectedInteractionId=chapter.interactions[0]?.id||null;
-    devStoryPlacing=false;
-    renderGameUI();
-  }
-
-  function startStoryInteractionPlacement(){
-    if(!currentDevStoryChapter()) return;
-    devStoryPlacing=true;
-    renderStoryDevEditor();
-  }
-
-  function placeStoryInteraction(event){
-    if(!devStoryPlacing) return false;
-    const layer=$("#story-dev-layer");
-    const chapter=currentDevStoryChapter();
-    if(!layer||!chapter) return false;
-    const rect=layer.getBoundingClientRect();
-    const width=12, height=12;
-    const px=((event.clientX-rect.left)/Math.max(1,rect.width))*100;
-    const py=((event.clientY-rect.top)/Math.max(1,rect.height))*100;
-    const interaction=newChapterInteractionAt(
-      clampNumber(px-width/2,0,100-width,44),
-      clampNumber(py-height/2,0,100-height,42)
-    );
-    chapter.interactions.push(interaction);
-    devSelectedInteractionId=interaction.id;
-    devStoryPlacing=false;
-    markEditorDraft();
-    renderStoryDevEditor();
-    toast("상호작용을 화면에 추가했어요.");
-    return true;
-  }
-
-  function beginStoryInteractionPointer(event,id,mode){
-    const chapter=currentDevStoryChapter();
-    const interaction=chapter?.interactions?.find(item=>String(item.id)===String(id));
-    const layer=$("#story-dev-layer");
-    if(!interaction||!layer) return;
-    const normalized=normalizeVisualInteraction(interaction);
-    Object.assign(interaction,normalized);
-    devSelectedInteractionId=interaction.id;
-    const rect=layer.getBoundingClientRect();
-    devStoryPointer={
-      mode,
-      id:interaction.id,
-      startClientX:event.clientX,
-      startClientY:event.clientY,
-      startX:interaction.x,
-      startY:interaction.y,
-      startWidth:interaction.width,
-      startHeight:interaction.height,
-      rect
-    };
-    syncStoryDevSelection();
-    renderStoryDevInspector();
-    event.preventDefault();
-  }
-
-  function updateStoryInteractionPointer(event){
-    if(!devStoryPointer) return;
-    const interaction=currentDevStoryChapter()?.interactions?.find(item=>String(item.id)===String(devStoryPointer.id));
-    if(!interaction) return;
-    const rect=devStoryPointer.rect;
-    const dx=((event.clientX-devStoryPointer.startClientX)/Math.max(1,rect.width))*100;
-    const dy=((event.clientY-devStoryPointer.startClientY)/Math.max(1,rect.height))*100;
-    if(devStoryPointer.mode==="resize"){
-      interaction.width=clampNumber(devStoryPointer.startWidth+dx,3,100-interaction.x,devStoryPointer.startWidth);
-      interaction.height=clampNumber(devStoryPointer.startHeight+dy,3,100-interaction.y,devStoryPointer.startHeight);
-    }else{
-      interaction.x=clampNumber(devStoryPointer.startX+dx,0,100-interaction.width,devStoryPointer.startX);
-      interaction.y=clampNumber(devStoryPointer.startY+dy,0,100-interaction.height,devStoryPointer.startY);
-    }
-    const layer=$("#story-dev-layer");
-    const box=$$("[data-story-dev-interaction]",layer).find(node=>node.dataset.storyDevInteraction===String(interaction.id));
-    if(box){
-      box.style.left=interaction.x+"%";
-      box.style.top=interaction.y+"%";
-      box.style.width=interaction.width+"%";
-      box.style.height=interaction.height+"%";
-    }
-    $("#story-dev-position").textContent="X "+Math.round(interaction.x)+" · Y "+Math.round(interaction.y)+" · W "+Math.round(interaction.width)+" · H "+Math.round(interaction.height);
-  }
-
-  function finishStoryInteractionPointer(){
-    if(!devStoryPointer) return;
-    devStoryPointer=null;
-    markEditorDraft();
-    renderStoryDevEditor();
-  }
-
-  function saveStoryInteractionDetails(){
-    const chapter=currentDevStoryChapter();
-    const interaction=currentDevStoryInteraction();
-    if(!chapter||!interaction) return;
-    const next={...interaction};
-    $$("[data-story-dev-field]",$("#story-dev-fields")).forEach(field=>{
-      const key=field.dataset.storyDevField;
-      next[key]=["x","y","width","height"].includes(key)?Number(field.value):field.value;
-    });
-    next.id=String(next.id||"").trim();
-    if(!next.id){toast("상호작용 ID는 비워둘 수 없습니다.");return}
-    if(chapter.interactions.some(item=>item!==interaction&&String(item.id)===next.id)){
-      toast("같은 상호작용 ID가 이미 있습니다.");
-      return;
-    }
-    Object.assign(interaction,normalizeVisualInteraction(next));
-    devSelectedInteractionId=interaction.id;
-    if(markEditorDraft()){
-      renderStoryDevEditor();
-      toast("상호작용 세부 설정을 저장했어요.");
-    }
-  }
-
-  function deleteStoryInteraction(){
-    const chapter=currentDevStoryChapter();
-    const interaction=currentDevStoryInteraction();
-    if(!chapter||!interaction) return;
-    if(!window.confirm((interaction.label||interaction.id)+" 상호작용을 삭제할까요?")) return;
-    const index=chapter.interactions.indexOf(interaction);
-    chapter.interactions.splice(index,1);
-    devSelectedInteractionId=chapter.interactions[Math.min(index,chapter.interactions.length-1)]?.id||null;
-    markEditorDraft();
-    renderStoryDevEditor();
-    toast("상호작용을 삭제했어요.");
   }
 
   function createDevEntry(){
@@ -2161,10 +1664,9 @@
     const entry=devNewTemplate(key);
     editorDraft[key].push(entry);
     devSelectedId=entry.id;
-    devSelectedInteractionId=null;
     if(markEditorDraft()){
       renderDevSettings();
-      toast("새 "+(key==="items"?"아이템":"항목")+"을 만들었습니다.");
+      toast(key==="postcards"?"새 엽서를 만들었습니다.":"새 카드를 만들었습니다.");
     }
   }
 
@@ -2173,27 +1675,21 @@
     const entries=editorDraft[key]||[];
     const index=entries.findIndex(entry=>String(entry.id)===String(devSelectedId));
     if(index<0) return;
-    const original=entries[index];
-    const next={...original};
+    const next={...entries[index]};
     $$("[data-dev-field]",$("#dev-editor-fields")).forEach(field=>{
       next[field.dataset.devField]=field.value;
     });
     next.id=String(next.id||"").trim();
-    if(!next.id){
-      toast("ID는 비워둘 수 없습니다.");
-      return;
-    }
+    if(!next.id){toast("ID는 비워둘 수 없습니다.");return}
     if(entries.some((entry,i)=>i!==index&&String(entry.id)===next.id)){
       toast("같은 ID가 이미 있습니다.");
       return;
     }
     entries[index]=next;
     devSelectedId=next.id;
-    if(markEditorDraft()){
-      renderDevSettings();
-      renderHome();
-      toast("개발자 설정을 저장했습니다.");
-    }
+    markEditorDraft();
+    renderDevSettings();
+    toast("컬렉션 초안에 반영했습니다.");
   }
 
   function deleteDevEntry(){
@@ -2201,29 +1697,14 @@
     const entries=editorDraft[key]||[];
     const index=entries.findIndex(entry=>String(entry.id)===String(devSelectedId));
     if(index<0) return;
-    const name=devEntryTitle(entries[index],key);
+    const name=devEntryTitle(entries[index]);
     if(!window.confirm(name+" 항목을 삭제할까요?")) return;
     entries.splice(index,1);
     devSelectedId=entries[Math.min(index,entries.length-1)]?.id||null;
-    if(markEditorDraft()){
-      renderDevSettings();
-      renderHome();
-      toast("항목을 삭제했습니다.");
-    }
+    markEditorDraft();
+    renderDevSettings();
+    toast("컬렉션 항목을 삭제했습니다.");
   }
-
-  function resetDevContent(){
-    if(!window.confirm("챕터·컬렉션·아이템 개발 설정을 모두 기본값으로 되돌릴까요?")) return;
-    editorDraft=cloneData(BASE_DEV_CONTENT);
-    devSelectedId=null;
-    devSelectedInteractionId=null;
-    if(markEditorDraft()){
-      renderDevSettings();
-      renderHome();
-      toast("개발자 설정을 기본값으로 복원했습니다.");
-    }
-  }
-
 
   function showUpdatePrompt(versionKey){
     if(!versionKey || dismissedUpdate===versionKey) return;
@@ -2283,7 +1764,7 @@
     $("#save-manager-button").addEventListener("click",()=>openSaveModal("manage"));
 
     Array.from(document.querySelectorAll("[data-open-collection]")).forEach(b=>b.addEventListener("click",()=>showView("collection")));
-    Array.from(document.querySelectorAll("[data-open-wardrobe]")).forEach(b=>b.addEventListener("click",()=>{wardrobeFromEditor=false;showView("wardrobe");}));
+    Array.from(document.querySelectorAll("[data-open-wardrobe]")).forEach(b=>b.addEventListener("click",()=>showView("wardrobe")));
     Array.from(document.querySelectorAll("[data-open-chapters]")).forEach(b=>b.addEventListener("click",()=>showView("chapters")));
     Array.from(document.querySelectorAll("[data-open-dev]")).forEach(b=>b.addEventListener("click",()=>showView("dev")));
     $$("[data-go-home]").forEach(b=>b.addEventListener("click",()=>showView("home")));
@@ -2453,14 +1934,6 @@
       renderWardrobe();
     });
 
-    $("#dev-settings-tabs")?.addEventListener("click",event=>{
-      const button=event.target.closest("[data-dev-section]");
-      if(!button) return;
-      devSection=button.dataset.devSection;
-      devSelectedId=null;
-      devSelectedInteractionId=null;
-      renderDevSettings();
-    });
     $("#dev-collection-types")?.addEventListener("click",event=>{
       const button=event.target.closest("[data-dev-collection-type]");
       if(!button) return;
@@ -2472,108 +1945,14 @@
       const button=event.target.closest("[data-dev-entry]");
       if(!button) return;
       devSelectedId=button.dataset.devEntry;
-      devSelectedInteractionId=null;
       renderDevSettings();
     });
-    $("#dev-open-chapter-scene")?.addEventListener("click",openChapterSceneEditor);
-    $("#dev-chapter-scenes")?.addEventListener("click",event=>{
-      const chapter=editorDraft.chapters.find(entry=>String(entry.id)===String(devSelectedId));
-      if(!chapter) return;
-      const open=event.target.closest?.("[data-dev-open-scene]");
-      if(open){openChapterSceneEditor();devStorySceneId=chapter.scenes[Number(open.dataset.devOpenScene)].id;renderStoryDevEditor();return;}
-      if(event.target.id==="dev-add-scene"){
-        const id="scene-"+Date.now().toString(36);
-        chapter.scenes.push({id,title:"새 장면",image:""});markEditorDraft();renderDevSettings();return;
-      }
-      const remove=event.target.closest?.("[data-scene-delete]");
-      if(remove && chapter.scenes.length>1 && window.confirm("이 장면을 삭제할까요? 연결된 상호작용은 CHECK에서 확인할 수 있습니다.")){
-        chapter.scenes.splice(Number(remove.dataset.sceneDelete),1);markEditorDraft();renderDevSettings();
-      }
-    });
-    $("#dev-chapter-scenes")?.addEventListener("change",event=>{
-      const chapter=editorDraft.chapters.find(entry=>String(entry.id)===String(devSelectedId));
-      const row=event.target.closest?.("[data-scene-index]");
-      const scene=chapter?.scenes?.[Number(row?.dataset.sceneIndex)];
-      if(!scene) return;
-      const field=event.target.dataset.sceneField;
-      if(field){scene[field]=event.target.value.trim();markEditorDraft();renderDevSettings();return;}
-      if(event.target.dataset.sceneUpload!==undefined){
-        const file=event.target.files?.[0];
-        if(!file) return;
-        if(!/^image\/(png|webp|jpeg)$/.test(file.type)||file.size>16*1024*1024){toast("PNG, WebP, JPG 이미지는 16MB 이하로 등록해 주세요.");return;}
-        const reader=new FileReader();
-        reader.onload=()=>{scene.image=String(reader.result||"");markEditorDraft();renderDevSettings();toast("배경을 초안에 등록했습니다. 모두 저장으로 적용해 주세요.");};
-        reader.onerror=()=>toast("배경 이미지를 읽지 못했습니다.");
-        reader.readAsDataURL(file);
-      }
-    });
-    $("#story-dev-enter")?.addEventListener("click",enterCurrentStorySceneEditor);
-    $("#story-dev-add-interaction")?.addEventListener("click",startStoryInteractionPlacement);
-    $("#story-dev-undo")?.addEventListener("click",()=>stepEditorHistory(-1));
-    $("#story-dev-redo")?.addEventListener("click",()=>stepEditorHistory(1));
-    $("#story-dev-check")?.addEventListener("click",()=>{devSection="data";showView("dev");});
-    $("#story-dev-save-all")?.addEventListener("click",saveEditorDraft);
-    $("#story-dev-scene")?.addEventListener("change",event=>{
-      devStorySceneId=event.target.value;
-      devSelectedInteractionId=null;
-      devStoryPlacing=false;
-      renderStoryDevEditor();
-    });
-    $("#story-dev-exit")?.addEventListener("click",closeChapterSceneEditor);
-    $("#story-dev-save-interaction")?.addEventListener("click",saveStoryInteractionDetails);
-    $("#story-dev-delete-interaction")?.addEventListener("click",deleteStoryInteraction);
-    $("#story-dev-layer")?.addEventListener("pointerdown",event=>{
-      const box=event.target.closest?.("[data-story-dev-interaction]");
-      if(!box) return;
-      const resize=event.target.closest?.("[data-story-dev-resize]");
-      beginStoryInteractionPointer(event,box.dataset.storyDevInteraction,resize?"resize":"move");
-    });
-    $("#story-dev-layer")?.addEventListener("click",event=>{
-      const box=event.target.closest?.("[data-story-dev-interaction]");
-      if(box){
-        devSelectedInteractionId=box.dataset.storyDevInteraction;
-        syncStoryDevSelection();
-        renderStoryDevInspector();
-        return;
-      }
-      placeStoryInteraction(event);
-    });
-    document.addEventListener("pointermove",updateStoryInteractionPointer);
-    document.addEventListener("pointerup",finishStoryInteractionPointer);
     $("#dev-new-entry")?.addEventListener("click",createDevEntry);
     $("#dev-save-entry")?.addEventListener("click",saveDevEntry);
     $("#dev-delete-entry")?.addEventListener("click",deleteDevEntry);
-    $("#dev-reset-content")?.addEventListener("click",resetDevContent);
     $("#dev-undo")?.addEventListener("click",()=>stepEditorHistory(-1));
     $("#dev-redo")?.addEventListener("click",()=>stepEditorHistory(1));
     $("#dev-save-all")?.addEventListener("click",saveEditorDraft);
-    $("#dev-check")?.addEventListener("click",()=>{devSection="data";renderDevSettings();});
-    $("#dev-data-check")?.addEventListener("click",renderEditorCheck);
-    $("#dev-data-export")?.addEventListener("click",exportEditorData);
-    $("#dev-data-import-button")?.addEventListener("click",()=>$("#dev-data-import-file").click());
-    $("#dev-data-import-file")?.addEventListener("change",async event=>{
-      await importEditorData(event.target.files?.[0]);
-      event.target.value="";
-    });
-    $("#dev-data-backup")?.addEventListener("click",restoreEditorBackup);
-    $("#wardrobe-back-button")?.addEventListener("click",()=>showView("home"));
-    $("#dev-check-results")?.addEventListener("click",event=>{
-      const button=event.target.closest("[data-dev-error]");
-      if(!button) return;
-      const issue=checkEditorData()[Number(button.dataset.devError)];
-      if(!issue) return;
-      devSection=issue.section==="cards"||issue.section==="postcards"?"collection":issue.section;
-      if(devSection==="collection") devCollectionType=issue.section;
-      devSelectedId=issue.id;
-      renderDevSettings();
-      if(issue.interaction && devSection==="chapters"){
-        devStoryChapterId=issue.id;
-        devSelectedInteractionId=issue.interaction;
-        const interaction=currentDevStoryInteraction();
-        devStorySceneId=interaction?.scene||"party-room";
-        showView("story");
-      }
-    });
     $("#dev-editor-fields")?.addEventListener("input",()=>{
       $("#dev-save-status").textContent="수정됨 · 저장 필요";
     });
@@ -2599,7 +1978,6 @@
       if(!$("#save-modal").hidden) closeSaveModal();
       else if(!$("#story-inventory-panel")?.hidden || !$("#story-missions-panel")?.hidden || !$("#story-map-panel")?.hidden){closeStoryPanels();}
       else if(!$("#story-dialogue")?.hidden){$("#story-dialogue").hidden=true;}
-      else if(devStoryChapterId && !$("[data-view='story']").hidden){closeChapterSceneEditor();}
       else if(!$("[data-view='collection']").hidden || !$("[data-view='chapters']").hidden || !$("[data-view='story']").hidden || !$("[data-view='wardrobe']").hidden || !$("[data-view='dev']").hidden) showView("home");
     });
   }

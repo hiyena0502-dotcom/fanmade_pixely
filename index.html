@@ -7,10 +7,10 @@
   <meta name="theme-color" content="#111a3b" />
   <title>PIXELY : LOST SKY</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=46" />
-  <script src="data/game-config.js?v=46" defer></script>
-  <script src="data/editor-schema.js?v=46" defer></script>
-  <script src="app.js?v=46" defer></script>
+  <link rel="stylesheet" href="style.css?v=47" />
+  <script src="data/game-config.js?v=47" defer></script>
+  <script src="data/editor-schema.js?v=47" defer></script>
+  <script src="app.js?v=47" defer></script>
 </head>
 <body>
   <div class="game-root">
@@ -38,10 +38,10 @@
         <small>DRESS UP</small>
       </button>
 
-      <button class="dev-shortcut" type="button" data-open-dev aria-label="개발자 설정 열기">
-        <span aria-hidden="true">⚙</span>
-        <b>개발자 설정</b>
-        <small>DEV SETTINGS</small>
+      <button class="dev-shortcut" type="button" data-open-dev aria-label="컬렉션 편집 열기">
+        <span aria-hidden="true">▤</span>
+        <b>컬렉션 편집</b>
+        <small>COLLECTION EDITOR</small>
       </button>
 
       <aside class="command-window game-window">
@@ -132,7 +132,6 @@
               <span><i></i><em id="story-location-name">파티방</em></span>
             </div>
             <div class="story-hud-actions">
-              <button class="story-dev-enter-button" type="button" id="story-dev-enter">EDIT</button>
               <button class="story-home-button" type="button" data-go-home aria-label="메인 화면으로">⌂</button>
             </div>
           </header>
@@ -144,39 +143,6 @@
           <button class="story-hotspot story-hotspot--table" type="button" data-story-hotspot="table"><span>테이블 조사</span></button>
           <button class="story-hotspot story-hotspot--bookshelf" type="button" data-story-hotspot="bookshelf"><span>책장 조사</span></button>
           <button class="story-hotspot story-hotspot--gramophone" type="button" data-story-hotspot="gramophone"><span>축음기 조사</span></button>
-
-          <section class="story-dev-toolbar" id="story-dev-toolbar" hidden>
-            <div>
-              <small>CHAPTER EDIT MODE</small>
-              <b id="story-dev-chapter-title">챕터 상호작용 배치</b>
-              <span id="story-dev-status">상호작용 박스를 화면에서 직접 배치할 수 있어요.</span>
-            </div>
-            <div class="story-dev-toolbar-actions">
-              <label class="story-dev-scene-label">장면 <select id="story-dev-scene"><option value="house-outside">집 밖</option><option value="door-closeup">문 앞</option><option value="party-room">집 안</option></select></label>
-              <button type="button" id="story-dev-undo">↶</button>
-              <button type="button" id="story-dev-redo">↷</button>
-              <button type="button" id="story-dev-check">CHECK</button>
-              <span class="story-dev-save-state" id="story-dev-save-state">저장됨</span>
-              <button type="button" id="story-dev-save-all">모두 저장</button>
-              <button type="button" class="primary" id="story-dev-add-interaction">＋ 상호작용 추가</button>
-              <button type="button" id="story-dev-exit">에디터로 돌아가기</button>
-            </div>
-          </section>
-
-          <div class="story-dev-layer" id="story-dev-layer" hidden aria-label="상호작용 배치 영역"></div>
-
-          <aside class="story-dev-inspector" id="story-dev-inspector" hidden>
-            <header>
-              <div><small>INTERACTION</small><b id="story-dev-interaction-title">상호작용을 선택하세요</b></div>
-              <span id="story-dev-position">X 0 · Y 0 · W 0 · H 0</span>
-            </header>
-            <p>상호작용 박스를 <b>드래그</b>해서 이동하고 오른쪽 아래 <b>●</b>를 끌어서 크기를 바꿔요.</p>
-            <div class="story-dev-fields" id="story-dev-fields"></div>
-            <div class="story-dev-inspector-actions">
-              <button type="button" class="danger" id="story-dev-delete-interaction" disabled>삭제</button>
-              <button type="button" class="primary" id="story-dev-save-interaction" disabled>세부 설정 저장</button>
-            </div>
-          </aside>
 
           <section class="story-dialogue" id="story-dialogue" hidden aria-live="polite">
             <div class="story-dialogue-mark">✦</div>
@@ -461,76 +427,36 @@
     <section class="view dev-settings-view" data-view="dev" hidden>
       <header class="subpage-topbar dev-topbar">
         <button class="back-button" type="button" data-go-home aria-label="홈으로">←</button>
-        <div><small>DEV EDITOR</small><h2 id="dev-context-label">게임 데이터 편집</h2></div>
+        <div><small>COLLECTION EDITOR</small><h2 id="dev-context-label">컬렉션 편집</h2></div>
         <div class="dev-top-actions">
           <button type="button" id="dev-undo" title="실행 취소">↶ UNDO</button>
           <button type="button" id="dev-redo" title="다시 실행">↷ REDO</button>
-          <button type="button" id="dev-check">✓ CHECK</button>
           <span class="dev-autosave-label" id="dev-global-status" role="status">저장됨</span>
-          <button type="button" class="dev-save-all" id="dev-save-all">모두 저장</button>
+          <button type="button" class="dev-save-all" id="dev-save-all">저장</button>
         </div>
       </header>
 
-      <main class="dev-settings-shell">
-        <aside class="dev-settings-sidebar game-window">
-          <div class="dev-settings-brand">
-            <small>CONTENT EDITOR</small>
-            <h3>설정할 데이터</h3>
-            <p>코드를 직접 열지 않고 개발용 데이터를 추가·수정합니다.</p>
-          </div>
-
-          <nav class="dev-settings-tabs" id="dev-settings-tabs" aria-label="개발자 설정 분류">
-            <button type="button" data-dev-section="chapters"><span>01</span><b>챕터</b><small>CHAPTERS</small></button>
-            <button type="button" data-dev-section="collection"><span>02</span><b>컬렉션</b><small>CARDS · POST</small></button>
-            <button type="button" data-dev-section="items"><span>03</span><b>아이템</b><small>ITEM DATA</small></button>
-            <button type="button" data-dev-section="wardrobe"><span>04</span><b>옷장</b><small>WARDROBE</small></button>
-            <button type="button" data-dev-section="data"><span>05</span><b>데이터</b><small>DATA</small></button>
-          </nav>
-
-          <div class="dev-sidebar-actions">
-            <button type="button" id="dev-reset-content">전체 기본값 복원</button>
-          </div>
-        </aside>
-
+      <main class="dev-settings-shell dev-collection-only-shell">
         <section class="dev-settings-main game-window">
           <header class="dev-settings-main-header">
             <div>
-              <small id="dev-current-section">챕터</small>
-              <h3>개발 데이터 편집</h3>
+              <small id="dev-current-section">컬렉션 카드</small>
+              <h3>컬렉션 데이터 편집</h3>
             </div>
             <div class="dev-header-meta">
               <span id="dev-entry-count">0개</span>
-              <span id="dev-save-status">브라우저 개발 설정</span>
+              <span id="dev-save-status">컬렉션 데이터</span>
             </div>
           </header>
 
-          <div class="dev-subtabs" id="dev-collection-types" hidden>
-            <button type="button" data-dev-collection-type="cards">카드</button>
+          <div class="dev-subtabs" id="dev-collection-types">
+            <button type="button" class="is-active" data-dev-collection-type="cards">카드</button>
             <button type="button" data-dev-collection-type="postcards">엽서</button>
           </div>
 
-          <section class="dev-data-tools" id="dev-data-tools" hidden>
-            <h4>프로젝트 데이터 관리</h4>
-            <p>내보내기에는 챕터·상호작용·컬렉션·아이템과 옷장 베이스·파츠 설정이 포함됩니다. 플레이 세이브는 별도로 유지됩니다.</p>
-            <div class="dev-data-actions">
-              <button type="button" id="dev-data-check">✓ 오류 검사</button>
-              <button type="button" id="dev-data-export">↓ JSON 내보내기</button>
-              <button type="button" id="dev-data-import-button">↑ JSON 가져오기</button>
-              <input type="file" id="dev-data-import-file" accept="application/json,.json" hidden>
-              <button type="button" id="dev-data-backup">저장 전 백업 복구</button>
-            </div>
-            <p id="dev-data-size">데이터 크기 확인 중</p>
-            <ul id="dev-check-results" class="dev-check-results" aria-live="polite"></ul>
-          </section>
-          <section class="dev-data-tools wardrobe-view" id="dev-wardrobe-tools" hidden>
-            <h4>옷장 이미지 편집</h4>
-            <p>베이스·파츠 등록, 복수 레이어, 순서와 좌표 조정을 여기에서 편집합니다. 변경 내용은 초안에 남고 상단의 모두 저장으로 적용됩니다.</p>
-            <div id="dev-wardrobe-mount"></div>
-          </section>
-
           <div class="dev-settings-toolbar">
             <button type="button" id="dev-new-entry">＋ 새 항목</button>
-            <p>선택한 항목을 초안에 반영한 뒤 상단의 모두 저장으로 게임 데이터에 적용하세요.</p>
+            <p>컬렉션에 표시할 카드와 엽서만 추가·수정합니다.</p>
           </div>
 
           <div class="dev-settings-workspace">
@@ -541,24 +467,21 @@
 
             <section class="dev-editor-pane">
               <div class="dev-editor-pane-title">
-                <div><small>EDITOR</small><h4 id="dev-editor-title">항목을 선택하세요</h4></div>
+                <div><small>COLLECTION</small><h4 id="dev-editor-title">항목을 선택하세요</h4></div>
               </div>
               <div class="dev-editor-fields" id="dev-editor-fields">
                 <div class="dev-editor-empty">왼쪽에서 항목을 선택하거나 + 새 항목을 눌러 주세요.</div>
               </div>
-              <div class="dev-chapter-scenes" id="dev-chapter-scenes" hidden></div>
               <div class="dev-editor-actions">
-                <button type="button" class="scene" id="dev-open-chapter-scene" hidden>▣ 장면 열기 · 상호작용 배치</button>
                 <button type="button" class="danger" id="dev-delete-entry" disabled>삭제</button>
                 <button type="button" class="primary" id="dev-save-entry" disabled>초안에 반영</button>
               </div>
-
             </section>
           </div>
 
           <footer class="dev-settings-note">
-            <b>개발 데이터</b>
-            <span>초안은 모두 저장 전까지 플레이에 적용되지 않습니다. 장면의 위치와 크기는 실제 챕터 화면에서 배치합니다.</span>
+            <b>COLLECTION ONLY</b>
+            <span>이 에디터에서는 컬렉션 카드와 엽서만 수정합니다. 챕터·상호작용·아이템·옷장은 게임 코드와 각 화면에서 관리합니다.</span>
           </footer>
         </section>
       </main>

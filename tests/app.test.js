@@ -51,11 +51,6 @@ function boot(saved,initialVersion=JSON.parse(fs.readFileSync(path.join(director
     result.dataset.wardrobeSlot=key;
     return result;
   });
-  const devTabs=["chapters","collection","items","wardrobe","data"].map(key=>{
-    const result=node(`dev-tab:${key}`);
-    result.dataset.devSection=key;
-    return result;
-  });
   const devCollectionTabs=["cards","postcards"].map(key=>{
     const result=node(`dev-collection:${key}`);
     result.dataset.devCollectionType=key;
@@ -78,7 +73,6 @@ function boot(saved,initialVersion=JSON.parse(fs.readFileSync(path.join(director
       if(selector==="[data-view]") return views;
       if(selector===".diary-tabs button") return tabs;
       if(selector==="[data-wardrobe-slot]") return wardrobeTabs;
-      if(selector==="[data-dev-section]") return devTabs;
       if(selector==="[data-dev-collection-type]") return devCollectionTabs;
       if(["[data-open-collection]","[data-open-chapters]","[data-open-wardrobe]","[data-open-dev]","[data-go-home]","[data-close-modal]"].includes(selector)) return [node(selector)];
       if(["[data-story-hotspot]","[data-story-exit]","[data-story-drawer]","[data-story-close-panel]","[data-layer-move]","[data-wardrobe-transform]"].includes(selector)) return [];
@@ -263,7 +257,7 @@ test("update prompt compares the loaded version on the first check and on later 
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
   assert.equal(state.requests[0].options.cache,"no-store");
-  state.setVersion("46");
+  state.setVersion("47");
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,false);
@@ -342,122 +336,48 @@ test("simplified wardrobe editor keeps all four multi-select categories",()=>{
 });
 
 
-test("developer settings screen unifies content, wardrobe and data tools",()=>{
+test("developer editor is collection-only",()=>{
   const html=fs.readFileSync(path.join(directory,"index.html"),"utf8");
   assert.match(html,/data-open-dev/);
   assert.match(html,/data-view="dev"/);
-  for(const section of ["chapters","collection","items","wardrobe","data"]){
-    assert.match(html,new RegExp('data-dev-section="'+section+'"'));
+  assert.match(html,/id="dev-collection-types"/);
+  assert.match(html,/data-dev-collection-type="cards"/);
+  assert.match(html,/data-dev-collection-type="postcards"/);
+  for(const removed of ["chapters","items","wardrobe","data"]){
+    assert.doesNotMatch(html,new RegExp('data-dev-section="'+removed+'"'));
   }
-  assert.doesNotMatch(html,/data-dev-section="dialogues"/);
-  assert.doesNotMatch(app,/dialogues:\[/);
-  assert.match(html,/id="dev-entry-list"/);
-  assert.match(html,/id="dev-editor-fields"/);
-  assert.match(app,/DEV_CONTENT_KEY/);
-  assert.match(app,/saveEditorDraft/);
-  assert.match(html,/id="dev-global-status"/);
-  assert.match(html,/id="dev-data-export"/);
+  assert.doesNotMatch(html,/id="dev-open-chapter-scene"/);
+  assert.doesNotMatch(html,/id="dev-wardrobe-mount"/);
+  assert.doesNotMatch(html,/id="dev-data-tools"/);
+  assert.doesNotMatch(html,/id="story-dev-enter"/);
+  assert.doesNotMatch(html,/id="story-dev-toolbar"/);
+  assert.doesNotMatch(app,/interactionSchema/);
 });
 
-test("developer settings can create an item entry without touching source code",()=>{
-  const state=boot(undefined,"30");
+test("collection editor can create and save a card",()=>{
+  const state=boot(undefined,"47");
   state.click("[data-open-dev]");
-  const itemTab=state.node("dev-tab:items");
-  state.node("#dev-settings-tabs").listeners.click({target:{closest(){return itemTab}}});
   state.click("#dev-new-entry");
   assert.equal(state.storage.get(devContentKey),undefined);
   assert.equal(state.node("#dev-global-status").textContent,"저장 필요");
   state.click("#dev-save-all");
   const stored=JSON.parse(state.storage.get(devContentKey));
-  assert.equal(Array.isArray(stored.items),true);
-  assert.equal(stored.items.some(item=>item.name==="새 아이템"),true);
-  assert.equal(state.node("view:dev").hidden,false);
+  assert.equal(Array.isArray(stored.cards),true);
+  assert.equal(stored.cards.some(item=>item.name==="새 카드"),true);
+  assert.deepEqual(Object.keys(stored).sort(),["cards","postcards"]);
 });
 
-
-test("chapter interactions are edited on the actual story scene, not outside it",()=>{
-  const html=fs.readFileSync(path.join(directory,"index.html"),"utf8");
-  assert.doesNotMatch(html,/id="dev-chapter-interactions"/);
-  assert.match(html,/id="dev-open-chapter-scene"/);
-  assert.match(html,/id="story-dev-enter"/);
-  assert.match(html,/id="story-dev-toolbar"/);
-  assert.match(html,/id="story-dev-add-interaction"/);
-  assert.match(html,/id="story-dev-layer"/);
-  assert.match(html,/id="story-dev-inspector"/);
-  assert.match(app,/const interactionSchema=/);
-  assert.match(app,/interactionsForChapter/);
-});
-
-test("developer can enter a chapter and place an interaction by clicking the actual scene",()=>{
-  const state=boot(undefined,"30");
-  state.click("[data-open-dev]");
-  state.click("#dev-open-chapter-scene");
-  assert.equal(state.node("view:story").hidden,false);
-  assert.equal(state.node("#story-dev-toolbar").hidden,false);
-  state.click("#story-dev-add-interaction");
-  state.node("#story-dev-layer").listeners.click({
-    clientX:500,clientY:300,
-    target:{closest(){return null}}
-  });
-  assert.equal(state.storage.get(devContentKey),undefined);
-  state.click("#dev-save-all");
-  const stored=JSON.parse(state.storage.get(devContentKey));
-  assert.equal(Array.isArray(stored.chapters[0].interactions),true);
-  assert.equal(stored.chapters[0].interactions.length,1);
-  assert.equal(stored.chapters[0].interactions[0].type,"inspect");
-  assert.equal(stored.chapters[0].interactions[0].x,44);
-  assert.equal(stored.chapters[0].interactions[0].y,44);
-  assert.equal(stored.chapters[0].interactions[0].scene,"house-outside");
-});
-
-test("undo removes an unsaved entry before saving",()=>{
+test("collection editor switches between cards and postcards and supports undo",()=>{
   const state=boot();
   state.click("[data-open-dev]");
-  const itemTab=state.node("dev-tab:items");
-  state.node("#dev-settings-tabs").listeners.click({target:{closest(){return itemTab}}});
   state.click("#dev-new-entry");
   state.click("#dev-undo");
-  assert.equal(state.node("#dev-entry-count").textContent,"9개");
   assert.equal(state.storage.get(devContentKey),undefined);
+  const postTab=state.node("dev-collection:postcards");
+  state.node("#dev-collection-types").listeners.click({target:{closest(){return postTab}}});
+  state.click("#dev-new-entry");
+  assert.match(state.node("#dev-editor-title").textContent,/새 엽서/);
 });
-
-test("JSON import stays in the draft and CHECK blocks missing item rewards",async()=>{
-  const state=boot();
-  const content=state.context.window.PixelyDevContent.all();
-  content.chapters[0].interactions.push({id:"bad-reward",scene:"party-room",x:20,y:20,width:10,height:10,rewardItem:"missing-item"});
-  state.click("[data-open-dev]");
-  const file={size:100,text:async()=>JSON.stringify({format:"pixely-dev-data",version:1,content})};
-  await state.node("#dev-data-import-file").listeners.change({target:{files:[file],value:""}});
-  const errors=state.context.window.PixelyDevContent.validateDraft();
-  assert.equal(errors.some(issue=>issue.message.includes("missing-item")),true);
-  state.click("#dev-save-all");
-  assert.equal(state.storage.get(devContentKey),undefined);
-  assert.match(state.node("#dev-check-results").innerHTML,/missing-item/);
-});
-
-test("wardrobe editor mounts inside DEV EDITOR and commits its draft separately",()=>{
-  const state=boot();
-  state.click("[data-open-dev]");
-  const wardrobeTab=state.node("dev-tab:wardrobe");
-  state.node("#dev-settings-tabs").listeners.click({target:{closest(){return wardrobeTab}}});
-  assert.equal(state.node("#dev-wardrobe-mount").children.includes(state.node(".wardrobe-shell")),true);
-  state.click("#wardrobe-save-button");
-  assert.equal(state.storage.get(wardrobeKey),undefined);
-  assert.equal(state.node("#dev-global-status").textContent,"저장 필요");
-  state.click("#dev-save-all");
-  assert.equal(typeof state.storage.get(wardrobeKey),"string");
-  assert.equal(state.node("#dev-global-status").textContent,"저장됨");
-});
-
-test("a running chapter can enter interaction edit mode from its EDIT button",()=>{
-  const state=boot();
-  state.click("#new-game-button");
-  state.slotAction("new-slot",0);
-  state.click("#story-dev-enter");
-  assert.equal(state.node("#story-dev-toolbar").hidden,false);
-  assert.equal(state.node("#story-location-name").textContent,"장면 편집");
-});
-
 
 test("desktop chapters and collection use wide-screen layout rules",()=>{
   const css=allCss;
@@ -478,16 +398,6 @@ test("desktop wardrobe uses a wide balanced workspace",()=>{
 });
 
 
-test("story interaction editor provides visible draggable placement UI",()=>{
-  const css=allCss;
-  assert.match(css,/IN-SCENE CHAPTER INTERACTION EDITOR v30/);
-  assert.match(css,/\.story-dev-layer\{/);
-  assert.match(css,/\.story-dev-hotspot\{/);
-  assert.match(css,/\[data-story-dev-resize\]/);
-  assert.match(css,/\.story-dev-inspector\{/);
-});
-
-
 test("wardrobe transform controls support direct numeric input",()=>{
   const html=fs.readFileSync(path.join(directory,"index.html"),"utf8");
   for(const key of ["x","y","scale","rotation"]){
@@ -504,15 +414,15 @@ test("static game and editor configuration are split from the runtime",()=>{
   assert.doesNotMatch(app,/const catalogue = \{/);
   assert.doesNotMatch(app,/const devSchemas=\{/);
   const html=fs.readFileSync(path.join(directory,"index.html"),"utf8");
-  assert.match(html,/data\/game-config\.js\?v=46/);
-  assert.match(html,/data\/editor-schema\.js\?v=46/);
+  assert.match(html,/data\/game-config\.js\?v=47/);
+  assert.match(html,/data\/editor-schema\.js\?v=47/);
 });
 
 
 test("feature CSS is split into maintainable modules without legacy patch stacks",()=>{
   const entry=fs.readFileSync(path.join(directory,"style.css"),"utf8");
   for(const file of ["core","home","chapters","collection","story","wardrobe","editor"]){
-    assert.match(entry,new RegExp('styles/'+file+'\\.css\\?v=46'));
+    assert.match(entry,new RegExp('styles/'+file+'\\.css\\?v=47'));
     assert.ok(fs.statSync(path.join(directory,"styles",file+".css")).size>100);
   }
   assert.doesNotMatch(allCss,/VISUAL PATCH v|WARDROBE PATCH v|WARDROBE IMAGE EDITOR v|WARDROBE PREVIEW \+ DEV EDITOR v|WARDROBE ALL-MULTI|SIMPLE WARDROBE DEV EDITOR|CHAPTER INTERACTION EDITOR v|DESKTOP WARDROBE WORKSPACE v|WARDROBE RE-EDIT v|WARDROBE TRANSFORM NUMBER INPUTS v/);
