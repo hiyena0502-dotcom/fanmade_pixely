@@ -164,6 +164,8 @@ test("Chapter 1 starts at the wide house and waits for a door click before the c
   assert.match(css,/is-exterior \.story-intro-backdrop\{\s*background-image:url\("\.\/assets\/story\/chapter1\/house-wide\.webp/);
   assert.match(css,/is-door \.story-intro-backdrop\{\s*background-image:url\("\.\/assets\/story\/chapter1\/house-door-close\.webp/);
   assert.match(css,/is-chapter \.story-intro-backdrop\{opacity:0/);
+  assert.match(css,/is-chapter \.intro-house\{display:none !important\}/);
+  assert.match(css,/\.story-stage:has\(\.story-intro-overlay:not\(\[hidden\]\)\) \.story-hud/);
   for(const name of ["house-door-close.webp","house-wide.webp"]){
     assert.ok(fs.statSync(path.join(directory,"assets/story/chapter1",name)).size>100000);
   }
@@ -255,7 +257,7 @@ test("update prompt compares the loaded version on the first check and on later 
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
   assert.equal(state.requests[0].options.cache,"no-store");
-  state.setVersion("41");
+  state.setVersion("42");
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,false);
@@ -264,7 +266,7 @@ test("update prompt compares the loaded version on the first check and on later 
   state.tick();
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(state.node("#update-modal").hidden,true);
-  const stale=boot(undefined,"39");
+  const stale=boot(undefined,"40");
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(stale.node("#update-modal").hidden,false);
 });
