@@ -595,7 +595,7 @@
   transform-origin:50% 67%;
 }
 
-/* The transparent cloud sheet is cropped by its viewport and moves across the house sky. */
+/* Each cloud is a separate crop of the original transparent sheet. */
 .story-sky-clouds{
   position:absolute;
   z-index:4;
@@ -613,30 +613,31 @@
   display:none !important;
 }
 
-.sky-cloud-sheet{
+.sky-cloud-sprite{
   position:absolute;
   left:0;
-  top:-2%;
-  width:max(760px,100%);
-  height:clamp(125px,17vw,300px);
-  background:url("../assets/story/chapter1/clouds-original.png?v=68") left top / 100% auto no-repeat;
+  top:var(--cloud-top);
+  width:var(--cloud-width);
+  height:var(--cloud-height);
+  background-image:url("../assets/story/chapter1/clouds-original.png?v=69");
+  background-repeat:no-repeat;
+  background-size:2048px 1152px;
+  background-position:var(--cloud-crop);
   filter:drop-shadow(0 5px 3px rgba(79,134,151,.12));
   opacity:.72;
   will-change:transform;
-  animation:pixely-cloud-sheet-drift 24s linear infinite;
+  animation:pixely-cloud-drift var(--cloud-duration) linear infinite;
+  animation-delay:var(--cloud-delay);
 }
-.sky-cloud-sheet--first{animation-delay:-6s}
-.sky-cloud-sheet--second{animation-delay:-18s}
+.sky-cloud-sprite--1{--cloud-top:1%;--cloud-width:310px;--cloud-height:158px;--cloud-crop:-24px -13px;--cloud-duration:48s;--cloud-delay:-37s}
+.sky-cloud-sprite--2{--cloud-top:8%;--cloud-width:105px;--cloud-height:61px;--cloud-crop:-551px -73px;--cloud-duration:62s;--cloud-delay:-37s}
+.sky-cloud-sprite--3{--cloud-top:-1%;--cloud-width:332px;--cloud-height:125px;--cloud-crop:-917px -3px;--cloud-duration:55s;--cloud-delay:-18s}
+.sky-cloud-sprite--4{--cloud-top:16%;--cloud-width:176px;--cloud-height:81px;--cloud-crop:-1444px -256px;--cloud-duration:70s;--cloud-delay:-13s}
+.sky-cloud-sprite--5{--cloud-top:3%;--cloud-width:223px;--cloud-height:126px;--cloud-crop:-1663px -37px;--cloud-duration:58s;--cloud-delay:-54s}
 
-@keyframes pixely-cloud-sheet-drift{
+@keyframes pixely-cloud-drift{
   from{transform:translate3d(100vw,0,0)}
   to{transform:translate3d(-100%,0,0)}
-}
-
-@media(max-width:680px){
-  .sky-cloud-sheet{top:-1%;animation-duration:28s}
-  .sky-cloud-sheet--first{animation-delay:-7s}
-  .sky-cloud-sheet--second{animation-delay:-21s}
 }
 
 .intro-ground{
@@ -1133,11 +1134,11 @@
 }
 
 .story-intro-overlay.is-exterior .story-intro-backdrop{
-  background-image:url("../assets/story/chapter1/house-wide.webp?v=68");
+  background-image:url("../assets/story/chapter1/house-wide.webp?v=69");
 }
 
 .story-intro-overlay.is-door .story-intro-backdrop{
-  background-image:url("../assets/story/chapter1/house-door-close.webp?v=68");
+  background-image:url("../assets/story/chapter1/house-door-close.webp?v=69");
 }
 
 .story-intro-overlay.is-approaching .story-intro-backdrop{
