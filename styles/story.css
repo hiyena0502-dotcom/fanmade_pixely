@@ -601,6 +601,8 @@
   z-index:4;
   inset:0;
   overflow:hidden;
+  /* Clouds disappear behind the roof instead of covering the house. */
+  clip-path:polygon(0 0,100% 0,100% 100%,71% 100%,71% 45%,60% 28%,50% 13%,40% 28%,29% 45%,29% 100%,0 100%);
   pointer-events:none;
   display:none;
 }
@@ -619,7 +621,7 @@
   top:var(--cloud-top);
   width:var(--cloud-width);
   height:var(--cloud-height);
-  background-image:url("../assets/story/chapter1/clouds-original.png?v=69");
+  background-image:url("../assets/story/chapter1/clouds-original.png?v=70");
   background-repeat:no-repeat;
   background-size:2048px 1152px;
   background-position:var(--cloud-crop);
@@ -629,11 +631,11 @@
   animation:pixely-cloud-drift var(--cloud-duration) linear infinite;
   animation-delay:var(--cloud-delay);
 }
-.sky-cloud-sprite--1{--cloud-top:1%;--cloud-width:310px;--cloud-height:158px;--cloud-crop:-24px -13px;--cloud-duration:48s;--cloud-delay:-37s}
-.sky-cloud-sprite--2{--cloud-top:8%;--cloud-width:105px;--cloud-height:61px;--cloud-crop:-551px -73px;--cloud-duration:62s;--cloud-delay:-37s}
-.sky-cloud-sprite--3{--cloud-top:-1%;--cloud-width:332px;--cloud-height:125px;--cloud-crop:-917px -3px;--cloud-duration:55s;--cloud-delay:-18s}
-.sky-cloud-sprite--4{--cloud-top:16%;--cloud-width:176px;--cloud-height:81px;--cloud-crop:-1444px -256px;--cloud-duration:70s;--cloud-delay:-13s}
-.sky-cloud-sprite--5{--cloud-top:3%;--cloud-width:223px;--cloud-height:126px;--cloud-crop:-1663px -37px;--cloud-duration:58s;--cloud-delay:-54s}
+.sky-cloud-sprite--1{--cloud-top:-3%;--cloud-width:310px;--cloud-height:158px;--cloud-crop:-24px -13px;--cloud-duration:72s;--cloud-delay:-56s}
+.sky-cloud-sprite--2{--cloud-top:3%;--cloud-width:105px;--cloud-height:61px;--cloud-crop:-551px -73px;--cloud-duration:90s;--cloud-delay:-54s}
+.sky-cloud-sprite--3{--cloud-top:-4%;--cloud-width:332px;--cloud-height:125px;--cloud-crop:-917px -3px;--cloud-duration:78s;--cloud-delay:-26s}
+.sky-cloud-sprite--4{--cloud-top:8%;--cloud-width:176px;--cloud-height:81px;--cloud-crop:-1444px -256px;--cloud-duration:96s;--cloud-delay:-18s}
+.sky-cloud-sprite--5{--cloud-top:-1%;--cloud-width:223px;--cloud-height:126px;--cloud-crop:-1663px -37px;--cloud-duration:84s;--cloud-delay:-78s}
 
 @keyframes pixely-cloud-drift{
   from{transform:translate3d(100vw,0,0)}
@@ -1134,11 +1136,11 @@
 }
 
 .story-intro-overlay.is-exterior .story-intro-backdrop{
-  background-image:url("../assets/story/chapter1/house-wide.webp?v=69");
+  background-image:url("../assets/story/chapter1/house-wide.webp?v=70");
 }
 
 .story-intro-overlay.is-door .story-intro-backdrop{
-  background-image:url("../assets/story/chapter1/house-door-close.webp?v=69");
+  background-image:url("../assets/story/chapter1/house-door-close.webp?v=70");
 }
 
 .story-intro-overlay.is-approaching .story-intro-backdrop{
