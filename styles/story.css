@@ -616,16 +616,17 @@
 .sky-cloud-sheet{
   position:absolute;
   left:0;
-  top:1%;
+  top:-2%;
   width:max(760px,100%);
   height:clamp(125px,17vw,300px);
-  background:url("../assets/story/chapter1/clouds-original.png?v=67") left top / 100% auto no-repeat;
-  filter:drop-shadow(0 5px 3px rgba(79,134,151,.22));
+  background:url("../assets/story/chapter1/clouds-original.png?v=68") left top / 100% auto no-repeat;
+  filter:drop-shadow(0 5px 3px rgba(79,134,151,.12));
+  opacity:.72;
   will-change:transform;
-  animation:pixely-cloud-sheet-drift 12s linear infinite;
+  animation:pixely-cloud-sheet-drift 24s linear infinite;
 }
-.sky-cloud-sheet--first{animation-delay:-3s}
-.sky-cloud-sheet--second{animation-delay:-9s}
+.sky-cloud-sheet--first{animation-delay:-6s}
+.sky-cloud-sheet--second{animation-delay:-18s}
 
 @keyframes pixely-cloud-sheet-drift{
   from{transform:translate3d(100vw,0,0)}
@@ -633,9 +634,9 @@
 }
 
 @media(max-width:680px){
-  .sky-cloud-sheet{top:2%;animation-duration:16s}
-  .sky-cloud-sheet--first{animation-delay:-4s}
-  .sky-cloud-sheet--second{animation-delay:-12s}
+  .sky-cloud-sheet{top:-1%;animation-duration:28s}
+  .sky-cloud-sheet--first{animation-delay:-7s}
+  .sky-cloud-sheet--second{animation-delay:-21s}
 }
 
 .intro-ground{
@@ -1132,11 +1133,11 @@
 }
 
 .story-intro-overlay.is-exterior .story-intro-backdrop{
-  background-image:url("../assets/story/chapter1/house-wide.webp?v=67");
+  background-image:url("../assets/story/chapter1/house-wide.webp?v=68");
 }
 
 .story-intro-overlay.is-door .story-intro-backdrop{
-  background-image:url("../assets/story/chapter1/house-door-close.webp?v=67");
+  background-image:url("../assets/story/chapter1/house-door-close.webp?v=68");
 }
 
 .story-intro-overlay.is-approaching .story-intro-backdrop{
