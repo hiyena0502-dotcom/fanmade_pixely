@@ -7,7 +7,7 @@
   column-gap:clamp(20px,4vw,64px);
   row-gap:20px;
   min-height:100vh;
-  padding:280px clamp(24px,5vw,88px) 30px;
+  padding:320px clamp(24px,5vw,88px) 30px;
   isolation:isolate;
   background:#c7eafb;
 }
@@ -51,10 +51,9 @@
   position:absolute;
   z-index:7;
   top:2px;
-  left:50%;
-  width:min(570px,62vw);
+  left:clamp(16px,4vw,68px);
+  width:min(650px,65vw);
   aspect-ratio:2.1;
-  transform:translateX(-50%);
   pointer-events:none;
 }
 .title-artwork{
@@ -200,7 +199,7 @@
   .command-button{min-height:56px}
 }
 @media(max-width:820px){
-  .title-view{display:flex;flex-direction:column;gap:17px;padding:270px 18px 28px}
+  .title-view{display:flex;flex-direction:column;gap:17px;padding:315px 18px 28px}
   .title-scene{width:min(700px,100%);min-height:360px}
   .command-window{width:min(620px,100%)}
   .save-summary{width:min(620px,100%);grid-template-columns:1fr 1fr}
@@ -209,8 +208,8 @@
   .title-view .dev-shortcut{right:18px;top:90px}
 }
 @media(max-width:560px){
-  .title-view{gap:12px;padding:290px 14px 22px}
-  .title-hero{left:50%;top:112px;width:calc(100% - 28px)}
+  .title-view{gap:12px;padding:300px 14px 22px}
+  .title-hero{left:10px;top:112px;width:calc(100% - 20px)}
   .title-view .wardrobe-shortcut{top:12px;right:12px}
   .title-view .dev-shortcut{top:66px;right:12px}
   .title-scene{min-height:290px;border-radius:27px}
