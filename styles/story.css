@@ -621,7 +621,7 @@
   top:var(--cloud-top);
   width:var(--cloud-width);
   height:var(--cloud-height);
-  background-image:url("../assets/story/chapter1/clouds-original.png?v=72");
+  background-image:url("../assets/story/chapter1/clouds-original.png?v=73");
   background-repeat:no-repeat;
   background-size:2048px 1152px;
   background-position:var(--cloud-crop);
@@ -1136,11 +1136,11 @@
 }
 
 .story-intro-overlay.is-exterior .story-intro-backdrop{
-  background-image:url("../assets/story/chapter1/house-wide.webp?v=72");
+  background-image:url("../assets/story/chapter1/house-wide.webp?v=73");
 }
 
 .story-intro-overlay.is-door .story-intro-backdrop{
-  background-image:url("../assets/story/chapter1/house-door-close.webp?v=72");
+  background-image:url("../assets/story/chapter1/house-door-close.webp?v=73");
 }
 
 .story-intro-overlay.is-approaching .story-intro-backdrop{
