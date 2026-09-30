@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="잠뜰님의 생일을 준비하며 여러 이야기의 세계를 여행하는 비공식 팬메이드 포인트앤클릭 어드벤처." />
-  <meta name="theme-color" content="#111a3b" />
+  <meta name="theme-color" content="#b9e9fa" />
   <title>꿈뜰이의 우당탕 생일 준비 대작전!!</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=71" />
-  <script src="data/game-config.js?v=71" defer></script>
-  <script src="data/editor-schema.js?v=71" defer></script>
-  <script src="app.js?v=71" defer></script>
+  <link rel="stylesheet" href="style.css?v=72" />
+  <script src="data/game-config.js?v=72" defer></script>
+  <script src="data/editor-schema.js?v=72" defer></script>
+  <script src="app.js?v=72" defer></script>
 </head>
 <body>
   <div class="game-root">
@@ -21,12 +21,17 @@
         <div class="backdrop-horizon"></div>
       </div>
       <header class="title-hero">
-        <span class="title-kicker">✦ 잠뜰님 생일 축하 팬메이드 게임 ✦</span>
         <h1 class="title-artwork">
-          <img class="title-logo" src="assets/home/title-logo.png?v=71" alt="꿈뜰이의 우당탕 생일 준비 대작전!!" />
+          <img class="title-logo" src="assets/home/title-logo.png?v=72" alt="꿈뜰이의 우당탕 생일 준비 대작전!!" />
         </h1>
-        <p class="title-tagline">잠뜰님 생일 축하하러 왔을 뿐인데...<br />이번엔 꿈뜰이가 온 세상을 누빈다!</p>
       </header>
+      <section class="title-scene" aria-label="메인 일러스트 영역">
+        <span class="title-scene-sun" aria-hidden="true"></span>
+        <span class="title-scene-cloud title-scene-cloud--left" aria-hidden="true"></span>
+        <span class="title-scene-cloud title-scene-cloud--right" aria-hidden="true"></span>
+        <span class="title-scene-star" aria-hidden="true">✦</span>
+        <p class="title-tagline">잠뜰님 생일 축하하러 왔을 뿐인데...<br />꿈뜰이의 우당탕 생일 준비 대작전!!</p>
+      </section>
 
       <button class="wardrobe-shortcut" type="button" data-open-wardrobe aria-label="꿈뜰이 옷장 열기">
         <span aria-hidden="true">✿</span>
@@ -91,10 +96,6 @@
         </dl>
       </section>
 
-      <div class="title-help">
-        <span>클리어 전에는 새벽 밤하늘, 엔딩 후에는 맑은 하늘로 변합니다.</span>
-        <span>HOME · SAVE · CHAPTERS · COLLECTION · WARDROBE</span>
-      </div>
     </section>
 
     <section class="view game-ui-view" data-view="story" hidden>
